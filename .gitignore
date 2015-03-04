@@ -108,4 +108,5 @@ sympy-plots-for-*.tex/
 # xindy
 *.xdy
 
-"*.vpp~*"
+*.vpp~*
+*.vpp.working
