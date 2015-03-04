@@ -94,6 +94,126 @@ in this analysis.
         \end{itemize}
 \end{itemize}
 
+\subsection{\emph{UC6}: De-activate personal document store}
+\begin{itemize}
+	\item \textbf{Summary:} A Registered recipient de-activates his or her personal document store account.
+    \item \textbf{Primary actor:} Registered recipient
+    \item \textbf{Secondary actors:} The System
+    \item \textbf{Interested parties:}
+        \begin{itemize}
+            \item \textit{Registered recipient:} wants to de-activite his or her personal document store
+            \item \textit{eDocs:} wants to keep as many Registered recipients as possible.
+        \end{itemize}
+
+    \item \textbf{Preconditions:} None
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The Registered recipient is now an Unregistered recipient and can no longer log in to the system.
+            \item The Registered recipient is now logged out and can no longer make use of his/her personal document store.
+            \item The System has removed the account of the Registered Recipient. It keeps the documents of the Registered recipient archived.
+            \item The Registered recipient now receives his or her documents via another channel than his or her personal document store.
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The Registered recipient indicates that he or she wants to de-activate his or her personal document store.
+       \item The System removes the account of the registered recipient.
+       \item The System indicates success to the Registered recipient and logs him or her out.
+    \end{enumerate}
+
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item \ldots
+    \end{enumerate}
+    
+    \item \textbf{Remarks:}
+        \begin{itemize}
+        	\item None
+        \end{itemize}
+\end{itemize}
+
+
+\subsection{\emph{UC7}: Provide document template}
+\begin{itemize}
+	\item \textbf{Summary:} An eDocs administrator
+    \item \textbf{Primary actor:} eDocs administrator
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+        	\item \textit{eDocs administrator:} wants to provide a document template that a customer organization can fill in.
+            \item \textit{Customer organization:} wants to have a template for its documents
+            \item \textit{eDocs:} wants to generate documents based on a template that the Customer organization has filled in.
+        \end{itemize}
+
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The Customer organization has registered itself with eDocs.
+        \end{itemize}
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The System now contains a template which the Customer organization can fill in.
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+		\item The eDocs administrator provides a document template to the System.
+    \end{enumerate}
+
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+    	\item None
+    \end{enumerate}
+    
+    \item \textbf{Remarks:}
+        \begin{itemize}
+        	\item None
+        \end{itemize}
+\end{itemize}
+
+\subsection{\emph{UC8}: Update document template}
+\begin{itemize}
+	\item \textbf{Summary:} The Customer organization updates a document template.
+    \item \textbf{Primary actor:} Customer organization
+    \item \textbf{Secondary actors:} eDocs administrator
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organization:} wants its documents to have a layout corresponding to the initial template it fills in.
+            \item \textit{eDocs:} wants to generate documents with a layout corresponding to the wishes of its clients.
+        \end{itemize}
+
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The Customer organization is logged in.
+        \end{itemize}
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The System from now on generates documents using the new filled in document template.
+            \item The System stores the provided document template.
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The Customer organization indicates it wants to download the current document template.
+       \item The System looks up the correct document template and provides it to the Customer organization.
+       \item The Customer organization changes the current document template.
+       \item The Customer organization indicates it wants to upload the filled in template.
+       \item The System downloads the updated document. It notifies an eDocs administrator that a new filled in document is waiting to be verified for correctness.
+       \item An eDocs administrator verifies the correctness of the document template.
+       \item The System stores it. The updated document replaces the old document template for that Customer organization and that document type.
+    \end{enumerate}
+
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [6a.] If the provided document template is not correctly filled in, the administrator notifies the Customer organization. Restart from step 3.
+    \end{enumerate}
+    
+    \item \textbf{Remarks:}
+        \begin{itemize}
+            \item If the Customer organization has not filled in a document template before, the document template presented to the Customer organization is the document template that the eDocs administrator provided for the Customer Organization to use.
+        \end{itemize}
+\end{itemize}
 \section{Non-functional requirements}\label{sec:non-functional}
 In this section, we model the non-functional requirements for the system in the
 form of \emph{quality attribute scenarios}. We provide for each type
