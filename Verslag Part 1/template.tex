@@ -94,6 +94,162 @@ in this analysis.
         \end{itemize}
 \end{itemize}
 
+\subsection{\emph{UC2}: Register customer organisation}
+\begin{itemize}
+    \item \textbf{Name:} Register customer organisation
+    \item \textbf{Summary:} The eDocs administrator registers a new customer organisation in order to enlarge the eDocs client base
+    \item \textbf{Primary actor:} eDocs administrator
+    \item \textbf{Secondary actor:} Customer organisation
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organisation:} wants to outsource its document processing to eDocs
+            \item \textit{eDocs:} wants to gain new clients  customer organisations) for which it can process documents
+            \item \textit{eDocs administrator:} deals with the administrational tasks during the registration of customer organisations
+        \end{itemize}
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The customer organisation has actively expressed its interest in eDocs
+            \item The eDocs administrator has initiated negotiations about the contract and SLA with the customer organisation
+        \end{itemize}
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item eDocs has gained a new client (and friend)
+            \item The customer organisation and eDocs administrator have succesfully negotiated a contract and SLA
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The customer organisation has expressed its interest in eDocs as its potential document processing partner
+       \item The eDocs administrator starts negotiations with the customer organisation about the contract and SLA
+       \item Both parties agree upon the terms and conditions specified in the forenamed documents
+       \item The customer organisation is now a client of eDocs and has agreed to outsource (part of) its document processing tasks to eDocs
+       \item \ldots
+    \end{enumerate}
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [3a.] The two parties do not reach an agreement
+        \item [4a.] The customer organisation expresses its intent to outsource its document processing tasks elsewhere
+        \item [5a.] eDocs had lost a potential client
+    \end{enumerate}
+    
+    \item \textbf{Assumptions:}
+        \begin{itemize}
+            \item The registration process is initiated by the customer organisation expressing its interest in eDocs. It is thus assumed that eDocs is a big player in the document processing market, following a passive strategy to gain new clients.
+        \end{itemize}
+\end{itemize}
+\subsection{\emph{UC3}: Consult management dashboard}
+\begin{itemize}
+    \item \textbf{Name:} Consult management dashboard
+    \item \textbf{Summary:} 
+    \item \textbf{Primary actor:} Customer organisation
+    \item \textbf{Secondary actor:} eDocs system
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organisation:} wants to access and/or change some of the organisation's data that is stored in the eDocs system
+            \item \textit{System:} provides an interface to access and manipulate the organisation's data that is outsourced to eDocs in a consistent way
+        \end{itemize}
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The customer organisation is a registered client of eDocs
+            \item The customer organisation is logged in to the eDocs system
+        \end{itemize}
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The customer organisation has accessed and/or manipulated (part of) its data that is stored/processed by eDocs
+            \item 
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The customer organisation has expressed its interest in eDocs as its potential document processing partner
+       \item The eDocs administrator starts negotiations with the customer organisation about the contract and SLA
+       \item Both parties agree upon the terms and conditions specified in the forenamed documents
+       \item The customer organisation is now a client of eDocs and has agreed to outsource (part of) its document processing tasks to eDocs
+       \item \ldots
+    \end{enumerate}
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [3a.] The two parties do not reach an agreement
+        \item [4a.] The customer organisation expresses its intent to outsource its document processing tasks elsewhere
+        \item [5a.] eDocs had lost a potential client
+    \end{enumerate}
+    
+    \item \textbf{Remarks:}
+        \begin{itemize}
+            \item 
+        \end{itemize}
+\end{itemize}
+\subsection{\emph{UC4}: Deliver raw data}
+\begin{itemize}
+    \item \textbf{Name:} Deliver raw data
+    \item \textbf{Summary:} The customer organisation provides eDocs with the raw data to be processed
+    \item \textbf{Primary actor:} Customer organisation
+    \item \textbf{Secondary actor:} eDocs system
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organisation:} wants to deliver its raw data to eDocs so that the latter can process it accordingly
+            \item \textit{System:} accepts the raw data to be processed
+        \end{itemize}
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The customer organisation is logged in to the eDocs system
+        \end{itemize}
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The customer organisation has provided the eDocs system with its raw data
+            \item The eDocs system has succesfully received the customer organisation's raw data
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The customer organisation sends its raw data to eDocs via the management dashboard or via a web service that provides a link from the customer organisation's system to that of eDocs
+       \item The eDocs system receives the customer organisation's raw data
+       \item \ldots
+    \end{enumerate}
+\end{itemize}
+\subsection{\emph{UC5}: Process raw data}
+\begin{itemize}
+    \item \textbf{Name:} Process raw data
+    \item \textbf{Summary:} 
+    \item \textbf{Primary actor:} eDocs system
+    \item \textbf{Secondary actor:} None
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organisation:} wants its raw data to be processed correctly
+            \item \textit{eDocs system:} wants to process the raw data correctly
+        \end{itemize}
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The customer organisation, to which the raw data belongs, is a registered client of eDocs
+            \item The raw data that has to be processed, was succesfully delivered to the eDocs system
+        \end{itemize}
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The raw data is processed
+            \item 
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item Check raw data for blank value, 
+       \item \ldots
+    \end{enumerate}
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [3a.] The two parties do not reach an agreement
+        \item [4a.] The customer organisation expresses its intent to outsource its document processing tasks elsewhere
+        \item [5a.] eDocs had lost a potential client
+    \end{enumerate}
+    
+    \item \textbf{Remarks:}
+        \begin{itemize}
+            \item 
+        \end{itemize}
+\end{itemize}
+
+
+
+
 \subsection{\emph{UC6}: De-activate personal document store}
 \begin{itemize}
 	\item \textbf{Summary:} A Registered recipient de-activates his or her personal document store account.
