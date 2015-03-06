@@ -493,7 +493,7 @@ in this analysis.
 
 \subsection{\emph{UC1}: Send document via e-mail}
 \begin{itemize}
-    \item \textbf{Summary:} Intiated by Time, the system sends an e-mail to an Unregistered recipient.
+    \item \textbf{Summary:} Initiated by Time, the system sends an e-mail to an Unregistered recipient.
     \item \textbf{Primary actor:} Time
 	\item \textbf{Secondary actors:} The System
     \item \textbf{Interested parties:} 
@@ -512,7 +512,7 @@ in this analysis.
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The System has send out an e-mail address to the Unregistered recipient.
+            \item The System has send out an e-mail to the Unregistered recipient.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
@@ -521,6 +521,8 @@ in this analysis.
        \item The System generates a unique link. When followed, the link points to a web page where the whole document can be read.
        \item The System generates an e-mail containing a preview of the document and the unique link  pointing to the web page with the document.
        \item The System sends the e-mail to the e-mail address provided as  addressing information in the raw data. 
+       \item The System marks the corresponding document processing job as sent by e-mail.
+       \item If this document is not part of a recurring batch of document processing jobs, the System adds the cost of delivering the generated document to the bill of the customer organization.
     \end{enumerate}
 
     \item \textbf{Alternative scenarios:} 
@@ -538,7 +540,7 @@ in this analysis.
 \begin{itemize}
     \item \textbf{Summary:} After receiving an error message from an e-mail provider, the System notifies the customer organization about the incorrect addressing information.
     \item \textbf{Primary actor:} E-mail provider
-	\item \textbf{Secondary actors:}
+	\item \textbf{Secondary actors:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants to be notified when it gives incorrect addressing information to the eDocs System.
@@ -554,7 +556,7 @@ in this analysis.
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item 
+            \item The Customer organization is notified about the wrong addressing information.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
@@ -643,6 +645,40 @@ in this analysis.
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
         \item [3a.] If the System does not find any documents that match the criteria, it notifies the Registered recipient of this fact. Continue from step 2.
+    \end{enumerate}
+\end{itemize}
+
+\subsection{\emph{UC1}: Send document via print \& postal service}
+\begin{itemize}
+    \item \textbf{Summary:} Initiated by Time, the system sends a document by postal mail to an Unregistered recipient.
+    \item \textbf{Primary actor:} Time
+	\item \textbf{Secondary actors:} Print \& postal service
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
+            \item \textbf{Unregistered recipient:} wants to receive his or her documents.
+            \item \textbf{eDocs:} wants the documents it sends to be correctly received.
+            \item \textbf{Print\& postal service:} wants to correctly deliver documents it send by e-mail in a timely manner.
+        \end{itemize}
+
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The document to be send is generated correctly.
+            \item The addressing information provided by the Customer Organization in the raw data is a postal address 
+        \end{itemize}
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The System has send out the document to the Recipient through postal mail.
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item Time notifies the System that it should send the generated document.
+       \item The System sends the document to the Print \& postal service via web services, including the complete postal address of the Unregistered recipient.
+       \item The Print \& postal service prints and packages the document and delivers it to the Unregistered recipient via postal mail. 
+       \item The System marks the corresponding document processing job as sent by postal mail.
+       \item If this document is not part of a recurring batch of document processing jobs, the System adds the cost of delivering the generated document to the bill of the customer organization.
     \end{enumerate}
 \end{itemize}
 
