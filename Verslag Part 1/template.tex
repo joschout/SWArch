@@ -269,7 +269,7 @@ in this analysis.
     \item \textbf{Preconditions:}
         \begin{itemize}
             \item The customer organisation, to which the raw data belongs, is a registered client of eDocs
-            \item The raw data that has to be processed, was succesfully delivered to the eDocs system
+            \item The raw data that has to be processed, was successfully delivered to the eDocs system
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
@@ -285,8 +285,8 @@ in this analysis.
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [2a.] Erronous data is sent back to the customer organisation from which it originated
-        \item [3a.] The customer organisation corrects the erronous part(s) of the respective (batch of) raw data
+        \item [2a.] Erroneous data is sent back to the customer organisation from which it originated
+        \item [3a.] The customer organisation corrects the erroneous part(s) of the respective (batch of) raw data
         \item [4a.] The customer organisation delivers a (batch of) raw data consisting only of those corrected records that were (partly) erronous at the beginning of this processing phase
         \item [5a.] Restart from step 1.
     \end{enumerate}
@@ -300,7 +300,7 @@ in this analysis.
     \item \textbf{Secondary actors:} The System
     \item \textbf{Interested parties:}
         \begin{itemize}
-            \item \textit{Registered recipient:} wants to de-activite his or her personal document store
+            \item \textit{Registered recipient:} wants to de-activate his or her personal document store
             \item \textit{eDocs:} wants to keep as many Registered recipients as possible.
         \end{itemize}
 
@@ -471,7 +471,7 @@ in this analysis.
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item Receipt tracking is now disanabled for all distribution channels.
+            \item Receipt tracking is now disabled for all distribution channels.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
@@ -491,50 +491,125 @@ in this analysis.
         \end{itemize}
 \end{itemize}
 
-\subsection{\emph{UC1}: Receive document via e-mail}
+\subsection{\emph{UC1}: Send document via e-mail}
 \begin{itemize}
-    \item \textbf{Primary actor:} Unregistered recipient
-	\item 
+    \item \textbf{Summary:} Intiated by Time, the system sends an e-mail to an Unregistered recipient.
+    \item \textbf{Primary actor:} Time
+	\item \textbf{Secondary actors:} The System
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
-            \item \textbf{Unregistered recipient and Registered recipient:} want to receive their documents.
-            \item \textbf{eDocs} wants the documents it sends to be correctly received.
+            \item \textbf{Unregistered recipient:} wants to receive his or her documents.
+            \item \textbf{eDocs;} wants the documents it sends to be correctly received.
             \item \textbf{E-mail provider} wants to correctly deliver documents it send by e-mail in a timely manner.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
             \item The document to be send is generated correctly.
-            \item The addressing information of the Recipient is correct.
-            \item
+            \item The addressing information provided by the Customer Organization in the raw data is an e-mail address.
         \end{itemize}
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The Registered recipient or Unregistered recipient has received his or her document .
+            \item The System has send out an e-mail address to the Unregistered recipient.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The System notices it is time to send the generated documents.
-       \item Step 2
-       \item Step 3
-       \item \ldots
+       \item Time notifies the System that it should send the generated document.
+       \item The System generates a unique link. When followed, the link points to a web page where the whole document can be read.
+       \item The System generates an e-mail containing a preview of the document and the unique link  pointing to the web page with the document.
+       \item The System sends the e-mail to the e-mail address provided as  addressing information in the raw data. 
     \end{enumerate}
 
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [3b.] Alternative at step 3
+        \item[2a] If receipt tracking is disabled:
+        	\begin{enumerate}
+        		\item The System generates an e-mail containing a short message indicating that there is a new document from the Customer organization. It puts the document as an attachment to the e-mail.
+       			\item Continue at step 4.
+       		\end{enumerate} 
+        \item [2b.] The unique link is not unique. The System keeps generating new links until it generates a unique one.	
     \end{enumerate}
-    
-    \item \textbf{Remarks:}
-        \begin{itemize}
-            \item First remark
-        \end{itemize}
 \end{itemize}
 
+\subsection{\emph{UC1}: Notify about incorrect e-mail address}
+\begin{itemize}
+    \item \textbf{Summary:} After receiving an error message from an e-mail provider, the System noifies the customer organization about the incorrect addressing information.
+    \item \textbf{Primary actor:} E-mail provider
+	\item \textbf{Secondary actors:}
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organization:} wants to be notified when it gives incorrect addressing information to the eDocs System.
+            \item \textbf{eDocs:} wants to notify a customer organisation about incorrect addressing information.
+            \item \textbf{E-mail provider} wants to deliver e-mails to the correct e-mail addresses.
+        \end{itemize}
 
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item UC: \emph{Send document via e-mail}
+            \item The addressing information provided by the Customer Organization in the raw data is an incorrect e-mail address.
+        \end{itemize}
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item 
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The E-mail provider receives an e-mail for an incorrect e-mail address.
+       \item The E-mail provider notifies the System it has received an e-mail to an incorrect address.
+       \item The System extracts the necessary information from the error message received from the E-mail provider.
+       \item The System looks up the raw data in its archive corresponding to the incorrect e-mail address and document.
+       \item The System notifies the Customer organization about the incorrect addressing information.
+    \end{enumerate}
+
+\end{itemize}
+\subsection{\emph{UC1}: Receive document via e-mail}
+\begin{itemize}
+    \item \textbf{Summary:} 
+    \item \textbf{Primary actor:} Unregistered Recipient
+	\item \textbf{Secondary actors:} The System
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+            \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
+            \item \textbf{Unregistered recipient:} wants to receive his or her documents.
+            \item \textbf{eDocs;} wants the documents it sends to be correctly received.
+            \item \textbf{E-mail provider} wants to correctly deliver documents it send by e-mail in a timely manner.
+        \end{itemize}
+
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item UC: \emph{Send document via e-mail}
+        \end{itemize}
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The Unregistered recipient has received his or her document .
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The Unregistered recipient checks his or her e-mail.
+       \item The Unregistered recipient sees the e-mail send by the System and opens it. 
+       \item The Unregistered recipient now sees the preview of the document and a unique link pointing to a web page.
+       \item The Unregistered recipient follows the link in the e-mail address.
+       \item The System gets a request that the Unregistered recipient wants to view a document using the unique link.
+       \item The System responds by sending a web page to the Unregistered recipient where he or she can see or download the document.
+       \item The Unregistered recipient now sees the page where he or she can see and download the document.   
+     \end{enumerate}
+
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [3a.] If receipt tracking is enabled:
+        \begin{enumerate}
+              \item The Unregistered recipient opens the attachment of the e-mail. 
+              \item The Unregistered recipient now sees his or her document. 
+        \end{enumerate}
+    \end{enumerate}
+\end{itemize}
 
 
 \section{Non-functional requirements}\label{sec:non-functional}
@@ -554,7 +629,7 @@ Shortly describe the context of the scenario.
             \item Description of a second stimulus.
         \end{itemize}
 
-    \item \textbf{Artifact:} the stimulated artifact
+    \item \textbf{Artefact:} the stimulated artefact
     \item \textbf{Environment:} the condition under which the stimulus occurs
     \item \textbf{Response:}
         \begin{itemize}
@@ -604,7 +679,7 @@ Shortly describe the context of the scenario.
             \item Description of a second stimulus.
         \end{itemize}
 
-    \item \textbf{Artifact:} the stimulated artifact
+    \item \textbf{Artefact:} the stimulated artefact
     \item \textbf{Environment:} the condition under which the stimulus occurs
     \item \textbf{Response:}
         \begin{itemize}
