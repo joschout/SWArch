@@ -536,7 +536,7 @@ in this analysis.
 
 \subsection{\emph{UC1}: Notify about incorrect e-mail address}
 \begin{itemize}
-    \item \textbf{Summary:} After receiving an error message from an e-mail provider, the System noifies the customer organization about the incorrect addressing information.
+    \item \textbf{Summary:} After receiving an error message from an e-mail provider, the System notifies the customer organization about the incorrect addressing information.
     \item \textbf{Primary actor:} E-mail provider
 	\item \textbf{Secondary actors:}
     \item \textbf{Interested parties:} 
@@ -569,7 +569,7 @@ in this analysis.
 \end{itemize}
 \subsection{\emph{UC1}: Receive document via e-mail}
 \begin{itemize}
-    \item \textbf{Summary:} 
+    \item \textbf{Summary:} The Unregistered recipient recipient receives a document via e-mail.
     \item \textbf{Primary actor:} Unregistered Recipient
 	\item \textbf{Secondary actors:} The System
     \item \textbf{Interested parties:} 
@@ -599,17 +599,53 @@ in this analysis.
        \item The System gets a request that the Unregistered recipient wants to view a document using the unique link.
        \item The System responds by sending a web page to the Unregistered recipient where he or she can see or download the document.
        \item The Unregistered recipient now sees the page where he or she can see and download the document.   
+       \item The System remembers the fact that the Unregistered recipient sees the document (receipt tracking).
      \end{enumerate}
 
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [3a.] If receipt tracking is enabled:
+        \item [3a.] If receipt tracking is disabled:
         \begin{enumerate}
               \item The Unregistered recipient opens the attachment of the e-mail. 
               \item The Unregistered recipient now sees his or her document. 
         \end{enumerate}
     \end{enumerate}
 \end{itemize}
+
+\subsection{\emph{UC1}: Search for document in personal document store}
+\begin{itemize}
+    \item \textbf{Summary:} Registered recipient searches for a specific document in his or her personal document store. 
+    \item \textbf{Primary actor:} Registered Recipient
+	\item \textbf{Secondary actors:} None
+    \item \textbf{Interested parties:} 
+        \begin{itemize}
+        	\item \textbf{Registered recipients:} want to find a specific document.
+            \item \textit{Customer organization:} wants the specific document to be found.
+        \end{itemize}
+
+    \item \textbf{Preconditions:}
+        \begin{itemize}
+            \item The Registered recipient is logged in (cf. \emph{UC1: Log in}.
+        \end{itemize}
+
+    \item \textbf{Postconditions:}
+        \begin{itemize}
+            \item The Registered recipient has received an overview of all the documents he or she received meet his or her search criteria.
+        \end{itemize}
+        
+    \item \textbf{Main scenario:} 
+    \begin{enumerate}
+       \item The Registered recipient indicates that he or she wants to search for a specific document, e.g. in the overview of received documents (cf. \emph{UC4: Consult personal document store}.
+       \item The System presents to the Registered recipient one or more ways to specify criteria that the document he/she is looking for must meet.
+       \item The System searches in its archive and looks up the documents that meet the specified requirements. The System presents the found documents to the Registered recipient.
+     \end{enumerate}
+
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [3a.] If the System does not find any documents that match the criteria, it notifies the Registered recipient of this fact. Continue from step 2.
+    \end{enumerate}
+\end{itemize}
+
 
 
 \section{Non-functional requirements}\label{sec:non-functional}
