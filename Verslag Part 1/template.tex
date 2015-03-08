@@ -261,8 +261,9 @@ in this analysis.
     \item \textbf{Main scenario:} 
     \begin{enumerate}
        \item Check raw data for consistency and completeness
-       \item Process document data according to previously provided template
        \item Process meta data
+       \item Process document data according to meta data and previously provided template
+       \item Generate document
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
@@ -271,6 +272,10 @@ in this analysis.
         \item [4a.] The customer organisation delivers a (batch of) raw data consisting only of those corrected records that were (partly) erronous at the beginning of this processing phase
         \item [5a.] Restart from step 1.
     \end{enumerate}
+    \item \textbf{Remarks:}
+        \begin{itemize}
+        	\item If the raw data were marked as critical by the provider, they should be processed with the highest priority (within the overall five hour deadline)
+        \end{itemize}
 \end{itemize}
 
 
@@ -671,28 +676,49 @@ form of \emph{quality attribute scenarios}. We provide for each type
 (availability, performance and modifiability) one requirement.
 
 \subsection{Availability}
-\subsubsection{\emph{Av1}: Name of the quality attribute scenario}
-Shortly describe the context of the scenario.
+\subsubsection{\emph{Av1}: Expiration of unique link}
+The unique link to a specific document in the document store, which was once sent to the customer organisation by e-mail, has expired.
 
 \begin{itemize}
-    \item \textbf{Source:} source
+    \item \textbf{Source:} Internal
     \item \textbf{Stimulus:}
         \begin{itemize}
-            \item Description of a first stimulus.
-            \item Description of a second stimulus.
+            \item The expected time period, in which the customer organisation client follows the received hyperlink to a document and opens it, has reached a certain limit value
         \end{itemize}
 
-    \item \textbf{Artefact:} the stimulated artefact
-    \item \textbf{Environment:} the condition under which the stimulus occurs
+    \item \textbf{Artefact:} the internal procedure of generating unique and time sensitive hyperlinks to documents
+    \item \textbf{Environment:} some customer organisation clients take more time than expected to follow a hyperlink to a document
     \item \textbf{Response:}
         \begin{itemize}
-            \item Describe how the system should respond to the stimulus.
+            \item This does not lead to the customer organisation client not being able to acces his or her document ever again
+            \item This does not increase the customer organisation client's effort necessary to acces the respective document significantly
+            \item Prevention
+		\begin{itemize}
+			\item The expiration date of a hyperlink to a document should lie sufficiently far in the future
+		\end{itemize}
+            \item Detection
+		\begin{itemize}
+			\item The eDocs system is notified when a customer organisation client attempts to follow an expired hyperlink to a document
+		\end{itemize}
+            \item Resolution
+		\begin{itemize}
+			\item If the respective document is still available within the eDocs system, a new unique hyperlink is generated and sent to the respective customer organisation client as part of the response to his or her first hyperlink request
+		\end{itemize}
         \end{itemize}
 
     \item \textbf{Response measure:}
-        \begin{itemize}
-            \item Describe how the satisfaction of a response is measured.
-        \end{itemize}
+            \item Prevention
+		\begin{itemize}
+			\item The life expectancy of a unique document link should cover the acces dates of at least 99% of all customer organisation clients that receive their documents by link
+		\end{itemize}
+            \item Detection
+		\begin{itemize}
+			\item The eDocs system should detect all expired links immediately at acces time
+		\end{itemize}
+            \item Resolution
+		\begin{itemize}
+			\item The replacement link should be generated according to the normal procedure and should be given the highest priority, resulting in a maximum delay of 3 hours
+		\end{itemize}
 \end{itemize}
 
 \subsection{Performance}
@@ -721,27 +747,26 @@ Shortly describe the context of the scenario.
 \end{itemize}
 
 \subsection{Modifiability}
-\subsubsection{\emph{M1}: Name of the quality attribute scenario}
-Shortly describe the context of the scenario.
+\subsubsection{\emph{M1}: Customized recipient channels}
+Currently, eDocs only supports document retrieval through a limited number of channels. In the future, recipients might want to link their own system to that of eDocs to receive their documents. To achieve this, eDocs will need to provide some kind of API.
 
 \begin{itemize}
-    \item \textbf{Source:} source
+    \item \textbf{Source:} Recipients
     \item \textbf{Stimulus:}
         \begin{itemize}
-            \item Description of a first stimulus.
-            \item Description of a second stimulus.
+            \item Recipients want to be able to receive their documents through customized channels
         \end{itemize}
 
-    \item \textbf{Artefact:} the stimulated artefact
-    \item \textbf{Environment:} the condition under which the stimulus occurs
+    \item \textbf{Artefact:} The document delivery process
+    \item \textbf{Environment:} The recipient has chosen to receive documents through his or her own custom delivery channel
     \item \textbf{Response:}
         \begin{itemize}
-            \item Describe how the system should respond to the stimulus.
+            \item The recipient is presented with an API to link it's customized channel to. This API should satisfy all of the recipient's needs
         \end{itemize}
 
     \item \textbf{Response measure:}
         \begin{itemize}
-            \item Describe how the satisfaction of a response is measured.
+            \item At least 99% of all recipients that have ever chosen the customized channel option are satisfied with the provided API and service. This results in at most 1% of all those recipients issuing some kind of complaint regarding this matter.
         \end{itemize}
 \end{itemize}
 
