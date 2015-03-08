@@ -107,33 +107,21 @@ in this analysis.
     \item \textbf{Preconditions:}
         \begin{itemize}
             \item The customer organisation is a registred client at eDocs
-            \item The customer organisation 
-            \item Second precondition.
+            \item The customer organisation is logged into the eDocs system
         \end{itemize}
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item First postcondition.
-            \item Second postcondition.
+            \item The customer organisation has consulted the status of the desired document
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item Step 1
-       \item Step 2
-       \item Step 3
-       \item \ldots
+       \item The customer orgnanisation provides the eDocs system with enough information for it to identify the desired document of which the status needs to be consulted
+       \item The eDocs system retrieves the status of the respective document
+       \item The eDocs system provides the customer organisation with the retrieved document status information
+       \item The customer organisation consults the document status information received from the eDocs system
     \end{enumerate}
-
-    \item \textbf{Alternative scenarios:} 
-    \begin{enumerate}
-        \item [3b.] Alternative at step 3
-    \end{enumerate}
-    
-    \item \textbf{Remarks:}
-        \begin{itemize}
-            \item First remark
-        \end{itemize}
 \end{itemize}
 
 \subsection{\emph{UC2}: Register customer organisation}
@@ -165,7 +153,6 @@ in this analysis.
        \item The eDocs administrator starts negotiations with the customer organisation about the contract and SLA
        \item Both parties agree upon the terms and conditions specified in the forenamed documents
        \item The customer organisation is now a client of eDocs and has agreed to outsource (part of) its document processing tasks to eDocs
-       \item \ldots
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
@@ -181,84 +168,79 @@ in this analysis.
 \end{itemize}
 
 
-\subsection{\emph{UC3}: Consult management dashboard}
+\subsection{\emph{UC3}: Deliver raw invoice data}
 \begin{itemize}
-    \item \textbf{Name:} Consult management dashboard
-    \item \textbf{Summary:} 
+    \item \textbf{Name:} Deliver raw invoice data
+    \item \textbf{Summary:} The customer organisation provides eDocs with the raw invoice data to be processed
     \item \textbf{Primary actor:} Customer organisation
     \item \textbf{Secondary actor:} eDocs system
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants to access and/or change some of the organisation's data that is stored in the eDocs system
-            \item \textit{System:} provides an interface to access and manipulate the organisation's data that is outsourced to eDocs in a consistent way
+            \item \textit{Customer organisation:} wants to deliver its raw invoice data to eDocs so that the latter can process it accordingly
+            \item \textit{System:} accepts the raw invoice data to be processed
         \end{itemize}
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation is a registered client of eDocs
             \item The customer organisation is logged in to the eDocs system
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The customer organisation has accessed and/or manipulated (part of) its data that is stored/processed by eDocs
-            \item 
+            \item The customer organisation has provided the eDocs system with its raw invoice data
+            \item The eDocs system has succesfully received the customer organisation's raw invoice data
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The customer organisation has expressed its interest in eDocs as its potential document processing partner
-       \item The eDocs administrator starts negotiations with the customer organisation about the contract and SLA
-       \item Both parties agree upon the terms and conditions specified in the forenamed documents
-       \item The customer organisation is now a client of eDocs and has agreed to outsource (part of) its document processing tasks to eDocs
-       \item \ldots
+       \item The customer organisation sends its raw invoice data to eDocs via the management dashboard or via a web service that provides a link from the customer organisation's system to that of eDocs
+       \item The eDocs system receives the customer organisation's raw invoice data
     \end{enumerate}
-    \item \textbf{Alternative scenarios:} 
-    \begin{enumerate}
-        \item [3a.] The two parties do not reach an agreement
-        \item [4a.] The customer organisation expresses its intent to outsource its document processing tasks elsewhere
-        \item [5a.] eDocs had lost a potential client
-    \end{enumerate}
-    
-    \item \textbf{Remarks:}
-        \begin{itemize}
-            \item 
-        \end{itemize}
 \end{itemize}
 
 
-\subsection{\emph{UC4}: Deliver raw data}
+\subsection{\emph{UC4}: Deliver raw payslip data}
 \begin{itemize}
-    \item \textbf{Name:} Deliver raw data
-    \item \textbf{Summary:} The customer organisation provides eDocs with the raw data to be processed
+    \item \textbf{Name:} Deliver raw payslip data
+    \item \textbf{Summary:} The customer organisation provides eDocs, either directly or indirectly, with the raw payslip data to be processed
     \item \textbf{Primary actor:} Customer organisation
     \item \textbf{Secondary actor:} eDocs system
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants to deliver its raw data to eDocs so that the latter can process it accordingly
-            \item \textit{System:} accepts the raw data to be processed
+            \item \textit{Customer organisation:} wants to deliver its raw payslip data to eDocs so that the latter can process it accordingly
+            \item \textit{Social secretary:} wants to be an intermediate party in the delivery of raw payslip data
+            \item \textit{System:} accepts the raw payslip data to be processed
         \end{itemize}
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation is logged in to the eDocs system
+            \item The customer organisation representative is logged in to the eDocs system
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The customer organisation has provided the eDocs system with its raw data
-            \item The eDocs system has succesfully received the customer organisation's raw data
+            \item The customer organisation representative has provided the eDocs system with its raw payslip data
+            \item The eDocs system has succesfully received the customer organisation's raw payslip data
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The customer organisation sends its raw data to eDocs via the management dashboard or via a web service that provides a link from the customer organisation's system to that of eDocs
-       \item The eDocs system receives the customer organisation's raw data
-       \item \ldots
+       \item The customer organisation sends its raw payslip data to eDocs via the management dashboard or via a web service that provides a link from the customer organisation's system to that of eDocs
+       \item The eDocs system receives the customer organisation's raw payslip data
     \end{enumerate}
+    \item \textbf{Alternative scenarios:} 
+    \begin{enumerate}
+        \item [1a.] The customer organisation provides its social secretary with the necessary employee and tax information
+        \item [2a.] The social secretary integrates the raw employee data into raw payslip data conform to the eDocs standard
+        \item [3a.] Continue from step 2.
+    \end{enumerate}
+    \item \textbf{Remarks:}
+        \begin{itemize}
+        	\item The customer organisation representative is either its social secretary or the customer organisation itself
+        \end{itemize}
 \end{itemize}
 
 
 \subsection{\emph{UC5}: Process raw data}
 \begin{itemize}
     \item \textbf{Name:} Process raw data
-    \item \textbf{Summary:} The eDocs system process the raw data that was provided by the customer organisation in a previous step
+    \item \textbf{Summary:} The eDocs system processes the raw data that was provided by the customer organisation in a previous step
     \item \textbf{Primary actor:} eDocs system
     \item \textbf{Secondary actor:} None
     \item \textbf{Interested parties:} 
@@ -281,7 +263,6 @@ in this analysis.
        \item Check raw data for consistency and completeness
        \item Process document data according to previously provided template
        \item Process meta data
-       \item \ldots
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
