@@ -34,6 +34,12 @@ In this section we provide additional domain constraints.
     \item A Recipient should have at most one personal document store.
     \item A Recipient should get a specific document over one channel.
     \item The System must first generate a document before it can archive it.
+    \item If a document is stored in the archive, the raw data on which it is based should also be stored in the archived. 
+    \item An Employee can receive only payslips.
+    \item A Customer organization client can receive only invoices.
+    \item \emph{Employee} and \emph{Customer organization client} are roles. They might be taken on by the same person.
+    \item There are two possible ways data from a customer organization can be provided. The first way is the customer organization providing the data for both invoices and payslips. The alternative consists of the customer organization providing only the data for invoices while the data for payslips is being provided by one or more Social secretaries.
+    \item Each customer organization must fill in a separate template for payslips and invoices.
 \end{itemize}
 
 \subsection{Glossary}
@@ -41,8 +47,9 @@ In this section, we provide a glossary of the most important terminology used
 in this analysis.
 
 \begin{itemize}
-    \item \textbf{Term1}: definition
-    \item \textbf{Term2}: definition
+    \item \textbf{Customer organization client}: a Reciever of invoices send by a Customer organization
+    \item \textbf{Archive}: definition
+    \item \textbf{Metadata}: part of the raw data that specifies the addressing method and address for a specific Recipient.
 \end{itemize}
 
 \section{Functional requirements}\label{sec:functional}
