@@ -723,7 +723,7 @@ The unique link to a specific document in the document store, which was once sen
 
 \subsection{Performance}
 \subsubsection{\emph{P1}: raw data transfer }
-
+It should  be possible to send raw data to the eDocs system in a timely fashion, even in case of a large number of customer organisations attempting to access this raw data transfer interface (e.g. at the end of each month or at the end of the default fiscal year).
 
 \begin{itemize}
     \item \textbf{Source:} Customer organisation
@@ -732,40 +732,48 @@ The unique link to a specific document in the document store, which was once sen
             \item A registered customer organisation sends (a batch of) raw data to the eDocs system
         \end{itemize}
 
-    \item \textbf{Artifact:} the stimulated artifact
-    \item \textbf{Environment:} the condition under which the stimulus occurs
+    \item \textbf{Artifact:} The eDocs system interface through which raw data is received
+    \item \textbf{Environment:} Normal execution
     \item \textbf{Response:}
         \begin{itemize}
-            \item Describe how the system should respond to the stimulus.
+		\item The eDocs system is able to receive raw data in a timely fashion while the rate of arriving raw data is lower than a certain value.
+		\item If the raw data arrive at a higher rate than this value, the system throttles the excessive arrivals so that this amount of raw data continues to be transfered in a timely fashion.
+		\item A large amount of raw data transfer should not affect the performance of other functionality of the eDocs system.
         \end{itemize}
 
     \item \textbf{Response measure:}
         \begin{itemize}
-            \item Describe how the satisfaction of a response is measured.
-        \end{itemize}
+		\item While the rate of arriving raw data is lower than 5000 records / second, the eDocs system should be able to receive at least 95\% of all records within 2 seconds and 99\% within 5 seconds
+	\end{itemize}
 \end{itemize}
 
 \subsection{Modifiability}
-\subsubsection{\emph{M1}: Customized recipient channels}
-Currently, eDocs only supports document retrieval through a limited number of channels. In the future, recipients might want to link their own system to that of eDocs to receive their documents. To achieve this, eDocs will need to provide some kind of API.
+\subsubsection{\emph{M1}: Different authentication methods}
+eDocs currently authenticates its registered users (both customer organisations and their clients) in a uniform way through username-password protection. As this is not considered to be very secure, the IT department might decide to include some other form of authentication someday, either replacing or complementing the current authentication procedure.
 
 \begin{itemize}
-    \item \textbf{Source:} Recipients
+    \item \textbf{Source:} IT department
     \item \textbf{Stimulus:}
         \begin{itemize}
-            \item Recipients want to be able to receive their documents through customized channels
+            \item The IT department wants to include another form of security in the authentication process
         \end{itemize}
 
-    \item \textbf{Artefact:} The document delivery process
-    \item \textbf{Environment:} The recipient has chosen to receive documents through his or her own custom delivery channel
+    \item \textbf{Artefact:} The user authentication process
+    \item \textbf{Environment:} Normal execution
     \item \textbf{Response:}
         \begin{itemize}
-            \item The recipient is presented with an API to link its customized channel to. This API should satisfy all of the recipient's needs
+            \item Incorporating a new authentication procedure in the eDocs system does not require changes to any other part of the eDocs system.
+            \item A newly introduced authentication procedure should not cause significant noticeable overhead for registered users when logging into or out of the eDocs system
+            \item A newly introduced authentication procedure should not cause any noticeable overhead for registered users during their session on the eDocs system
+            \item The rollout phase of a newly introduced authentication procedure should be communicated to all registered users in a timely and self-explanatory fashion
         \end{itemize}
 
     \item \textbf{Response measure:}
         \begin{itemize}
-            \item At least 99\% of all recipients that have ever chosen the customized channel option are satisfied with the provided API and service. This results in at most 1\% of all those recipients issuing some kind of complaint regarding this matter.
+            \item Including a new form of authentication should only delay the authentication procedure of 99\% of all registered users by a maximum of 10 seconds (compared to the original userame-password protection)
+            \item The form of authentication during a session is completely transparent to all registered users
+            \item Public communication of a new authentication procedure should start at least one month before rollout
+            \item A newly introduced authentication procedure should be accompanied with sufficient documentation to satisfy the needs of a test group consisting of at least 30 registered users. This documentation should be sent to all registered users, along with the initial publication (see previous measure)
         \end{itemize}
 \end{itemize}
 
