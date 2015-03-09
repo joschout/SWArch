@@ -676,48 +676,62 @@ form of \emph{quality attribute scenarios}. We provide for each type
 (availability, performance and modifiability) one requirement.
 
 \subsection{Availability}
-\subsubsection{\emph{Av1}: Expiration of unique link}
-The unique link to a specific document in the document store, which was once sent to the customer organisation by e-mail, has expired.
+\subsubsection{\emph{Av1}: Document processing infrastructure failure}
+The internal (sub-)system responsible for processing the raw data into documents fails or crashes.
 
 \begin{itemize}
     \item \textbf{Source:} Internal
-    \item \textbf{Stimulus:}
-        \begin{itemize}
-            \item The expected time period, in which the customer organisation client follows the received hyperlink to a document and opens it, has reached a certain limit value
-        \end{itemize}
+    \item \textbf{Stimulus:} The internal (sub-)system responsible for generating documents fails or crashes.
 
-    \item \textbf{Artefact:} the internal procedure of generating unique and time sensitive hyperlinks to documents
-    \item \textbf{Environment:} some customer organisation clients take more time than expected to follow a hyperlink to a document
+    \item \textbf{Artifact:} Internal subsystem
+    \item \textbf{Environment:} Normal execution
     \item \textbf{Response:}
         \begin{itemize}
-            \item This does not lead to the customer organisation client not being able to acces his or her document ever again
-            \item This does not increase the customer organisation client's effort necessary to acces the respective document significantly
+        	\item This does not affect the availability of other subsystems, such as (i) the availability of the personal document store, (ii) the delivery of already generated documents, (iii) the availability of persistent data such as user data and billing data, etc..
+			\item This does not lead to the loss of raw data.
+			\item This does not lead to the loss of already generated documents.
+			\item This does not lead to critical documents not being processed on time.
             \item Prevention
-		\begin{itemize}
-			\item The expiration date of a hyperlink to a document should lie sufficiently far in the future
-		\end{itemize}
-            \item Detection
-		\begin{itemize}
-			\item The eDocs system is notified when a customer organisation client attempts to follow an expired hyperlink to a document
+				\begin{itemize}
+				\item The system responsible for processing raw data should have a guaranteed maximal down-time.
+				\end{itemize}
+           	 \item Detection
+				\begin{itemize}
+					\item The eDocs Operators are notified of this problem.
+					\item The System is able to detect this problem and goes into degraded modus:
+				\begin{itemize}
+				\item Raw data to be processed is stored and processed when the processing system returns operational.
+				\item Fail gracefully: if the system fails while handeling a processing job, the documents it did finish generating are stored in the archive as in a regular processing job.
+				\end{itemize}
 		\end{itemize}
             \item Resolution
 		\begin{itemize}
-			\item If the respective document is still available within the eDocs system, a new unique hyperlink is generated and sent to the respective customer organisation client as part of the response to his or her first hyperlink request
+			\item The notified eDocs Operators address the problem, e.g. by replacing failed hardware or by restarting the software.
+			\item The System automatically finishes the planned processing jobs, including the ones it possibly was handling during the failure.
 		\end{itemize}
         \end{itemize}
 
     \item \textbf{Response measure:}
             \item Prevention
 		\begin{itemize}
-			\item The life expectancy of a unique document link should cover the acces dates of at least 99% of all customer organisation clients that receive their documents by link
+			\item The System should be down for at most 14 hours per year, in time spans of at most two hours. The time between two down-time periods should be at least the time necessary to process all pending documents to be generated.
+			\item The time necessary to process raw data into a document should be at most the time agreed upon in the SLA minus the maximal consecutive downtime. This way, there is a time buffer to take into account the possible down-time. More specifically:
+			\begin{itemize}
+			\item Critical documents, which have a deadline to be processed within 5 hours, should take at most three hours to process.
+			\item Non-recurring documents with a diamond priority, which have a deadline of maximal 12 hours to process, should take at most 9 hours to process.
+			\item Non-recurring documents with a gold priority, which have a deadline of maximal 24 hours to process, should take at most 21 hours to process.
+			\item  Non-recurring documents with a silver priority, which have a deadline of maximal 48 hours to process, should take at most 45 hours to process.
+			\end{itemize}
 		\end{itemize}
             \item Detection
 		\begin{itemize}
-			\item The eDocs system should detect all expired links immediately at acces time
+			\item Detection of failed hardware or crashed software happens within 5 seconds.
+			\item The eDocs operators are notified within 1 minute.
+			\item In the transition between normal and degraded modus, no document are lost.
 		\end{itemize}
             \item Resolution
 		\begin{itemize}
-			\item The replacement link should be generated according to the normal procedure and should be given the highest priority, resulting in a maximum delay of 3 hours
+			\item It should be possible for the eDocs operators to address the problem in within 2 hours.
 		\end{itemize}
 \end{itemize}
 
@@ -757,7 +771,7 @@ Currently, eDocs only supports document retrieval through a limited number of ch
             \item Recipients want to be able to receive their documents through customized channels
         \end{itemize}
 
-    \item \textbf{Artefact:} The document delivery process
+    \item \textbf{Artifact:} The document delivery process
     \item \textbf{Environment:} The recipient has chosen to receive documents through his or her own custom delivery channel
     \item \textbf{Response:}
         \begin{itemize}
