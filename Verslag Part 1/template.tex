@@ -31,8 +31,9 @@ This section shows the domain model(s).
 In this section we provide additional domain constraints.
 
 \begin{itemize}
-    \item This is a first constraint.
-    \item This is a second constraint.
+    \item A Recipient should have at most one personal document store.
+    \item A Recipient should get a specific document over one channel.
+    \item The System must first generate a document before it can archive it.
 \end{itemize}
 
 \subsection{Glossary}
@@ -718,9 +719,9 @@ The internal (sub-)system responsible for processing the raw data into documents
 			\item The time necessary to process raw data into a document should be at most the time agreed upon in the SLA minus the maximal consecutive downtime. This way, there is a time buffer to take into account the possible down-time. More specifically:
 			\begin{itemize}
 			\item Critical documents, which have a deadline to be processed within 5 hours, should take at most three hours to process.
-			\item Non-recurring documents with a diamond priority, which have a deadline of maximal 12 hours to process, should take at most 9 hours to process.
-			\item Non-recurring documents with a gold priority, which have a deadline of maximal 24 hours to process, should take at most 21 hours to process.
-			\item  Non-recurring documents with a silver priority, which have a deadline of maximal 48 hours to process, should take at most 45 hours to process.
+			\item Non-recurring documents with a diamond priority, which have a deadline of maximal 12 hours to process, should take at most 10 hours to process.
+			\item Non-recurring documents with a gold priority, which have a deadline of maximal 24 hours to process, should take at most 22 hours to process.
+			\item  Non-recurring documents with a silver priority, which have a deadline of maximal 48 hours to process, should take at most 46 hours to process.
 			\end{itemize}
 		\end{itemize}
             \item Detection
