@@ -2,6 +2,7 @@
 
 \usepackage[english]{babel}
 \usepackage{graphicx}
+\usepackage{placeins}
 \usepackage[colorlinks, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage{geometry}
 \geometry{tmargin=3cm, bmargin=2.2cm, lmargin=2.2cm, rmargin=2cm}
@@ -20,13 +21,13 @@
 \subsection{Domain model}
 This section shows the domain model.
 
-\begin{figure}[!htp]
+\begin{figure}[h]
     \centering
     %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Domain model}
+	\includegraphics[width=0.6\textwidth]{eDocs_domain_model.png}
     \caption{The domain model for the system.}\label{fig:domain_model}
 \end{figure}
-
+\FloatBarrier
 \subsection{Domain constraints}
 In this section we provide additional domain constraints.
 
@@ -84,70 +85,72 @@ or a client subscribed to the services of a customer organisation.
 \end{figure}
 
 \subsection{\emph{UC7}: Consult document status}
+\label{usecase:consultdocstatus}
 \begin{itemize}
-    \item \textbf{Name:} Consult document status
     \item \textbf{Primary actor:} Customer organisation
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants to consult the status of one of its documents at eDocs
-            \item \textit{The eDocs system:} provides a management dashboard through which the customer can, among other things, consult the status of its documents
+            \item \textit{Customer organisation:} wants to consult the status of one of its documents at eDocs.
+            \item \textit{The eDocs system:} provides a management dashboard through which the customer can, among other things, consult the status of its documents.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation is a registred client at eDocs
-            \item The customer organisation is logged into the eDocs system
+            \item The Customer organisation is a registered client at eDocs. (cf. the use case in \ref{usecase:registercustomerorg} )
+            \item The Customer organisation is logged into the eDocs system. (cf. UC1: Log in).
         \end{itemize}
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The customer organisation has consulted the status of the desired document
+            \item The Customer organisation has consulted the status of the desired document
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The customer orgnanisation provides the eDocs system with enough information for it to identify the desired document of which the status needs to be consulted
-       \item The eDocs system retrieves the status of the respective document
-       \item The eDocs system provides the customer organisation with the retrieved document status information
-       \item The customer organisation consults the document status information received from the eDocs system
+       \item The Customer orgnanisation provides the eDocs system with enough information for it to identify the desired document of which the status needs to be consulted.
+       \item The eDocs system retrieves the status of the respective document.
+       \item The eDocs system provides the Customer organisation with the retrieved document status information.
+       \item The Customer organisation consults the document status information received from the eDocs system.
     \end{enumerate}
 \end{itemize}
 
 \subsection{\emph{UC8}: Register customer organisation}
+\label{usecase:registercustomerorg}
 \begin{itemize}
-    \item \textbf{Name:} Register customer organisation
-    \item \textbf{Summary:} The eDocs administrator registers a new customer organisation in order to enlarge the eDocs client base
+    \item \textbf{Summary:} The eDocs administrator registers a new Customer organisation in order to enlarge the eDocs client base.
     \item \textbf{Primary actor:} eDocs administrator
     \item \textbf{Secondary actor:} Customer organisation
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants to outsource its document processing to eDocs
-            \item \textit{eDocs:} wants to gain new clients  customer organisations) for which it can process documents
-            \item \textit{eDocs administrator:} deals with the administrational tasks during the registration of customer organisations
+            \item \textit{Customer organisation:} wants to outsource its document processing to eDocs.
+            \item \textit{eDocs:} wants to gain new Customer organisation clients for which it can process documents.
+            \item \textit{eDocs administrator:} deals with the administrational tasks during the registration of customer organisations.
         \end{itemize}
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation has actively expressed its interest in eDocs
-            \item The eDocs administrator has initiated negotiations about the contract and SLA with the customer organisation
+            \item The Customer organisation has actively expressed its interest in eDocs.
+            \item The eDocs administrator has initiated negotiations about the contract and SLA with the customer organisation.
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item eDocs has gained a new client (and friend)
-            \item The customer organisation and eDocs administrator have succesfully negotiated a contract and SLA
+            \item eDocs has gained a new client (and friend).
+            \item The Customer organisation and eDocs administrator have successfully negotiated a contract and SLA.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The customer organisation has expressed its interest in eDocs as its potential document processing partner
        \item The eDocs administrator starts negotiations with the customer organisation about the contract and SLA
-       \item Both parties agree upon the terms and conditions specified in the forenamed documents
-       \item The customer organisation is now a client of eDocs and has agreed to outsource (part of) its document processing tasks to eDocs
+       \item Both parties agree upon the terms and conditions specified in the forenamed documents.
+       \item The Customer organisation is now a client of eDocs and has agreed to outsource (part of) its document processing tasks to eDocs.
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [3a.] The two parties do not reach an agreement
-        \item [4a.] The customer organisation expresses its intent to outsource its document processing tasks elsewhere
-        \item [5a.] eDocs had lost a potential client
+        \item [2a.] The two parties do not reach an agreement.
+        \begin{enumerate}
+        \item The customer organisation expresses its intent to outsource its document processing tasks elsewhere
+        \item  eDocs has lost a potential client
+        \end{enumerate}
+        
     \end{enumerate}
     
     \item \textbf{Assumptions:}
@@ -158,112 +161,115 @@ or a client subscribed to the services of a customer organisation.
 
 
 \subsection{\emph{UC9}: Deliver raw invoice data}
+\label{usecase:deliverrawinvoicedata}
 \begin{itemize}
-    \item \textbf{Name:} Deliver raw invoice data
-    \item \textbf{Summary:} The customer organisation provides eDocs with the raw invoice data to be processed
+    \item \textbf{Summary:} The Customer organisation provides eDocs with the raw invoice data to be processed
     \item \textbf{Primary actor:} Customer organisation
     \item \textbf{Secondary actor:} eDocs system
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants to deliver its raw invoice data to eDocs so that the latter can process it accordingly
-            \item \textit{System:} accepts the raw invoice data to be processed
+            \item \textit{Customer organisation:} wants to deliver its raw invoice data to eDocs so that the latter can process it accordingly.
+            \item \textit{System:} accepts the raw invoice data to be processed.
         \end{itemize}
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation is logged in to the eDocs system
+            \item The Customer organisation is logged in to the eDocs system. (cf. UC1: Log in)
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The customer organisation has provided the eDocs system with its raw invoice data
-            \item The eDocs system has succesfully received the customer organisation's raw invoice data
+            \item The Customer organisation has provided the eDocs system with its raw invoice data.
+            \item The eDocs system has successfully received the customer organisation's raw invoice data.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The customer organisation sends its raw invoice data to eDocs via the management dashboard or via a web service that provides a link from the customer organisation's system to that of eDocs
-       \item The eDocs system receives the customer organisation's raw invoice data
+       \item The customer organisation sends its raw invoice data to eDocs via the management dashboard or via a web service that connects the customer organisation's system to that of eDocs.
+       \item The eDocs system receives the customer organisation's raw invoice data.
     \end{enumerate}
 \end{itemize}
 
 
 \subsection{\emph{UC10}: Deliver raw payslip data}
+\label{usecase:deliverrawpayslipdata}
 \begin{itemize}
-    \item \textbf{Name:} Deliver raw payslip data
-    \item \textbf{Summary:} The customer organisation provides eDocs, either directly or indirectly, with the raw payslip data to be processed
+    \item \textbf{Summary:} The Customer organisation provides eDocs, either directly or indirectly, with the raw payslip data to be processed.
     \item \textbf{Primary actor:} Customer organisation
     \item \textbf{Secondary actor:} eDocs system
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants to deliver its raw payslip data to eDocs so that the latter can process it accordingly
-            \item \textit{Social secretary:} wants to be an intermediate party in the delivery of raw payslip data
-            \item \textit{System:} accepts the raw payslip data to be processed
+            \item \textit{Customer organisation:} wants to deliver its raw payslip data to eDocs so that the latter can process it accordingly.
+            \item \textit{Social secretary:} wants to be an intermediate party in the delivery of raw payslip data.
+            \item \textit{System:} accepts the raw payslip data to be processed.
         \end{itemize}
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation representative is logged in to the eDocs system
+            \item The Customer organisation representative is logged in to the eDocs system. (cf. UC1:Log in)
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The customer organisation representative has provided the eDocs system with its raw payslip data
-            \item The eDocs system has succesfully received the customer organisation's raw payslip data
+            \item The Customer organisation representative has provided the eDocs system with its raw payslip data.
+            \item The eDocs system has successfully received the customer organisation's raw payslip data.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The customer organisation sends its raw payslip data to eDocs via the management dashboard or via a web service that provides a link from the customer organisation's system to that of eDocs
-       \item The eDocs system receives the customer organisation's raw payslip data
+       \item The customer organisation sends its raw payslip data to eDocs via the management dashboard or via a web service that connects the Customer organisation's system to that of eDocs.
+       \item The eDocs system receives the customer organisation's raw payslip data.
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [1a.] The customer organisation provides its social secretary with the necessary employee and tax information
-        \item [2a.] The social secretary integrates the raw employee data into raw payslip data conform to the eDocs standard
-        \item [3a.] Continue from step 2.
+        \item [1a.] The Customer organization outsources (part of) its payslip data to a Social secretary.
+        \begin{enumerate}
+        \item The Customer organisation provides its social secretary with the necessary employee and tax information.
+        \item  The Social secretary integrates the raw employee data into raw payslip data conform to the eDocs standard.
+        \item The Social secretary sends the raw payslip data to the eDocs System.
+        \item  Continue from step 2.
+        \end{enumerate}
     \end{enumerate}
-    \item \textbf{Remarks:}
-        \begin{itemize}
-        	\item The customer organisation representative is either its social secretary or the customer organisation itself
-        \end{itemize}
 \end{itemize}
 
 
 \subsection{\emph{UC11}: Process raw data}
+\label{usecase:processrawdata}
 \begin{itemize}
-    \item \textbf{Name:} Process raw data
-    \item \textbf{Summary:} The eDocs system processes the raw data that was provided by the customer organisation in a previous step
+    \item \textbf{Summary:} The eDocs system processes the raw data that was provided by the Customer organisation in a previous step.
     \item \textbf{Primary actor:} eDocs system
     \item \textbf{Secondary actor:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
-            \item \textit{Customer organisation:} wants its raw data to be processed correctly
-            \item \textit{eDocs system:} wants to process the raw data correctly
+            \item \textit{Customer organisation:} wants its raw data to be processed correctly.
+            \item \textit{eDocs system:} wants to process the raw data correctly.
         \end{itemize}
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The customer organisation, to which the raw data belongs, is a registered client of eDocs
-            \item The raw data that has to be processed, was successfully delivered to the eDocs system
+            \item The customer organisation, to which the raw data belongs, is a registered client of eDocs. (cf. the use case in \ref{usecase:registercustomerorg}.
+            \item The raw data that has to be processed, was successfully delivered to the eDocs system. (cf. the use cases in \ref{usecase:deliverrawinvoicedata} and \ref{usecase:deliverrawpayslipdata})
         \end{itemize}
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The raw data is processed
+            \item The raw data is processed.
+            \item The document is generated correctly.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item Check raw data for consistency and completeness
-       \item Process meta data
-       \item Process document data according to meta data and previously provided template
-       \item Generate document
+       \item The System checks the raw data for consistency and completeness.
+       \item The System processes the meta data.
+       \item The System processes the document data according to meta data and previously provided template.
+       \item The System generates the document.
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [2a.] Erroneous data is sent back to the customer organisation from which it originated
-        \item [3a.] The customer organisation corrects the erroneous part(s) of the respective (batch of) raw data
-        \item [4a.] The customer organisation delivers a (batch of) raw data consisting only of those corrected records that were (partly) erronous at the beginning of this processing phase
+        \item [2a.] The System sends back erroneous data to the customer organisation from which it originated.
+        \begin{enumerate}
+        \item The Customer organisation corrects the erroneous part(s) of the respective (batch of) raw data.
+        \item  The Customer organisation delivers a (batch of) raw data consisting only of those corrected records that were (partly) erroneous at the beginning of this processing phase.
         \item [5a.] Restart from step 1.
+          \end{enumerate}
     \end{enumerate}
     \item \textbf{Remarks:}
         \begin{itemize}
-        	\item If the raw data were marked as critical by the provider, they should be processed with the highest priority (within the overall five hour deadline)
+        	\item If the raw data were marked as critical by the provider, they should be processed with the highest priority (within the overall five hour deadline).
         \end{itemize}
 \end{itemize}
 
@@ -275,11 +281,11 @@ or a client subscribed to the services of a customer organisation.
     \item \textbf{Secondary actors:} The System
     \item \textbf{Interested parties:}
         \begin{itemize}
-            \item \textit{Registered recipient:} wants to de-activate his or her personal document store
+            \item \textit{Registered recipient:} wants to de-activate his or her personal document store.
             \item \textit{eDocs:} wants to keep as many Registered recipients as possible.
         \end{itemize}
 
-    \item \textbf{Preconditions:} None
+    \item \textbf{Preconditions:} The Registered Recipient has to be logged in (cf. UC1: Log in).
 
     \item \textbf{Postconditions:}
         \begin{itemize}
@@ -295,22 +301,12 @@ or a client subscribed to the services of a customer organisation.
        \item The System removes the account of the registered recipient.
        \item The System indicates success to the Registered recipient and logs him or her out.
     \end{enumerate}
-
-    \item \textbf{Alternative scenarios:} 
-    \begin{enumerate}
-        \item \ldots
-    \end{enumerate}
-    
-    \item \textbf{Remarks:}
-        \begin{itemize}
-        	\item None
-        \end{itemize}
 \end{itemize}
 
 
 \subsection{\emph{UC13}: Provide document template}
 \begin{itemize}
-	\item \textbf{Summary:} An eDocs administrator
+	\item \textbf{Summary:} An eDocs administrator provides a document template to the System.
     \item \textbf{Primary actor:} eDocs administrator
     \item \textbf{Interested parties:} 
         \begin{itemize}
@@ -321,7 +317,7 @@ or a client subscribed to the services of a customer organisation.
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The Customer organization has registered itself with eDocs.
+            \item The Customer organization has registered itself with eDocs. (cf. the use case in \ref{usecase:registercustomerorg})
         \end{itemize}
 
     \item \textbf{Postconditions:}
@@ -333,16 +329,6 @@ or a client subscribed to the services of a customer organisation.
     \begin{enumerate}
 		\item The eDocs administrator provides a document template to the System.
     \end{enumerate}
-
-    \item \textbf{Alternative scenarios:} 
-    \begin{enumerate}
-    	\item None
-    \end{enumerate}
-    
-    \item \textbf{Remarks:}
-        \begin{itemize}
-        	\item None
-        \end{itemize}
 \end{itemize}
 
 \subsection{\emph{UC14}: Update document template}
@@ -353,7 +339,8 @@ or a client subscribed to the services of a customer organisation.
     	\begin{itemize}
         	\item eDocs administrator
         	\item eDocs System
-        \end{itemize}eDocs administrator
+        	\item eDocs administrator
+        \end{itemize}
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants its documents to have a layout corresponding to the initial template it fills in.
@@ -362,7 +349,7 @@ or a client subscribed to the services of a customer organisation.
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The Customer organization is logged in.
+            \item The Customer organization is logged in. (cf. UC1: Log in).
         \end{itemize}
 
     \item \textbf{Postconditions:}
@@ -405,7 +392,7 @@ or a client subscribed to the services of a customer organisation.
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The Customer organization is logged in.
+            \item The Customer organization is logged in. (cf. UC:1 Log in)
         \end{itemize}
 
     \item \textbf{Postconditions:}
@@ -418,11 +405,6 @@ or a client subscribed to the services of a customer organisation.
        \item The Customer organization indicates that it wants to enable receipt tracking.
        \item The System stores this setting.
     \end{enumerate}
-
-    \item \textbf{Alternative scenarios:} 
-    \begin{enumerate}
-        \item \ldots
-    \end{enumerate}
     
     \item \textbf{Remarks:}
         \begin{itemize}
@@ -432,7 +414,7 @@ or a client subscribed to the services of a customer organisation.
 
 \subsection{\emph{UC16}: Disable receipt tracking}
 \begin{itemize}
-	\item \textbf{Summary:} The Customer organization disables receipt tracking
+	\item \textbf{Summary:} The Customer organization disables receipt tracking.
     \item \textbf{Primary actor:} Customer organization
     \item \textbf{Interested parties:} 
         \begin{itemize}
@@ -442,7 +424,7 @@ or a client subscribed to the services of a customer organisation.
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The Customer organization is logged in.
+            \item The Customer organization is logged in. (cf. UC1: Log in)
         \end{itemize}
 
     \item \textbf{Postconditions:}
@@ -455,11 +437,6 @@ or a client subscribed to the services of a customer organisation.
        \item The Customer organization indicates that it no longer wants to enable receipt tracking.
        \item The System stores this setting.
     \end{enumerate}
-
-    \item \textbf{Alternative scenarios:} 
-    \begin{enumerate}
-        \item \ldots
-    \end{enumerate}
     
     \item \textbf{Remarks:}
         \begin{itemize}
@@ -468,6 +445,7 @@ or a client subscribed to the services of a customer organisation.
 \end{itemize}
 
 \subsection{\emph{UC17}: Send document via e-mail}
+\label{usecase:senddocumentviaemail}
 \begin{itemize}
     \item \textbf{Summary:} Initiated by Time, the system sends an e-mail to an Unregistered recipient.
     \item \textbf{Primary actor:} Time
@@ -475,14 +453,14 @@ or a client subscribed to the services of a customer organisation.
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
-            \item \textbf{Unregistered recipient:} wants to receive his or her documents.
-            \item \textbf{eDocs;} wants the documents it sends to be correctly received.
-            \item \textbf{E-mail provider} wants to correctly deliver documents it send by e-mail in a timely manner.
+            \item \textit{Unregistered recipient:} wants to receive his or her documents.
+            \item \textit{eDocs:} wants the documents it sends to be correctly received.
+            \item \textit{E-mail provider} wants to correctly deliver documents it send by e-mail in a timely manner.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The document to be send is generated correctly.
+            \item The document to be send is generated correctly. (cf. the use case in \ref{usecase:processrawdata})
             \item The addressing information provided by the Customer Organization in the raw data is an e-mail address.
         \end{itemize}
 
@@ -516,17 +494,17 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} After receiving an error message from an e-mail provider, the System notifies the customer organization about the incorrect addressing information.
     \item \textbf{Primary actor:} E-mail provider
-	\item \textbf{Secondary actors:} None
+	\item \textbf{Secondary actors:} The System
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants to be notified when it gives incorrect addressing information to the eDocs System.
-            \item \textbf{eDocs:} wants to notify a customer organisation about incorrect addressing information.
-            \item \textbf{E-mail provider} wants to deliver e-mails to the correct e-mail addresses.
+            \item \textit{eDocs:} wants to notify a customer organisation about incorrect addressing information.
+            \item \textit{E-mail provider} wants to deliver e-mails to the correct e-mail addresses.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item UC: \emph{Send document via e-mail}
+            \item A document was sent via e-mail. (cf. the use case in \ref{usecase:senddocumentviaemail})
             \item The addressing information provided by the Customer Organization in the raw data is an incorrect e-mail address.
         \end{itemize}
 
@@ -543,8 +521,8 @@ or a client subscribed to the services of a customer organisation.
        \item The System looks up the raw data in its archive corresponding to the incorrect e-mail address and document.
        \item The System notifies the Customer organization about the incorrect addressing information.
     \end{enumerate}
-
 \end{itemize}
+
 \subsection{\emph{UC19}: Receive document via e-mail}
 \begin{itemize}
     \item \textbf{Summary:} The Unregistered recipient recipient receives a document via e-mail.
@@ -553,14 +531,14 @@ or a client subscribed to the services of a customer organisation.
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
-            \item \textbf{Unregistered recipient:} wants to receive his or her documents.
-            \item \textbf{eDocs;} wants the documents it sends to be correctly received.
-            \item \textbf{E-mail provider} wants to correctly deliver documents it send by e-mail in a timely manner.
+            \item \textit{Unregistered recipient:} wants to receive his or her documents.
+            \item \textit{eDocs;} wants the documents it sends to be correctly received.
+            \item \textit{E-mail provider} wants to correctly deliver documents it sends by e-mail in a timely manner.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item UC: \emph{Send document via e-mail}
+            \item A document was sent via e-mail. (cf. the use case in \ref{usecase:senddocumentviaemail})
         \end{itemize}
 
     \item \textbf{Postconditions:}
@@ -594,26 +572,26 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} Registered recipient searches for a specific document in his or her personal document store. 
     \item \textbf{Primary actor:} Registered Recipient
-	\item \textbf{Secondary actors:} None
+	\item \textbf{Secondary actors:} the System
     \item \textbf{Interested parties:} 
         \begin{itemize}
-        	\item \textbf{Registered recipients:} want to find a specific document.
+        	\item \textit{Registered recipients:} want to find a specific document.
             \item \textit{Customer organization:} wants the specific document to be found.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The Registered recipient is logged in (cf. \emph{UC1: Log in}.
+            \item The Registered recipient is logged in (cf. \emph{UC1: Log in}).
         \end{itemize}
 
     \item \textbf{Postconditions:}
         \begin{itemize}
-            \item The Registered recipient has received an overview of all the documents he or she received meet his or her search criteria.
+            \item The Registered recipient has received an overview of all the received documents that meet his or her search criteria.
         \end{itemize}
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
-       \item The Registered recipient indicates that he or she wants to search for a specific document, e.g. in the overview of received documents (cf. \emph{UC4: Consult personal document store}.
+       \item The Registered recipient indicates that he or she wants to search for a specific document, e.g. in the overview of received documents (cf. \emph{UC4: Consult personal document store}).
        \item The System presents to the Registered recipient one or more ways to specify criteria that the document he/she is looking for must meet.
        \item The System searches in its archive and looks up the documents that meet the specified requirements. The System presents the found documents to the Registered recipient.
      \end{enumerate}
@@ -632,15 +610,15 @@ or a client subscribed to the services of a customer organisation.
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
-            \item \textbf{Unregistered recipient:} wants to receive his or her documents.
-            \item \textbf{eDocs:} wants the documents it sends to be correctly received.
-            \item \textbf{Print\& postal service:} wants to correctly deliver documents it send by e-mail in a timely manner.
+            \item \textit{Unregistered recipient:} wants to receive his or her documents.
+            \item \textit{eDocs:} wants the documents it sends to be correctly received.
+            \item \textit{Print\& postal service:} wants to correctly deliver documents it send by e-mail in a timely manner.
         \end{itemize}
 
     \item \textbf{Preconditions:}
         \begin{itemize}
-            \item The document to be send is generated correctly.
-            \item The addressing information provided by the Customer Organization in the raw data is a postal address 
+            \item The document to be send is generated correctly. (cf. the use case in \ref{usecase:processrawdata}).
+            \item The addressing information provided by the Customer Organization in the raw data is a postal address.
         \end{itemize}
 
     \item \textbf{Postconditions:}
