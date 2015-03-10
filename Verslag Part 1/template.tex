@@ -17,8 +17,8 @@
 \newpage
 
 \section{Domain analysis}\label{sec:domain}
-\subsection{Domain models}
-This section shows the domain model(s).
+\subsection{Domain model}
+This section shows the domain model.
 
 \begin{figure}[!htp]
     \centering
@@ -38,8 +38,11 @@ In this section we provide additional domain constraints.
     \item An Employee can receive only payslips.
     \item A Customer organization client can receive only invoices.
     \item \emph{Employee} and \emph{Customer organization client} are roles. They might be taken on by the same person.
-    \item There are two possible ways data from a customer organization can be provided. The first way is the customer organization providing the data for both invoices and payslips. The alternative consists of the customer organization providing only the data for invoices while the data for payslips is being provided by one or more Social secretaries.
-    \item Each customer organization must fill in a separate template for payslips and invoices.
+    \item There are two possible ways data from a Customer organization can be provided. The first way is the Customer organization providing the data for both invoices and payslips. The alternative consists of the Customer organization providing only the data for invoices while the data for payslips is being provided by one or more Social secretaries.
+    \item Each Customer organization must fill in a separate template for payslips and invoices.
+    \item A Personal document store can only show documents that are in the archive.
+    \item It should be possible for a Recipient's Personal document store to show all of the Recipient's documents that have previously been archived.
+    \item The archive contains all of the documents that have been generated.
 \end{itemize}
 
 \subsection{Glossary}
@@ -47,9 +50,27 @@ In this section, we provide a glossary of the most important terminology used
 in this analysis.
 
 \begin{itemize}
-    \item \textbf{Customer organization client}: a Reciever of invoices send by a Customer organization
-    \item \textbf{Archive}: definition
-    \item \textbf{Metadata}: part of the raw data that specifies the addressing method and address for a specific Recipient.
+	\item \textbf{Customer organisation}: an organisation that outsources its document processing for payslips and/or
+invoices to eDocs.
+	\item \textbf{Invoice}: a commercial document issued for the sale of goods and/or services from a seller to a buyer.
+	\item \textbf{Payslip}: a document sent out by companies to their employees that describes how their salary for a certain
+period is calculated.
+\item \textbf{Raw data}: the unformatted information that is represented in a document.
+\item \textbf{Recipient}: a person or organisation that receives a document, e.g. an employee of a customer organisation
+or a client subscribed to the services of a customer organisation.
+	\item \textbf{Employee}: a Receiver of payslips send by a Customer organization representative.
+    \item \textbf{Customer organization client}: a Receiver of invoices send by a Customer organization.
+    \item \textbf{Archive}: a logical place where the received raw data and generated documents are stored.
+    \item \textbf{Meta data}: part of the raw data that specifies the addressing method and address for a specific Recipient.
+    \item \textbf{eDocs administrator}: an employee of eDocs that supervises the system infrastructure.
+    \item \textbf{Customer organization representative}: a(n) (employee of a) company  who can deliver raw data in the name of the Customer organization.
+    \item \textbf{Social secretary}: representative of the Customer organization it works for.
+    \item \textbf{Service Level Agreement}: a contract between the company eDocs and a customer organization or between the eDocs company and an organization to which eDocs outsources services, specifying the services that have to be provided by both parties and the conditions under which it is valid. 
+    \item \textbf{template}: a predefined textual structure on which the generated documents are based.
+    \item \textbf{Personal document store}: a channel provided by the eDocs company through which a receiver can consult all documents for which he or she is the receiver.
+    \item \textbf{Channel}: a medium over which Recipients can receive documents.
+    \item \textbf{Addendum}: a document complementing a previously sent payslip.
+    \item \textbf{Document data}: the part of the raw data that specifies the contents of a document.
 \end{itemize}
 
 \section{Functional requirements}\label{sec:functional}
