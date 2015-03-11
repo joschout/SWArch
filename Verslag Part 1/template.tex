@@ -233,7 +233,7 @@ or a client subscribed to the services of a customer organisation.
 \label{usecase:processrawdata}
 \begin{itemize}
     \item \textbf{Summary:} The eDocs system processes the raw data that was provided by the Customer organisation in a previous step.
-    \item \textbf{Primary actor:} eDocs system
+    \item \textbf{Primary actor:} Time
     \item \textbf{Secondary actor:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
@@ -253,6 +253,7 @@ or a client subscribed to the services of a customer organisation.
         
     \item \textbf{Main scenario:} 
     \begin{enumerate}
+    	\item Time notifies the System it should start to process some specific raw data.
        \item The System checks the raw data for consistency and completeness.
        \item The System processes the meta data.
        \item The System processes the document data according to meta data and previously provided template.
@@ -260,11 +261,11 @@ or a client subscribed to the services of a customer organisation.
     \end{enumerate}
     \item \textbf{Alternative scenarios:} 
     \begin{enumerate}
-        \item [2a.] The System sends back erroneous data to the customer organisation from which it originated.
+        \item [3a.] The System sends back erroneous data to the customer organisation from which it originated.
         \begin{enumerate}
         \item The Customer organisation corrects the erroneous part(s) of the respective (batch of) raw data.
         \item  The Customer organisation delivers a (batch of) raw data consisting only of those corrected records that were (partly) erroneous at the beginning of this processing phase.
-        \item [5a.] Restart from step 1.
+        \item Restart from step 1.
           \end{enumerate}
     \end{enumerate}
     \item \textbf{Remarks:}
