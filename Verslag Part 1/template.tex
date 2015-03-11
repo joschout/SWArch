@@ -165,7 +165,7 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} The Customer organisation provides eDocs with the raw invoice data to be processed
     \item \textbf{Primary actor:} Customer organisation
-    \item \textbf{Secondary actor:} eDocs system
+    \item \textbf{Secondary actor:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organisation:} wants to deliver its raw invoice data to eDocs so that the latter can process it accordingly.
@@ -194,7 +194,7 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} The Customer organisation provides eDocs, either directly or indirectly, with the raw payslip data to be processed.
     \item \textbf{Primary actor:} Customer organisation
-    \item \textbf{Secondary actor:} eDocs system
+    \item \textbf{Secondary actor:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organisation:} wants to deliver its raw payslip data to eDocs so that the latter can process it accordingly.
@@ -278,7 +278,7 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
 	\item \textbf{Summary:} A Registered recipient de-activates his or her personal document store account.
     \item \textbf{Primary actor:} Registered recipient
-    \item \textbf{Secondary actors:} The System
+    \item \textbf{Secondary actors:} None
     \item \textbf{Interested parties:}
         \begin{itemize}
             \item \textit{Registered recipient:} wants to de-activate his or her personal document store.
@@ -338,7 +338,6 @@ or a client subscribed to the services of a customer organisation.
     \item \textbf{Secondary actors:} 
     	\begin{itemize}
         	\item eDocs administrator
-        	\item eDocs System
         	\item eDocs administrator
         \end{itemize}
     \item \textbf{Interested parties:} 
@@ -449,7 +448,7 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} Initiated by Time, the system sends an e-mail to an Unregistered recipient.
     \item \textbf{Primary actor:} Time
-	\item \textbf{Secondary actors:} The System
+	\item \textbf{Secondary actors:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
@@ -494,7 +493,7 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} After receiving an error message from an e-mail provider, the System notifies the customer organization about the incorrect addressing information.
     \item \textbf{Primary actor:} E-mail provider
-	\item \textbf{Secondary actors:} The System
+	\item \textbf{Secondary actors:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants to be notified when it gives incorrect addressing information to the eDocs System.
@@ -527,12 +526,12 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} The Unregistered recipient recipient receives a document via e-mail.
     \item \textbf{Primary actor:} Unregistered Recipient
-	\item \textbf{Secondary actors:} The System
+	\item \textbf{Secondary actors:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
             \item \textit{Customer organization:} wants the Unregistered recipients to receive their documents.
             \item \textit{Unregistered recipient:} wants to receive his or her documents.
-            \item \textit{eDocs;} wants the documents it sends to be correctly received.
+            \item \textit{eDocs:} wants the documents it sends to be correctly received.
             \item \textit{E-mail provider} wants to correctly deliver documents it sends by e-mail in a timely manner.
         \end{itemize}
 
@@ -572,7 +571,7 @@ or a client subscribed to the services of a customer organisation.
 \begin{itemize}
     \item \textbf{Summary:} Registered recipient searches for a specific document in his or her personal document store. 
     \item \textbf{Primary actor:} Registered Recipient
-	\item \textbf{Secondary actors:} the System
+	\item \textbf{Secondary actors:} None
     \item \textbf{Interested parties:} 
         \begin{itemize}
         	\item \textit{Registered recipients:} want to find a specific document.
@@ -645,7 +644,7 @@ form of \emph{quality attribute scenarios}. We provide for each type
 
 \subsection{Availability}
 \subsubsection{\emph{Av1}: Document processing infrastructure failure}
-The internal (sub-)system responsible for processing the raw data into documents fails or crashes.
+The internal (sub-)system responsible for generating documents from raw data fails or crashes.
 
 \begin{itemize}
     \item \textbf{Source:} Internal
@@ -682,7 +681,7 @@ The internal (sub-)system responsible for processing the raw data into documents
     \item \textbf{Response measure:}
             \item Prevention
 		\begin{itemize}
-			\item The System should be down for at most 14 hours per year, in time spans of at most two hours. The time between two down-time periods should be at least the time necessary to process all pending documents to be generated.
+			\item The System should be down for at most 14 hours per year, in time intervals of at most two consecutive hours. The time between two down-time periods should be at least the time necessary to process all pending documents to be generated.
 			\item The time necessary to process raw data into a document should be at most the time agreed upon in the SLA minus the maximal consecutive downtime. This way, there is a time buffer to take into account the possible down-time. More specifically:
 			\begin{itemize}
 			\item Critical documents, which have a deadline to be processed within 5 hours, should take at most three hours to process.
@@ -695,11 +694,11 @@ The internal (sub-)system responsible for processing the raw data into documents
 		\begin{itemize}
 			\item Detection of failed hardware or crashed software happens within 5 seconds.
 			\item The eDocs operators are notified within 1 minute.
-			\item In the transition between normal and degraded modus, no document are lost.
+			\item In the transition between normal and degraded modus, no documents are lost.
 		\end{itemize}
             \item Resolution
 		\begin{itemize}
-			\item It should be possible for the eDocs operators to address the problem in within 2 hours.
+			\item It should be possible for the eDocs operators to address the problem within 2 hours.
 		\end{itemize}
 \end{itemize}
 
@@ -711,16 +710,16 @@ It should  be possible to send raw data to the eDocs system in a timely fashion,
     \item \textbf{Source:} Customer organisation
     \item \textbf{Stimulus:}
         \begin{itemize}
-            \item A registered customer organisation sends (a batch of) raw data to the eDocs system
+            \item A registered Customer organisation sends (a batch of) raw data to the eDocs system.
         \end{itemize}
 
-    \item \textbf{Artifact:} The eDocs system interface through which raw data is received
+    \item \textbf{Artifact:} The eDocs system interface through which raw data is received.
     \item \textbf{Environment:} Normal execution
     \item \textbf{Response:}
         \begin{itemize}
 		\item The eDocs system is able to receive raw data in a timely fashion while the rate of arriving raw data is lower than a certain value.
-		\item If the raw data arrive at a higher rate than this value, the system throttles the excessive arrivals so that this amount of raw data continues to be transfered in a timely fashion.
-		\item A large amount of raw data transfer should not affect the performance of other functionality of the eDocs system.
+		\item If the raw data arrive at a higher rate than this value, the system throttles the excessive arrivals so that this amount of raw data continues to be received in a timely fashion.
+		\item A large raw data transfer should not affect the performance of other functionality of the eDocs system.
         \end{itemize}
 
     \item \textbf{Response measure:}
@@ -737,24 +736,24 @@ eDocs currently authenticates its registered users (both customer organisations 
     \item \textbf{Source:} IT department
     \item \textbf{Stimulus:}
         \begin{itemize}
-            \item The IT department wants to include another form of security in the authentication process
+            \item The IT department wants to include another form of security in the authentication process.
         \end{itemize}
-    \item \textbf{Artefact:} The user authentication process
+    \item \textbf{Artifact:} The authentication process for Customer organizations and Registered recipients.
     \item \textbf{Environment:} Normal execution
     \item \textbf{Response:}
         \begin{itemize}
             \item Incorporating a new authentication procedure in the eDocs system does not require changes to any other part of the eDocs system.
-            \item A newly introduced authentication procedure should not cause significant noticeable overhead for registered users when logging into or out of the eDocs system
+            \item A newly introduced authentication procedure should not cause significant overhead noticeable to registered users when logging into or out of the eDocs system.
             \item A newly introduced authentication procedure should not cause any noticeable overhead for registered users during their session on the eDocs system
-            \item The rollout phase of a newly introduced authentication procedure should be communicated to all registered users in a timely and self-explanatory fashion
+            \item The rollout phase of a newly introduced authentication procedure should be communicated to all registered users in a timely and comprehensible fashion.
         \end{itemize}
 
     \item \textbf{Response measure:}
         \begin{itemize}
-            \item Including a new form of authentication should only delay the authentication procedure of 99\% of all registered users by a maximum of 10 seconds (compared to the original userame-password protection)
-            \item The form of authentication during a session is completely transparent to all registered users
-            \item Public communication of a new authentication procedure should start at least one month before rollout
-            \item A newly introduced authentication procedure should be accompanied with sufficient documentation to satisfy the needs of a test group consisting of at least 30 registered users. This documentation should be sent to all registered users, along with the initial publication (see previous measure)
+            \item Including a new form of authentication should only delay the authentication procedure of 95\% of all registered user by a maximum of 1 second and 5\% of all registered users by a maximum of 5 seconds (compared to the original username-password protection).
+            \item The form of authentication during a session is completely transparent to all registered users.
+            \item Public communication of a new authentication procedure should start at least one month before rollout.
+            \item A newly introduced authentication procedure should be accompanied with sufficient documentation to satisfy the needs of a test group consisting of at least 30 registered users. This documentation should be sent to all registered users, along with the initial publication (see previous measure).
         \end{itemize}
 \end{itemize}
 
