@@ -44,16 +44,17 @@ UC4 and UC5 in the eDocs System rely on the generation of documents and are thus
 \paragraph{Scheduling for P1}
 P1 specifies that the system(s) processing the raw data must be able to cope with a potentially large amount of incoming data by scheduling the different processing jobs. For this we introduce the \texttt{DocumentGenerationScheduler} that takes a coordinating role and guarantees all deadlines for all processing jobs to be met. More precisely, the \texttt{DocumentGenerationScheduler} maintains a dynamic queue to which recurring batches of document processing jobs as well as prioritized document processing jobs (critical, diamond, gold, silver, restarted) are added according to their deadline. Notice that restarted documents are also put in the queue. This queue is pulled on a regular basis by one or more \texttt{DocumentGenerationProcessors} following a shortest-deadline-first approach in order to prevent documents from being processed beyond their respective deadline.
 
-\paragraph{Dedicated persistent data databases for Av1}
+\paragraph{Dedicated persistent databases for Av1}
 Besides the performance of the system processing raw data, it is also important that all types of persistent data remain available in the presence of software or hardware failures.
-First, Av1 specifies that a failure of the internal infrastructure for generating documents from raw data does not affect the availability of any type of persistent data, such as (i) the personal document stores, (ii) the status of ongoing document processing jobs, (iii) billing data, etc. Therefore, the storage of persistent data is handled by dedicated databases, or more precisely, the components handling the storage of persistent data do not handle the generation of documents.
+First, Av1 specifies that a failure of the internal infrastructure for generating documents from raw data does not affect the availability of any type of persistent data, such as (i) the personal document stores, (ii) the status of ongoing document processing jobs, (iii) billing data, etc. Therefore, the storage of persistent data is handled by dedicated databases, or more precisely, the components handling the storage of persistent data do not handle the generation of documents. For security reasons, we introduce database components for different persistent datatypes. We introduce two database components at this point, \texttt{TemplateDB} and \texttt{DocumentDB}. \texttt{TemplateDB} contains the templates for documents to be generated. The 
 
-\paragraph{}
+\paragraph{Unaffected functionality of other components}
 Next to storing the  persistent data in a dedicated databases, Av1 also requires the other functionality of the system to remain unaffected when the infrastructure for document generation fails or crashes. This functionality includes (i) the personal document stores, (ii) the status overview for Customer Administrator, (iii) delivering the raw data, etc.
 We therefore 
 
 \paragraph{Unique document generation and delivery for Av1}
 Av1 also requires documents to be generated and delivered exactly once. This is accomplished by the \texttt{DocumentGenerationScheduler} overseeing all processing jobs an
+
 
 \subsubsection*{Alternatives considered}
 \paragraph{Alternatives for solution}
