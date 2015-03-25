@@ -53,7 +53,7 @@ Next to storing the  persistent data in a dedicated databases, Av1 also requires
 We therefore 
 
 \paragraph{Unique document generation and delivery for Av1}
-Av1 also requires documents to be generated and delivered exactly once. This is accomplished by the \texttt{DocumentGenerationScheduler} overseeing all processing jobs an
+Av1 also requires documents to be generated and delivered exactly once. This is accomplished by the \texttt{DocumentGenerationScheduler} overseeing all processing jobs and
 
 
 \subsubsection*{Alternatives considered}
@@ -146,14 +146,132 @@ requirements it is responsible for.
         the responsibility of this component.
 \end{itemize}
 
-\subsection{Decomposition 2: Module (drivers)}
+\subsection{Decomposition 2: Delivery functionality (Av2, P2, UC11, UC12, UC13, UC14)}
 \subsubsection{Module to decompose}
+In this run we decompose the \emph{delivery functionality} that was introduced in the first decomposition.
+
 \subsubsection{Selected architectural drivers}
+The selected non-functional drivers for this decomposition are:
+
+\begin{itemize}
+	\item \emph{Av2}: Personal document storage failure
+	\item \emph{P2}: Document lookups
+\end{itemize}
+
+There are two use cases about the generation of documents. These qre thus selected as the functional drivers. These use cases are:
+
+\begin{itemize}
+	\item \emph{UC11}: Deliver document via personal document store
+	\item \emph{UC12}: Consult personal document store
+	\item \emph{UC13}: Search documents in personal document store
+	\item \emph{UC14}: Consult document in personal document store
+\end{itemize}
+
+\paragraph{Rationale}
+
 \subsubsection{Architectural design}
+\paragraph{Scheduling for P1}
+
+
+\paragraph{Dedicated persistent databases for Av1}
+
+
+\paragraph{Unaffected functionality of other components}
+
+
+\paragraph{Unique document generation and delivery for Av1}
+
+
+
+\subsubsection*{Alternatives considered}
+\paragraph{Alternatives for solution}
+A discussion of the alternative solutions and why that were not selected.
+
 \subsubsection{Instantiation and allocation of functionality}
+\paragraph{Decomposition}
+Main aspects of the resulting decomposition.
+
+\subparagraph{ModuleB}
+Per introduced component a paragraph describing its responsibilities.
+
+\subparagraph{ModuleC}
+Per introduced component a paragraph describing its responsibilities.
+
+\begin{figure}[!htp]
+	\centering
+	%\includegraphics[width=0.8\textwidth]{}
+	\missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
+	\caption{Component-and-connector diagram of this decomposition.
+	}\label{fig:it1-cc_main}
+\end{figure}
+
+\paragraph{Behaviour}
+If needed and explanation of the behaviour of certain aspects of the design so
+far.
+
+\begin{figure}[!htp]
+	\centering
+	%\includegraphics[width=0.8\textwidth]{}
+	\missingfigure[figwidth=0.8\textwidth]{Sequence diagram}
+	\caption{Sequence diagram illustrating a key behavioural aspect.
+	}\label{fig:it1-seq_aspect1}
+\end{figure}
+
+\paragraph{Deployment}
+Rationale of the allocation of components to physical nodes.
+
+\begin{figure}[!htp]
+	\centering
+	%\includegraphics[width=0.8\textwidth]{}
+	\missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
+	\caption{Deployment diagram of this decomposition.
+	}\label{fig:it1-depl_main}
+\end{figure}
+
 \subsubsection{Interfaces for child modules}
+\subsubsection*{ModuleB}
+\begin{itemize}
+	\item InterfaceA
+	\begin{itemize}
+		\item \texttt{returnType operation1(ParamType param1)} throws TypeOfException
+		\begin{itemize}
+			\item Effect: Describe the effect of calling this operation.
+			\item Exceptions: 
+			\begin{itemize}
+				\item TypeOfException: Describe when this exception is thrown.
+			\end{itemize}
+		\end{itemize}
+		
+		\item \texttt{returnType operation2()}
+		\begin{itemize}
+			\item Effect: Describe the effect of calling this operation.
+			\item Exceptions: None
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
 \subsubsection{Data type definitions}
+Describe per complex data type used in the interfaces what it represents.
+
+\paragraph{returnType} This data element represents X.
+
+\paragraph{ParamType} This data element represents Y.
+
 \subsubsection{Verify and refine}
+This section describes per component which (parts of) the remaining
+requirements it is responsible for.
+
+\paragraph{ModuleB}
+\begin{itemize}
+	\item \emph{Z1}: name
+	\item \emph{UCd}: name
+\end{itemize}
+
+\paragraph{ModuleC}
+\begin{itemize}
+	\item \emph{UCba}: name\\Description which part of the original use case is
+	the responsibility of this component.
+\end{itemize}
 
 \subsection{Decomposition 3: Module (drivers)}
 \subsubsection{Module to decompose}
