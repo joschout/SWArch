@@ -41,8 +41,11 @@ There are two use cases about the generation of documents. These qre thus select
 UC4 and UC5 in the eDocs System rely on the generation of documents and are thus selected as functional drivers.
 
 \subsubsection{Architectural design}
-\paragraph{Scheduling for P1}
-P1 specifies that the system(s) processing the raw data must be able to cope with a potentially large amount of incoming data by scheduling the different processing jobs. For this we introduce the \texttt{DocumentGenerationScheduler} that takes a coordinating role and guarantees all deadlines for all processing jobs to be met. More precisely, the \texttt{DocumentGenerationScheduler} maintains a dynamic queue to which recurring batches of document processing jobs as well as prioritized document processing jobs (critical, diamond, gold, silver, restarted) are added according to their deadline. Notice that restarted documents are also put back into the queue once their generation process is restarted by the scheduler, this happens when the service offered by one or more \texttt{DocumentGenerationProcessors} is somehow disrupted. This queue is pulled on a regular basis by one or more \texttt{DocumentGenerationProcessors} following a shortest-deadline-first approach in order to prevent documents from being processed beyond their respective deadline.
+\paragraph{Deadline scheduling for P1}
+P1 specifies that the system(s) processing the raw data must be able to cope with a potentially large amount of incoming data by scheduling the different processing jobs. For this we introduce the \texttt{DocumentGenerationScheduler} that takes a coordinating role and guarantees all deadlines for all processing jobs to be met. More precisely, the \texttt{DocumentGenerationScheduler} creates new processing jobs based on the raw data received. For document processing jobs regarding recurring batches of raw data, the \texttt{DocumentGenerationScheduler} assigns a deadline to the newly created jobs based on the priority stipulated in the SLA that was negotiated with the Customer Organisation who sent the raw data. For document processing jobs not part of recurring batches, the deadlines depend on the priority of the document itself, which can be retrieved from the meta data. Furthermore, the \texttt{QueueManager} maintains a dynamic queue to which the \texttt{DocumentGenerationScheduler} adds these newly created processing jobs according to their deadline. Notice that restarted documents are also put back into the queue once their generation process is restarted by the scheduler, this happens when the service offered by one or more \texttt{DocumentGenerationProcessors} is somehow disrupted. 
+
+\paragraph{Parallel processing for P1}
+The \texttt{QueueManager}, that we introduced earlier, is sent a pull request on a regular basis by the \texttt{DocumentGenerationProcessorManager}, which in turn provides an interface to one or more \texttt{DocumentGenerationProcessors} to request a job to be processed, following a shortest-deadline-first approach in order to prevent documents from being processed beyond their respective deadline. This \texttt{DocumentGenerationProcessorManager} oversees all processing tasks and has the ability to detect defective \texttt{DocumentGenerationProcessors}. When this \texttt{DocumentGenerationProcessorManager} detects such a defect, the document currently being generated on the respective \texttt{DocumentGenerationProcessor} will be marked as \textit{restarted} and put back into the queue that is accessed through the \texttt{QueueManager}.Notice that the processing capacity of the eDocs System can now be adjusted dynamically due to the pull methodology we just discussed.
 
 \paragraph{Dedicated persistent databases for Av1}
 Besides the performance of the system processing raw data, it is also important that all types of persistent data remain available in the presence of software or hardware failures.
@@ -52,13 +55,12 @@ First, Av1 specifies that a failure of the internal infrastructure for generatin
 Next to storing the  persistent data in a dedicated databases, Av1 also requires the other functionality of the system to remain unaffected when the infrastructure for document generation fails or crashes. This functionality includes (i) the personal document stores, (ii) the status overview for Customer Administrator, (iii) delivering the raw data, etc.
 We therefore 
 
-\paragraph{Unique document generation and delivery for Av1}
-Av1 also requires documents to be generated and delivered exactly once. This is accomplished by the \texttt{DocumentGenerationScheduler} overseeing all processing jobs and
-
+\paragraph{Unique document generation for Av1}
+Av1 also requires documents to be generated and delivered exactly once. This is accomplished by the \texttt{DocumentGenerationProcessorManager} overseeing all processing jobs that are running on the active \texttt{DocumentGenerationProcessors}. More specifically, the \texttt{DocumentGenerationProcessorManager} is notified by a \texttt{DocumentGenerationProcessor} when the latter completes its job. Subsequently, the \texttt{DocumentGenerationProcessorManager} checks the \texttt{QueueManager} for any other \texttt{DocumentGenerationProcessors} committed to this job: if there are any, the \texttt{DocumentGenerationProcessorManager} cancels their job and assigns them a new one from the queue. Finally, the \texttt{DocumentGenerationProcessorManager} gives the finished \texttt{DocumentGenerationProcessor} permission to write its generated document into the \texttt{DocumentDB}. Notice that two \texttt{DocumentGenerationProcessors} can indeed be working on the same job: imagine the \texttt{DocumentGenerationProcessorManager} losing connectivity with a \texttt{DocumentGenerationProcessor} working on a specific job, which causes the \texttt{DocumentGenerationProcessorManager} to put this job (which is now given the status \textit{restarted}) back into the queue where it could be requested by another \texttt{DocumentGenerationProcessor} once again.
 
 \subsubsection*{Alternatives considered}
-\paragraph{Alternatives for solution}
-A discussion of the alternative solutions and why that were not selected.
+\paragraph{Alternatives for active replication}
+
 
 \subsubsection{Instantiation and allocation of functionality}
 \paragraph{Decomposition}
