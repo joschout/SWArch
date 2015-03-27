@@ -69,7 +69,7 @@ The \texttt{DocumentGenerationScheduler} is responsible for checking if the prec
 An alternative to the use of a pull methodology for the processing of document generation jobs would have been the use of a push methodology. With a push methodology, the \texttt{DocumentGenerationProcessorManager} maintains a list of references to all active \texttt{DocumentGenerationProcessors} to which it can push jobs. More specifically, this manager fetches jobs from the \texttt{QueueManager} and sees to it that all active \texttt{DocumentGenerationProcessors} are handed a job to process. A major disadvantage of this methodology over the pull model is that the number of \texttt{DocumentGenerationProcessors} cannot be adjusted dynamically, which is also the reason for choosing the pull methodology over this one.
 
 \paragraph{Alternative for the Ping/Echo}
-The failure of the components monitored by the \textt could also be done using a \textbf{heartbeat}. But this would require both the monit
+The failure of the components monitored by the \texttt{NotificationHandler} could also be done using a \textbf{heartbeat}. But this would require both the monitored components and the \texttt{NotificationHandler} keep track of respectively when to send and receive a heartbeat. This complicates the addition of any monitored components since they would require this extra logic.
 
 
 \subsubsection{Instantiation and allocation of functionality}
