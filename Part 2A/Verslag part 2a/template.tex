@@ -70,8 +70,21 @@ An alternative to the use of a pull methodology for the processing of document g
 \paragraph{Decomposition}
 %TODO
 
-\subparagraph{AuthenticationFunctionality}
+\subparagraph{CustomerOrganisationGateway}
+Responsible for communication with the Customer Organisation. This consists mainly of providing the Customer Organisation with an interface for logging into the eDocs System, sending batches of raw data and consulting the management dashboard.
 
+\subparagraph{CustomerOrganisationDB}
+Responsible for the actual storage of the Customer Organisation data, including document priorities that were negotiated in the SLA.
+
+\subparagraph{RawDataGateway}
+Responsible for receiving and verifying incoming batches of raw data.
+
+\subparagraph{RawDataDB}
+Responsible for the actual storage of the Raw Data, consisting of both meta data (i.e. document priority etc.) and document data.
+
+\subparagraph{DocumentGenerationScheduler}
+Responsible for creating and scheduling all jobs from incoming Raw Data. 
+ on the sensor data database in its queue and monitoring whether the deadlines are met. If not the scheduler switches from normal modus to overload modus and changes its scheduling policy accordingly (P1).
 
 \begin{figure}[!htp]
     \centering
