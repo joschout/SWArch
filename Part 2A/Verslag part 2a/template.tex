@@ -208,7 +208,7 @@ requirements it is responsible for.
 
 \subsection{Decomposition 2: Delivery functionality (Av2, P2, UC11, UC12, UC13, UC14)}
 \subsubsection{Module to decompose}
-In this run we decompose the \emph{delivery functionality} that was introduced in the first decomposition.
+In this run we decompose the \texttt{DeliveryFunctionality} component that was introduced in the first decomposition. 
 
 \subsubsection{Selected architectural drivers}
 The selected non-functional drivers for this decomposition are:
@@ -218,7 +218,7 @@ The selected non-functional drivers for this decomposition are:
 	\item \emph{P2}: Document lookups
 \end{itemize}
 
-There are two use cases about the generation of documents. These qre thus selected as the functional drivers. These use cases are:
+We decompose it with the personal document store in mind. There are four use cases related to the personal document store. These are thus selected as the functional drivers. These use cases are: 
 
 \begin{itemize}
 	\item \emph{UC11}: Deliver document via personal document store
@@ -227,7 +227,7 @@ There are two use cases about the generation of documents. These qre thus select
 	\item \emph{UC14}: Consult document in personal document store
 \end{itemize}
 
-\paragraph{Rationale}
+\paragraph{Rationale} \emph{P2} and \emph{A2} where chosen because they both have high priority. \emph{P2} concerns the performance of document lookups and  \emph{A2} concerns the availability of the system which stores documents in personal document stores, both central parts of the eDocs system. Also, \emph{Av2} is the last high priority non-functional requirement.
 
 \subsubsection{Architectural design}
 \paragraph{Scheduling for P1}
