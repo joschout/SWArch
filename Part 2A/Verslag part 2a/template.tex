@@ -75,10 +75,16 @@ The failure of the components monitored by the \texttt{NotificationHandler} coul
 
 \subsubsection{Instantiation and allocation of functionality}
 \paragraph{Decomposition}
-Figure 1 shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentGenerationProcessor}. This component actually represents multiple instances of the same processor to provide parallel processing power when necessary.
+Figure \ref{fig:compandcondecomp1} shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentGenerationProcessor}. This component actually represents multiple instances of the same processor to provide parallel processing power when necessary.
 Furthermore, we instantiated \texttt{DocumentGenerationScheduler}, \texttt{DocumentGenerationProcessorManager} and \texttt{NotificationHandler} to fully achieve the selected drivers.
 The responsibilities of the resulting components are as follows:
 
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
+	\caption{Component-and-connector diagram of the first decomposition.
+	}\label{fig:compandcondecomp1}
+\end{figure}
 \subparagraph{CustomerOrganisationGateway}
 Responsible for communication with the Customer Organisation. This consists mainly of providing the Customer Organisation with an interface for logging into the eDocs System, sending batches of raw data and consulting the management dashboard.
 
@@ -291,20 +297,26 @@ The eDocs System must indicate to the Customer Organization that the raw data is
 The \texttt{TemplateDB} component does not need to change to support new types of documents, since its interface for storing template is generic. The \texttt{DocumentGenerationProcessor} component also does not need to change, since it receives all the information necessary to generate a document from the job that the \texttt{DocumentGenerationScheduler} creates. The latter pulls the necessary template and raw data generically from the \texttt{TemplateDB} and the \texttt{RawDataDB}.
 \subsubsection{Instantiation and allocation of functionality}
 \paragraph{Decomposition}
-Main aspects of the resulting decomposition.
+Figure \ref{fig:compandcondecomp3} shows the component-and-connector diagram resulting from this decompostion. Notice that with respect to figure  \ref{fig:compandcondecomp1}, the \texttt{RawDataGateway} has interfaces employs additional interfaces which were not yet foreseen in the first decomposition. More specifically, the new interfaces are VerifierMgmt, DeliverNotification and DBMgmt.\\
+The responsibilities of the resulting conponents are as follows:
+\subparagraph{DataReceiver}
 
-\subparagraph{ModuleB}
-Per introduced component a paragraph describing its responsibilities.
 
-\subparagraph{ModuleC}
-Per introduced component a paragraph describing its responsibilities.
+\subparagraph{Dispatcher}
+
+\subparagraph{InvoiceVerifier}
+
+\subparagraph{PayslipVerifier}
+
+\subparagraph{BankslipVerifier}
+
+\subparagraph{NotificationVerifier}
 
 \begin{figure}[!htp]
 	\centering
-	%\includegraphics[width=0.8\textwidth]{}
-	\missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
-	\caption{Component-and-connector diagram of this decomposition.
-	}\label{fig:it1-cc_main}
+	\includegraphics[width=0.8\textwidth]{RawDataGateway.png}
+	\caption{Component-and-connector diagram resulting from the third decomposition.
+	}\label{fig:compandcondecomp3}
 \end{figure}
 
 
