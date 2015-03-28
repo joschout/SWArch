@@ -299,18 +299,23 @@ The \texttt{TemplateDB} component does not need to change to support new types o
 \paragraph{Decomposition}
 Figure \ref{fig:compandcondecomp3} shows the component-and-connector diagram resulting from this decompostion. Notice that with respect to figure  \ref{fig:compandcondecomp1}, the \texttt{RawDataGateway} has interfaces employs additional interfaces which were not yet foreseen in the first decomposition. More specifically, the new interfaces are VerifierMgmt, DeliverNotification and DBMgmt.\\
 The responsibilities of the resulting conponents are as follows:
-\subparagraph{DataReceiver}
+\subparagraph{DataReceiver} Responsible for buffering the incoming raw data received from a Customer Organization.
 
+\subparagraph{Dispatcher} Responsible for sending the raw data to the component designed to verify raw data of that particular type. Has an interface used by eDocs administrators to update its knowledge of available raw data verifiers where it can send raw data to (M1).
 
-\subparagraph{Dispatcher}
+\subparagraph{InvoiceVerifier} Responsible for verifying the raw data corresponding to invoices. This component validates the raw data. If the raw data belongs to the a recurring batch of data, the component checks if the raw data does not contain more than the maximally allowed number of documents to be generated. It gets this maximum value by querying the \texttt{CustomerOrganizationDB}. It also validates the individual entries of the raw data. Both in the cases of success and failure of the verification, it forwards a notification to the \texttt{NotificationHandler} (UC3a).
 
-\subparagraph{InvoiceVerifier}
+\subparagraph{PayslipVerifier} Responsible for verifying the raw data corresponding to payslips. Has the same functionality as \texttt{InvoiceVerifier}, but for payslips.
 
-\subparagraph{PayslipVerifier}
+\subparagraph{BankslipVerifier} Responsible for verifying the raw data corresponding to bankslips. Has the same functionality as \texttt{InvoiceVerifier}, but for bankslips. This component is given as an example for extending the functionality to a new document type (M1).
 
-\subparagraph{BankslipVerifier}
+\subparagraph{NotificationHandler} Responsible for communication with the Customer Organization about the success or failure of the verification of the received raw data.
 
-\subparagraph{NotificationVerifier}
+\subparagraph{CustomerOrganizationGateway} See \texttt{CustomerOrganizationGateway} in decompositon 1.
+
+\subparagraph{TemplateDB} See \texttt{TemplateDB} in decompositon 1.
+\subparagraph{CustomerOrganizatonDB} See \texttt{CustomerOrganizatonDB} in decompositon 1.
+\subparagraph{RawDataDB} See \texttt{RawDataDB} in decompositon 1.
 
 \begin{figure}[!htp]
 	\centering
@@ -318,10 +323,6 @@ The responsibilities of the resulting conponents are as follows:
 	\caption{Component-and-connector diagram resulting from the third decomposition.
 	}\label{fig:compandcondecomp3}
 \end{figure}
-
-
-
-
 
 \subsubsection{Interfaces for child modules}
 \subsubsection{Data type definitions}
