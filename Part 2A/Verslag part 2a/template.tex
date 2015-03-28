@@ -75,7 +75,9 @@ The failure of the components monitored by the \texttt{NotificationHandler} coul
 
 \subsubsection{Instantiation and allocation of functionality}
 \paragraph{Decomposition}
-%TODO
+Figure 1 shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentGenerationProcessor}. This component actually represents multiple instances of the same processor to provide parallel processing power when necessary.
+Furthermore, we instantiated \texttt{DocumentGenerationScheduler}, \texttt{DocumentGenerationProcessorManager} and \texttt{NotificationHandler} to fully achieve the selected drivers.
+The responsibilities of the resulting components are as follows:
 
 \subparagraph{CustomerOrganisationGateway}
 Responsible for communication with the Customer Organisation. This consists mainly of providing the Customer Organisation with an interface for logging into the eDocs System, sending batches of raw data and consulting the management dashboard.
@@ -90,8 +92,28 @@ Responsible for receiving and verifying incoming batches of raw data.
 Responsible for the actual storage of the Raw Data, consisting of both meta data (i.e. document priority etc.) and document data.
 
 \subparagraph{DocumentGenerationScheduler}
-Responsible for creating and scheduling all jobs from incoming Raw Data. 
- on the sensor data database in its queue and monitoring whether the deadlines are met. If not the scheduler switches from normal modus to overload modus and changes its scheduling policy accordingly (P1).
+Responsible for creating all jobs from incoming Raw Data and subsequently scheduling them according to deadline in the \texttt{QueueManager}.
+ 
+\subparagraph{TemplateDB}
+Responsible for the actual storage of Templates, on which all generated Documents are based.
+
+\subparagraph{QueueManager}
+Responsible for maintaining a queue of all Document Generation Jobs that are not yet completed. Note that each of these jobs is assigned a status too.
+
+\subparagraph{DocumentGenerationProcessorManager}
+Responsible for managing all active \texttt{DocumentGenerationProcessors}. More precisely, it presents these processors with an interface for pulling Document Generation Jobs from the \texttt{QueueManager} and subsequently follows up on their Document Generation Process (i.e. granting write permission to the DocumentDB if appropriate, checking processor activity, etc.)
+
+\subparagraph{DocumentGenerationProcessor}
+Responsible for processing Document Generation Jobs assigned by the \texttt{DocumentGenerationProcessorManager}. More specifically, it is able to process only one job at a time, which consists of generating the Document that is defined by the respective Document Generation Job.
+
+\subparagraph{NotificationHandler}
+Responsible for handling Notifications that can be received either from the \texttt{DocumentGenerationScheduler}, the \texttt{DocumentGenerationProcessorManager} or one of the \texttt{DocumentGenerationProcessors}.
+
+\subparagraph{DocumentDB}
+Responsible for the actual storage of the Documents that have been fully generated.
+
+\subparagraph{DeliveryFunctionality}
+Encapsulates requirements that can be assigned to a Document Delivery component that will not be decomposed any further in this run.
 
 \begin{figure}[!htp]
     \centering
@@ -100,58 +122,6 @@ Responsible for creating and scheduling all jobs from incoming Raw Data.
     \caption{Component-and-connector diagram of this decomposition.
         }\label{fig:it1-cc_main}
 \end{figure}
-
-\paragraph{Behaviour}
-If needed and explanation of the behaviour of certain aspects of the design so
-far.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram}
-    \caption{Sequence diagram illustrating a key behavioural aspect.
-        }\label{fig:it1-seq_aspect1}
-\end{figure}
-
-\paragraph{Deployment}
-Rationale of the allocation of components to physical nodes.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
-    \caption{Deployment diagram of this decomposition.
-        }\label{fig:it1-depl_main}
-\end{figure}
-
-\subsubsection{Interfaces for child modules}
-\subsubsection*{ModuleB}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returnType operation1(ParamType param1)} throws TypeOfException
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: 
-            \begin{itemize}
-                \item TypeOfException: Describe when this exception is thrown.
-            \end{itemize}
-        \end{itemize}
-
-        \item \texttt{returnType operation2()}
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: None
-         \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsubsection{Data type definitions}
-Describe per complex data type used in the interfaces what it represents.
-
-\paragraph{returnType} This data element represents X.
-
-\paragraph{ParamType} This data element represents Y.
 
 \subsubsection{Verify and refine}
 This section describes per component which (parts of) the remaining
