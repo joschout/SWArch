@@ -63,7 +63,7 @@ This requirement is accomplished by introducing a\texttt{DocumentGenerationProce
 \paragraph{Failure detection for A1}
 A1 requires that the System autonomously detects failures or crashes. For this reason, selected \textbf{Ping/Echo} as an internal mechanism to detect failures. The \texttt{NotificationHandler} periodically pings the \texttt{DocumentGenerationScheduler}, the \texttt{QueueManager} and the \texttt{DocumentGenerationProcessorManager}. These components have five seconds to get their echo response back, as this is the time interval as specified by Av1. If one of these components fails, it detects it and notifies the eDocs Operators of this problem within one minute.\\
 The \texttt{DocumentGenerationScheduler} is responsible for checking if the precessors which should be working on jobs haven't failed. When a \texttt{DocumentGenerationProcessor} pulls a job from the queue using the interface provided by the \texttt{DocumentGenerationProcessorManager}, it leaves its identifier at the manager. The manager puts the identifier as meta data for the job in the queue and uses it to \textbf{Ping/Echo} the processor. If the processor stops responding, it changes the status of the job in the queue. Thereafter, the job can be pulled by another processor. If the processor starts responding again, the \texttt{DocumentGenerationProcessorManager} cancels it job, as another processor might be working on it.\\
-The Customer organization can view the status of using the \texttt{CustomerOrganizationGateWay}. This component handles all interactions between the System and the Customer Organization. It offers Customer Organizations the possibility to register, to authenticate to the system and to send in raw data. It is connected to the \texttt{CustomerOrganizationDB}, which stores the necessary information about the registered Customer Organizations, their SLA's and authentication methods. To enable Customer Organizations to look up the status of document processing jobs, the \texttt{CustomerOrganizationGateWay} is connected to the \texttt{QueueManager}, which stores which jobs are ready to be processed, to jobs that are being processed and their status.
+The Customer organization can view the status of using the \texttt{CustomerOrganizationGateway}. This component handles all interactions between the System and the Customer Organization. It offers Customer Organizations the possibility to register, to authenticate to the system and to send in raw data. It is connected to the \texttt{CustomerOrganizationDB}, which stores the necessary information about the registered Customer Organizations, their SLA's and authentication methods. To enable Customer Organizations to look up the status of document processing jobs, the \texttt{CustomerOrganizationGateway} is connected to the \texttt{QueueManager}, which stores which jobs are ready to be processed, to jobs that are being processed and their status.
 
 \subsubsection*{Alternatives considered}
 \paragraph{Alternatives for pull methodology}
@@ -127,7 +127,7 @@ Encapsulates requirements that can be assigned to a Document Delivery component 
 This section describes per component which (parts of) the remaining
 requirements it is responsible for.
 
-\paragraph{CustomerOrganzationGateWay}
+\paragraph{CustomerOrganzationGateway}
 \begin{itemize}
     \item \emph{UC1a}: Log in\\ Logs a Customer Organization in.
     \item \emph{UC2a}: Log out\\ Logs a Customer Organization out.
@@ -136,7 +136,7 @@ requirements it is responsible for.
     \item \emph{UC21}: Consult status of all document processing jobs
 \end{itemize}
 
-\paragraph{RawDataGateWay}
+\paragraph{RawDataGateway}
 \begin{itemize}
 	\item \emph{M2}: New type of document: bank statements
     \item \emph{UC3b}: Initiate document processing\\ Validates the received data and indicates to the Customer Organization if the raw data is received correctly and validated. Stores the validated raw data via its outgoing interface.
@@ -264,10 +264,24 @@ Per introduced component a paragraph describing its responsibilities.
 	}\label{fig:it1-cc_main}
 \end{figure}
 
-\subsection{Decomposition 3: Module (drivers)}
+\subsection{Decomposition 3: RawDataGateway (M1, UC3c)}
 \subsubsection{Module to decompose}
+In this run we decompose the \texttt{RawDataGateway} component  introduced in the first run
+
 \subsubsection{Selected architectural drivers}
+The non-functional requirements we selected for this decomposition are:
+\begin{itemize}
+	\item \emph{M1}: New type of document: bank statements
+\end{itemize}
+There is one use case that is affected by adding a new type of document. The followin use case is thus the only functional driver of this decomposition:
+\begin{itemize}
+	\item \emph{UC3b}: Initiate document processing\\ Validates the received data and indicates to the Customer Organization if the raw data is received correctly and validated. Stores the validated raw data via its outgoing interface.
+\end{itemize}
+
+\paragraph{Rationale} \emph{M1} is the last remaining medium priority non-functional requirement. The other high and medium priority non-functional requirements were already tackled in decompositions 1 and 2. 
 \subsubsection{Architectural design}
+\paragraph{Adding a new type of document to be verified} \emph{M1} requires the functionality for receiving and verifying raw data to be extendable to support new document types. We therefore introduce a \texttt{Dispatcher} component. This component receives incoming raw data from the \texttt{DataReceiver} component, which acts as a buffer between the \texttt{Dispatcher} and the \texttt{CustomerOrganizationGateway} compoments to control congestion when large amounts of raw data arrive. The \texttt{Dispatcher} is connected to components that verify the raw data. There is a component for each type of document, that is, an \texttt{InvoiceVerifier}, a \texttt{PayslipVerifier} and a \texttt{BankslipVerifier}. As mentioned in \emph{UC3}, the Customer Organization indicates the type of document to be generated using the interface of the \texttt{CustomerOrganizationGateway}, which validates wether the contract of the user allows generating the indicated document type. If the contract covers the indicated document type, the \texttt{CustomerOrganizationGateway} signals the dispatcher which of the verifier components it should use to verify the incoming raw data. If eDocs wants to extend the functionality to other types of data, it can create a new verifying component for that kind of data. It will have to update the \texttt{Dispatcher}, since the \texttt{Dispatcher} requires knowledge of which verifiers is can send data to. Only as slight modification to the \texttt{CustomerOrganizationGateway}  is needed, i.e. the possibility for the Customer Organization to 
+
 \subsubsection{Instantiation and allocation of functionality}
 \subsubsection{Interfaces for child modules}
 \subsubsection{Data type definitions}
