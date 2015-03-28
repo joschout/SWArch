@@ -186,7 +186,7 @@ requirements it is responsible for.
 \end{itemize}
 \paragraph{DeliveryFunctionality}
 \begin{itemize}
-	\item \emph{Av2}:Personal document storage failure
+	\item \emph{Av2}: Personal document storage failure
 	\item \emph{Av3}: Zoomit failure
 	\item \emph{M2}: Multiple print \& postal services
 	\item \emph{M3}: Dynamic selection of the cheapest of print \& postal services
@@ -277,6 +277,86 @@ Per introduced component a paragraph describing its responsibilities.
 	\caption{Component-and-connector diagram of this decomposition.
 	}\label{fig:it1-cc_main}
 \end{figure}
+\subsubsection{Verify and refine}
+This section maps the requirements not yet tackled to the components defined so far.
+\paragraph{Dispatcher}
+\begin{itemize}
+	\item \emph{M2a} Multiple print \& postal services \\ 
+	\item \emph{M3a} Dynamic selection of the cheapest of print \& postal\\ services
+\end{itemize}
+
+\paragraph{EmailChannel}
+\begin{itemize}
+	\item \emph{UC6}: Deliver document via e-mai
+	\item \emph{UC7}: Notify of e-mail delivery failure
+\end{itemize}
+
+\paragraph{ZoomitChannel}
+\begin{itemize}
+	\item \emph{Av3}: Zoomit failure
+	\item \emph{UC9}: Deliver invoice via Zoomit
+	\item \emph{UC10}: Confirm document delivery (Zoomit)
+\end{itemize}
+
+\paragraph{PrintAndPostalService}
+\begin{itemize}
+	\item \emph{M2b}: Multiple print \& postal services\\
+	\item \emph{M3b}: Dynamic selection of the cheapest of print \& postal services\\
+	\item \emph{UC8}: Deliver via postal mail
+\end{itemize}
+
+\paragraph{NotificationHandler}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{ReplicationManager}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{NotificationHandler}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{DocumentReferenceCache}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{DocumentReferenceDB}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{RequestDispatcher}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{RawDataDB}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{DocumentDB}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{CustomerOrganizationGateway}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\paragraph{UserWebInterface}
+\begin{itemize}
+	\item \emph{UC1b}: Log in\\ Logs a Registered Recipient in.
+    \item \emph{UC2b}: Log out\\ Logs a Registered Recipient out. 
+    \item \emph{UC15}: Register to personal document store
+    \item \emph{UC16}: Unregister from personal document store
+\end{itemize}
 
 \subsection{Decomposition 3: RawDataGateway (M1, UC3c)}
 \subsubsection{Module to decompose}
