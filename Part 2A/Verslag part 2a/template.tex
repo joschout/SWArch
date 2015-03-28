@@ -236,16 +236,24 @@ We decompose it with the personal document store in mind. There are four use cas
 \paragraph{Rationale} \emph{P2} and \emph{A2} where chosen because they both have high to medium priority. \emph{Av2} concerns the availability of the system that stores documents in personal document stores and \emph{P2} concerns the performance of document lookups in these stores, both central parts of the eDocs system. Also, \emph{Av2} is the last high-priority non-functional requirement.
 
 \subsubsection{Architectural design}
-\paragraph{Active replication for P2}
+\paragraph{Document reference database for Av2}
+A failure or crash of the internal (sub-)system responsible for storing documents in personal document stores cannot entail the loss of any documents. This is guaranteed by the fact that personal document stores merely consist of a (set of ) \texttt{DocumentReferenceDB(s)} containing references to the documents that appear to be present in the store. Whenever a document in the store is requested through the \texttt{RequestDispatcher} (discussed below), this reference database sends the appropriate request to the \texttt{DocumentDB}, which in turn sends back the right document. The same reference database then once again acts as a middle man by passing this document to the requesting component (which is either the \texttt{UserWebInterface} or the \texttt{Email}).
 
 
 \paragraph{Request dispatcher for P2}
+Since it should be possible to look up documents via the personal document store or an e-mail notification in a timely fashion (even in case of a large number of parallel lookups, searches or downloads), the reference database (discussed above) should be able to handle a large number of requests at once. For this reason, the \texttt{RequestDispatcher} has been created: this component bypasses all incoming document requests to one of the available \texttt{DocumentReferenceDBs} that are actively replicated, if this database is in a consistent state. This dispatcher thus acts as a load balancer too, throttling excessive document requests if no reference database would be available at the time.
 
+\paragraph{Active replication for P2}
+As was already mentioned before, the \texttt{DocumentReferenceDB} is actively replicated. To cope with this level of consistent redundancy, a \texttt{ReplicationManager} was created. This replication manager handles all updates to the database instances and manages their global consistency. Finally, the \texttt{DocumentReferenceCache} maintains a recent history of write operations on the reference database in order to keep the database in a consistent stage after a possible failure or crash of the replication manager.
 
 \paragraph{Unaffected functionality of other components}
+Next to storing the  persistent data in a dedicated databases, Av2 also requires the other functionality of the system to remain unaffected when the infrastructure for personal document stores fails or crashes. This functionality includes (i) the state of ongoing document processing jobs, (ii) generated documents delivered through other channels, (iii) billing data, etc. 
 
 
-\paragraph{Unique document generation and delivery for Av1}
+We therefore let other components handle this functionality. The \texttt{DeliveryFunctionality} component handles the delivery of documents to the Receivers and only requires access to the \texttt{RawDataDB} and \texttt{DocumentDB} components for retrieving the documents that need to be send. The delivery of raw data to the \texttt{RawDataDB} is handled by the \textbf{RawDataGateway} component. The \texttt{QueueManager} internally replicates its queue to have higher availability of the status overview for Customer Administrators when conponents for processing fail or crash. This way, the information of which job was being processed on which processor isn't lost when these components fail.
+
+
+\paragraph{Notification handler for Av2}
 
 
 \subsubsection*{Alternatives considered}
