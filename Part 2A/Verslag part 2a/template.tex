@@ -62,14 +62,15 @@ This requirement is accomplished by introducing a\texttt{DocumentGenerationProce
 
 \paragraph{Failure detection for A1}
 A1 requires that the System autonomously detects failures or crashes. For this reason, selected \textbf{Ping/Echo} as an internal mechanism to detect failures. The \texttt{NotificationHandler} periodically pings the \texttt{DocumentGenerationScheduler}, the \texttt{QueueManager} and the \texttt{DocumentGenerationProcessorManager}. These components have five seconds to get their echo response back, as this is the time interval as specified by Av1. If one of these components fails, it detects it and notifies the eDocs Operators of this problem within one minute.\\
-The \texttt{DocumentGenerationScheduler} is responsible for checking if the precessors which should be working on jobs haven't failed. When a \texttt{DocumentGenerationProcessor} pulls a job from the queue using the interface provided by the \texttt{DocumentGenerationProcessorManager}, it leaves its identifier at the manager. The manager puts the identifier as meta data for the job in the queue and uses it to \textbf{Ping/Echo} the processor. If the processor stops responding, it changes the status of the job in the queue. Thereafter, the job can be pulled by another processor. If the processor starts responding again, the \texttt{DocumentGenerationProcessorManager} cancels it job, as another processor might be working on it.
+The \texttt{DocumentGenerationScheduler} is responsible for checking if the precessors which should be working on jobs haven't failed. When a \texttt{DocumentGenerationProcessor} pulls a job from the queue using the interface provided by the \texttt{DocumentGenerationProcessorManager}, it leaves its identifier at the manager. The manager puts the identifier as meta data for the job in the queue and uses it to \textbf{Ping/Echo} the processor. If the processor stops responding, it changes the status of the job in the queue. Thereafter, the job can be pulled by another processor. If the processor starts responding again, the \texttt{DocumentGenerationProcessorManager} cancels it job, as another processor might be working on it.\\
+The Customer organization can view the status of using the \texttt{CustomerOrganizationGateWay}. This component handles all interactions between the System and the Customer Organization. It offers Customer Organizations the possibility to register, to authenticate to the system and to send in raw data. It is connected to the \texttt{CustomerOrganizationDB}, which stores the necessary information about the registered Customer Organizations, their SLA's and authentication methods. To enable Customer Organizations to look up the status of document processing jobs, the \texttt{CustomerOrganizationGateWay} is connected to the \texttt{QueueManager}, which stores which jobs are ready to be processed, to jobs that are being processed and their status.
 
 \subsubsection*{Alternatives considered}
 \paragraph{Alternatives for pull methodology}
 An alternative to the use of a pull methodology for the processing of document generation jobs would have been the use of a push methodology. With a push methodology, the \texttt{DocumentGenerationProcessorManager} maintains a list of references to all active \texttt{DocumentGenerationProcessors} to which it can push jobs. More specifically, this manager fetches jobs from the \texttt{QueueManager} and sees to it that all active \texttt{DocumentGenerationProcessors} are handed a job to process. A major disadvantage of this methodology over the pull model is that the number of \texttt{DocumentGenerationProcessors} cannot be adjusted dynamically, which is also the reason for choosing the pull methodology over this one.
 
 \paragraph{Alternative for the Ping/Echo}
-The failure of the components monitored by the \texttt{NotificationHandler} could also be done using a \textbf{heartbeat}. But this would require both the monitored components and the \texttt{NotificationHandler} keep track of respectively when to send and receive a heartbeat. This complicates the addition of any monitored components since they would require this extra logic.
+The failure of the components monitored by the \texttt{NotificationHandler} could also be done using a \textbf{heartbeat}. But this would require both the monitored components and the \texttt{NotificationHandler} to keep track of respectively when to send and receive a heartbeat. This complicates the addition of any monitored components since they would require this extra logic.
 
 
 \subsubsection{Instantiation and allocation of functionality}
@@ -156,17 +157,84 @@ Describe per complex data type used in the interfaces what it represents.
 This section describes per component which (parts of) the remaining
 requirements it is responsible for.
 
-\paragraph{ModuleB}
+\paragraph{CustomerOrganzationGateWay}
 \begin{itemize}
-    \item \emph{Z1}: name
-    \item \emph{UCd}: name
+    \item \emph{UC1a}: Log in\\ Logs a Customer Organization in.
+    \item \emph{UC2a}: Log out\\ Logs a Customer Organization out.
+    \item \emph{UC3a}: Initiate document processing\\ Lets a Customer Organization initiate a  batch processing job by providing an interface to which it deliver raw data. Checks if the Customer Organization is logged in. Lets the Customer organization indicate the type of document to be generated and validates whether the contract of the Customer Organization allows. generating the indicate type of document.
+    \item \emph{UC20a}: Update document template\\ Lets the Customer Administrator indicate that he or she wants to update one of its document templates. Indicates the document types that the corresponding customer organization is allowed to generate, and the current templates for these types. Receives the new template from the Customer Administrator.
+    \item \emph{UC21}: Consult status of all document processing jobs
 \end{itemize}
 
-\paragraph{ModuleC}
+\paragraph{RawDataGateWay}
 \begin{itemize}
-    \item \emph{UCba}: name\\Description which part of the original use case is
-        the responsibility of this component.
+	\item \emph{M2}: New type of document: bank statements
+    \item \emph{UC3b}: Initiate document processing\\ Validates the received data and indicates to the Customer Organization if the raw data is received correctly and validated. Stores the validated raw data via its outgoing interface.
 \end{itemize}
+
+\paragraph{RawDataDB}
+\begin{itemize}
+	\item \emph{UC3c}: Initiate document processing\\ Stores the validated raw data it receives and signals for a new document processing job to begin. 
+\end{itemize}
+\paragraph{CustomerOrganizationDB}
+\begin{itemize}
+	\item \emph{UC3d}: Initiate document processing\\ Stores the contract which describes which types of documents the Customer Organization can indicate to be generated.
+	\item \emph{UC18}: Register customer organization
+    \item \emph{UC19}: Unregister customer oganization
+    \item \emph{U20b}: Update document template\\ Stores the contract which describes which types of documents the Customer Organization is allowed to generate.
+\end{itemize}
+\paragraph{TemplateDB}
+\begin{itemize}
+		\item \emph{UC20b}: Update document template\\ Stores the templates for the document types of an Customer Organization. Provides an interface to query and update these documents.
+\end{itemize}
+\paragraph{DocumentGenerationScheduler}
+\begin{itemize}
+	\item None
+\end{itemize}
+\paragraph{QueueManager}
+\begin{itemize}
+	\item \emph{P3}: Status overview for customer administrators
+	\item \emph{UC21}: Consult status of all document processing jobs
+\end{itemize}
+\paragraph{NotificationHandler}
+\begin{itemize}
+	\item \emph{UC22}: Notify customer administrator
+\end{itemize}
+\paragraph{DocumentGenerationProcessorManager}
+\begin{itemize}
+	\item None
+\end{itemize}
+\paragraph{DocumentGenerationProcessor}
+\begin{itemize}
+	\item None
+\end{itemize}
+\paragraph{DeliveryFunctionality}
+\begin{itemize}
+	\item \emph{Av2}:Personal document storage failure
+	\item \emph{Av3}: Zoomit failure
+	\item \emph{M2}: Multiple print \& postal services
+	\item \emph{M3}: Dynamic selection of the cheapest of print \& postal services
+	\item \emph{P2}: Document lookups
+	\item \emph{UC1b}: Log in\\ Logs a Registered Recipient in.
+    \item \emph{UC2b}: Log out\\ Logs a Registered Recipient out.
+	\item \emph{UC6}: Deliver document via e-mail
+ 	\item \emph{UC7}: Notify of e-mail delivery failure
+ 	\item \emph{UC8}: Deliver document via postal mail
+ 	\item \emph{UC9}: Deliver invoice via Zoomit
+ 	\item \emph{UC10}: Confirm document delivery (Zoomit)
+	\item \emph{UC11}: Deliver document via personal document store
+	\item \emph{UC12}: Consult personal document store
+	\item \emph{UC13}: Search documents in personal document store
+	\item \emph{UC14}: Consult document  in personal document store
+	\item \emph{UC15}: Register to personal document store
+	\item \emph{UC16}: Unregister from personal document stores
+\end{itemize}
+\paragraph{DocumentDB}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+
 
 \subsection{Decomposition 2: Delivery functionality (Av2, P2, UC11, UC12, UC13, UC14)}
 \subsubsection{Module to decompose}
