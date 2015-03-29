@@ -501,22 +501,13 @@ This section describes the architecture of the eDocs System resulting from the a
 In this section, we show the structure of the system in terms of its components using a component-and-connector view. We do not repeat the list of components or their responsibilities, since they are identical to the ones that were already discussed in the decompositions above.
 
 \subsection{Component-and-connector view}
-\ref{fig:finalCompCon1} shows the primary diagram of the component-and-connector view. For readability reasons, we chose to bundle the components related to storing sensor data into the new super-component SensorDataDB and the components related to risk estimations into the new super-component RiskEstimator and keep the decomposition of the GatewayFacade as shown in the third decomposition. Their respective decompositions are shown in Figure 12, Figure 13 and Figure 14.
+\ref{fig:partArch} shows the primary diagram of the component-and-connector view. For readability reasons, we chose to bundle the components related to delivering documents into the super-component DeliveryFunctionality and the components related to the transfer of raw data into the super-component RawDataGateway. Both super-components were already decomposed earlier and will therefore not be discussed any further.
 
 \begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
-    \caption{Primary diagram for the component-and-connector view.
-        }\label{fig:finalCompCon1}
-\end{figure}
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Key decomposition}
-    \caption{Decomposition of a component shown in Figure~\ref{fig:cc_main}
-        }\label{fig:decomp_decomp1}
+	\centering
+	\includegraphics[width=0.8\textwidth]{PartialArchitecture1.png}
+	\caption{Overview of the partial architecture.
+	}\label{fig:partArch}
 \end{figure}
 
 \end{document}
