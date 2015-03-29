@@ -361,11 +361,6 @@ This section maps the requirements not yet tackled to the components defined so 
 	\item None
 \end{itemize}
 
-\paragraph{NotificationHandler}
-\begin{itemize}
-	\item None
-\end{itemize}
-
 \paragraph{DocumentReferenceCache}
 \begin{itemize}
 	\item None
@@ -373,12 +368,15 @@ This section maps the requirements not yet tackled to the components defined so 
 
 \paragraph{DocumentReferenceDB}
 \begin{itemize}
-	\item None
+	\item \emph{UC11}: Deliver document via personal document store
+	\item \emph{UC13b}: Search documents in personal document store\\ Delivers requested documents
+	\item \emph{UC14b}: Consult document in personal document store\\ Delivers requested documents
 \end{itemize}
 
 \paragraph{RequestDispatcher}
 \begin{itemize}
-	\item None
+	\item \emph{UC13a}: Search documents in personal document store\\ Handles incoming Document requests
+	\item \emph{UC14a}: Consult document in personal document store\\ Handles incoming Document requests
 \end{itemize}
 
 \paragraph{RawDataDB}
@@ -400,6 +398,7 @@ This section maps the requirements not yet tackled to the components defined so 
 \begin{itemize}
 	\item \emph{UC1b}: Log in\\ Logs a Registered Recipient in.
     \item \emph{UC2b}: Log out\\ Logs a Registered Recipient out. 
+	\item \emph{UC12}: Consult personal document store
     \item \emph{UC15}: Register to personal document store
     \item \emph{UC16}: Unregister from personal document store
 \end{itemize}
@@ -459,21 +458,60 @@ The responsibilities of the resulting conponents are as follows:
 \end{figure}
 
 \subsubsection{Verify and refine}
+This section maps the requirements not yet tackled to the components defined so far.
+
+\subparagraph{DataReceiver}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{Dispatcher}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{InvoiceVerifier}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{PayslipVerifier}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{BankslipVerifier}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{NotificationHandler}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{CustomerOrganizationGateway}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{TemplateDB}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{CustomerOrganizatonDB}
+\begin{itemize}
+	\item None
+\end{itemize}
+
+\subparagraph{RawDataDB}
+\begin{itemize}
+	\item None
+\end{itemize}
 
 \section{Resulting partial architecture}\label{sec:architecture}
 This section provides an overvuew of the architecture constructed through ADD\@.
-
-\subsection{Context diagram}
-This subsection discusses the context diagram.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Context diagram for component-and-
-        connector view.}
-    \caption{Context diagram for the component-and-connector view.
-        }\label{fig:cc_context}
-\end{figure}
 
 \subsection{Component-and-connector view}
 A short discussion of the component-and-connector view with the key
@@ -493,25 +531,6 @@ decompositions if any.
     \missingfigure[figwidth=0.8\textwidth]{Key decomposition}
     \caption{Decomposition of a component shown in Figure~\ref{fig:cc_main}
         }\label{fig:decomp_decomp1}
-\end{figure}
-
-\subsection{Deployment view}
-A short discussion of the allocation of components to physical nodes based on a
-context diagram and a deployment diagram.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Context diagram for the allocation
-        view.}
-    \caption{Context diagram for the allocation view.}\label{fig:depl_context}
-\end{figure}
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
-    \caption{Primary diagram for the allocation view.}\label{fig:depl_main}
 \end{figure}
 
 \end{document}
