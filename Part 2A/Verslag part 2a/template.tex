@@ -79,12 +79,6 @@ Figure \ref{fig:compandcondecomp1} shows the components resulting from the decom
 Furthermore, we instantiated \texttt{DocumentGenerationScheduler}, \texttt{DocumentGenerationProcessorManager} and \texttt{NotificationHandler} to fully achieve the selected drivers.
 The responsibilities of the resulting components are as follows:
 
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
-	\caption{Component-and-connector diagram of the first decomposition.
-	}\label{fig:compandcondecomp1}
-\end{figure}
 \subparagraph{CustomerOrganisationGateway}
 Responsible for communication with the Customer Organisation. This consists mainly of providing the Customer Organisation with an interface for logging into the eDocs System, sending batches of raw data and consulting the management dashboard.
 
@@ -122,11 +116,10 @@ Responsible for the actual storage of the Documents that have been fully generat
 Encapsulates requirements that can be assigned to a Document Delivery component that will not be decomposed any further in this run.
 
 \begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
-    \caption{Component-and-connector diagram of this decomposition.
-        }\label{fig:it1-cc_main}
+	\centering
+	\includegraphics[width=0.8\textwidth]{eDocsSystem.png}
+	\caption{Component-and-connector diagram of the first decomposition.
+	}\label{fig:compandcondecomp1}
 \end{figure}
 
 \subsubsection{Verify and refine}
@@ -267,13 +260,6 @@ The failure of a database component can also be detected by relying on a heartbe
 Figure \ref{fig:compandcondecomp2} shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentReferenceDB}. This component actually represents multiple actively replicated instances of the same database to provide parallel lookups, searches and downloads when necessary. Furthermore, we instantiated \texttt{ChannelDispatcher}, \texttt{ReplicationManager} and \texttt{RequestDispatcher} to fully achieve the selected drivers.
 The responsibilities of the resulting components are as follows:
 
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
-	\caption{Component-and-connector diagram of the first decomposition.
-	}\label{fig:compandcondecomp2}
-\end{figure}
-
 \subparagraph{DocumentDB}
 See \texttt{DocumentDB} in decompositon 1.
 
@@ -316,14 +302,13 @@ Responsible for the actual storage of the Document References that refer to Docu
 \subparagraph{RequestDispatcher}
 Responsible for dispatching incoming Document requests to one of the available active replicas in the Document Reference Database.
 
-
 \begin{figure}[!htp]
 	\centering
-	%\includegraphics[width=0.8\textwidth]{}
-	\missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
-	\caption{Component-and-connector diagram of this decomposition.
-	}\label{fig:it1-cc_main}
+	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
+	\caption{Component-and-connector diagram of the second decomposition.
+	}\label{fig:compandcondecomp2}
 \end{figure}
+
 \subsubsection{Verify and refine}
 This section maps the requirements not yet tackled to the components defined so far.
 \paragraph{ChannelDispatcher}
@@ -432,6 +417,7 @@ The \texttt{TemplateDB} component does not need to change to support new types o
 \paragraph{Decomposition}
 Figure \ref{fig:compandcondecomp3} shows the component-and-connector diagram resulting from this decompostion. Notice that with respect to figure  \ref{fig:compandcondecomp1}, the \texttt{RawDataGateway} has interfaces employs additional interfaces which were not yet foreseen in the first decomposition. More specifically, the new interfaces are VerifierMgmt, DeliverNotification and DBMgmt.\\
 The responsibilities of the resulting conponents are as follows:
+
 \subparagraph{DataReceiver} Responsible for buffering the incoming raw data received from a Customer Organization.
 
 \subparagraph{RawDataDispatcher} Responsible for sending the raw data to the component designed to verify raw data of that particular type. Has an interface used by eDocs administrators to update its knowledge of available raw data verifiers where it can send raw data to (M1).
@@ -511,7 +497,7 @@ This section maps the requirements not yet tackled to the components defined so 
 \end{itemize}
 
 \section{Resulting partial architecture}\label{sec:architecture}
-This section provides an overvuew of the architecture constructed through ADD\@.
+This section provides an overview of the architecture constructed through ADD\@.
 
 \subsection{Component-and-connector view}
 A short discussion of the component-and-connector view with the key
