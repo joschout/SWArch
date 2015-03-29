@@ -2,6 +2,7 @@
 
 \usepackage[english]{babel}
 \usepackage{graphicx}
+\usepackage{cite}
 \graphicspath{{./figures/}}
 \usepackage[colorlinks, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage{geometry}
@@ -15,7 +16,7 @@
 \newpage
 
 \section{Introduction}\label{sec:introduction}
-
+In this report, we describe the execution of the attribute-driven design approach applied to the requirements of the eDocs System. Each of the following sections describes a single decomposition and each decomposition is structured according to the ADD  steps specified in \cite{SWArchinpractice}.
 \section{Attribute-driven design documentation}\label{sec:add}
 \subsection{Decomposition 1: The eDocs System (Av1, P1, UC4, UC5)}
 \subsubsection{Module to decompose}
@@ -29,7 +30,7 @@ The selected non-functional drivers for this decomposition are:
     \item \emph{P1}: Document generation
 \end{itemize}
 
-There are two use cases about the generation of documents. These qre thus selected as the functional drivers. These use cases are:
+There are two use cases about the generation of documents. These are thus selected as the functional drivers. These use cases are:
 
 \begin{itemize}
     \item \emph{UC4}: Generate payslip
@@ -510,4 +511,10 @@ Figure \ref{fig:partArch} shows the primary diagram of the component-and-connect
 	}\label{fig:partArch}
 \end{figure}
 
+
+
+\bibliography{references.bib}
+\bibliographystyle{plain}
 \end{document}
+
+
