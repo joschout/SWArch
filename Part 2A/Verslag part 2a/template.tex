@@ -273,17 +273,49 @@ The responsibilities of the resulting components are as follows:
 	\caption{Component-and-connector diagram of the first decomposition.
 	}\label{fig:compandcondecomp2}
 \end{figure}
-\subparagraph{CustomerOrganisationGateway}
-Responsible for communication with the Customer Organisation. This consists mainly of providing the Customer Organisation with an interface for logging into the eDocs System, sending batches of raw data and consulting the management dashboard.
 
 \subparagraph{DocumentDB}
-Responsible for the actual storage of the Documents that have been fully generated.
+See \texttt{DocumentDB} in decompositon 1.
 
 \subparagraph{RawDataDB}
-Responsible for the actual storage of the Raw Data, consisting of both meta data (i.e. document priority etc.) and document data.
+See \texttt{RawDataDB} in decompositon 1.
 
 \subparagraph{NotificationHandler}
-Responsible for handling Notifications that can be received either from the \texttt{DocumentGenerationScheduler}, the \texttt{DocumentGenerationProcessorManager} or one of the \texttt{DocumentGenerationProcessors}.
+Next to the responsibilities already mentioned in decomposition 1, it is also responsible for handling Notifications that can be received from the \texttt{ReplicationManager}.
+
+\subparagraph{CustomerOrganisationGateway}
+See \texttt{CustomerOrganizationGateway} in decompositon 1.
+
+\subparagraph{UserWebInterface}
+Responsible for presenting a user friendly view of all System functionality that is externally accessible by users.
+
+\subparagraph{Dispatcher}
+Responsible for dispatching documents to the appropriate channel based on their delivery information that it retrieves from the raw data database.
+
+\subparagraph{EmailChannel}
+Responsible for sending documents to recipients by email either as an attachment or as a reference link.
+
+\subparagraph{ZoomitChannel}
+Responsible for sending documents to recipients through Zoomit.
+
+\subparagraph{PrintAndPostalServiceChannel}
+Responsible for sending documents to recipients via print and postal service.
+
+\subparagraph{PersonalDocumentStoreChannel}
+Encapsulates the responsibility of providing documents to recipients through their Personal Document Store.
+
+\subparagraph{ReplicationManager}
+Responsible for managing all write operations on the actively replicated Document Reference Databases.
+
+\subparagraph{DocumentReferenceCache}
+Responsible for caching all Document References that are in the process of being written in the Document Reference Database by the Replication Manager, in case the latter should encounter any type of failure during this process.
+
+\subparagraph{DocumentReferenceDB}
+Responsible for the actual storage of the Document References that refer to Documents in the Document Database.
+
+\subparagraph{RequestDispatcher}
+Responsible for dispatching incoming Document requests to one of the available active replicas in the Document Reference Database.
+
 
 \begin{figure}[!htp]
 	\centering
