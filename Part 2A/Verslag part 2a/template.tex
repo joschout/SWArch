@@ -249,31 +249,41 @@ As was already mentioned before, the \texttt{DocumentReferenceDB} is actively re
 \paragraph{Unaffected functionality of other components}
 Next to storing the  persistent data in a dedicated databases, Av2 also requires the other functionality of the system to remain unaffected when the infrastructure for personal document stores fails or crashes. This functionality includes (i) the state of ongoing document processing jobs, (ii) generated documents delivered through other channels, (iii) billing data, etc. It is quite straightforward to see that this failure independence is a natural consequence of the encapsulation of the personal document stores in \texttt{DocumentReferenceDBs} that merely store references to the respective documents in the \texttt{DocumentDB}.
 
-
 \paragraph{Failure detection for Av2}
 Because the System should be able to detect a failure or crash of the internal (sub-)system responsible for storing documents in personal document stores, failure of the core \texttt{DocumentReferenceDBs} should be detected. The replication manager and request dispatcher resolve this problem by implicitly seeing their read/write operations on the respective reference database as a ping message and its answer (the requested document) as an echo message. Although this introduces some redundancy regarding the amount of ping/echo messages, there is no significant overhead due to the fact that these messages are implicitly encoded into the read/write operations on the respective database.
-
 
 \paragraph{Notification handler for Av2}
 Because a failure or crash of the internal (sub-)system responsible for storing documents in personal document stores should be reported, a \texttt{NotificationHandler} was created. This handler offers an interface to notify both eDocs administrators and users (through the \texttt{UserWebInterface}) in case of a failure or crash of the internal (sub-)system.
 
-
 \subsubsection*{Alternatives considered}
 \paragraph{Alternatives for active replication}
-A discussion of the alternative solutions and why that were not selected.
+An alternative to the use of active replication would have been the use of passive redundancy. With passive redundancy, only one of the replicas is able to respond to incoming requests (i.e. the primary database). As the name indicates, other replicas merely serve as dormant (i.e. passive) copies, waiting to be activated in case of a failure of the primary replica. The disadvantage of this passive methodology however, is that it is not scalable with regard to the number of incoming requests (which is exactly what \emph{Av2} requires).
 
 \paragraph{Alternatives for ping/echo}
-A discussion of the alternative solutions and why that were not selected.
+The failure of a database component can also be detected by relying on a heartbeat, periodically initiated by the component itself. This would require both the receiving (i.e. database component) and the requesting (i.e. replication manager and request dispatcher) end to keep track of respectively when to send and receive a heartbeat. This complicates the addition of any database components since they would require this extra logic.
 
 \subsubsection{Instantiation and allocation of functionality}
 \paragraph{Decomposition}
-Main aspects of the resulting decomposition.
+Figure \ref{fig:compandcondecomp2} shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentReferenceDB}. This component actually represents multiple actively replicated instances of the same database to provide parallel lookups, searches and downloads when necessary. Furthermore, we instantiated \texttt{Dispatcher}, \texttt{ReplicationManager} and \texttt{RequestDispatcher} to fully achieve the selected drivers.
+The responsibilities of the resulting components are as follows:
 
-\subparagraph{ModuleB}
-Per introduced component a paragraph describing its responsibilities.
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
+	\caption{Component-and-connector diagram of the first decomposition.
+	}\label{fig:compandcondecomp2}
+\end{figure}
+\subparagraph{CustomerOrganisationGateway}
+Responsible for communication with the Customer Organisation. This consists mainly of providing the Customer Organisation with an interface for logging into the eDocs System, sending batches of raw data and consulting the management dashboard.
 
-\subparagraph{ModuleC}
-Per introduced component a paragraph describing its responsibilities.
+\subparagraph{DocumentDB}
+Responsible for the actual storage of the Documents that have been fully generated.
+
+\subparagraph{RawDataDB}
+Responsible for the actual storage of the Raw Data, consisting of both meta data (i.e. document priority etc.) and document data.
+
+\subparagraph{NotificationHandler}
+Responsible for handling Notifications that can be received either from the \texttt{DocumentGenerationScheduler}, the \texttt{DocumentGenerationProcessorManager} or one of the \texttt{DocumentGenerationProcessors}.
 
 \begin{figure}[!htp]
 	\centering
@@ -416,12 +426,10 @@ The responsibilities of the resulting conponents are as follows:
 	}\label{fig:compandcondecomp3}
 \end{figure}
 
-\subsubsection{Interfaces for child modules}
-\subsubsection{Data type definitions}
 \subsubsection{Verify and refine}
 
 \section{Resulting partial architecture}\label{sec:architecture}
-This section provides an over of the architecture constructed through ADD\@.
+This section provides an overvuew of the architecture constructed through ADD\@.
 
 \subsection{Context diagram}
 This subsection discusses the context diagram.
