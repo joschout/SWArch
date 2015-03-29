@@ -497,18 +497,18 @@ This section maps the requirements not yet tackled to the components defined so 
 \end{itemize}
 
 \section{Resulting partial architecture}\label{sec:architecture}
-This section provides an overview of the architecture constructed through ADD\@.
+This section describes the architecture of the eDocs System resulting from the attribute driven design (ADD\@) process described throughout the above sections. This architecture is only partial (i.e. not complete), since the design process was not completed yet.
+In this section, we show the structure of the system in terms of its components using a component-and-connector view. We do not repeat the list of components or their responsibilities, since they are identical to the ones that were already discussed in the decompositions above.
 
 \subsection{Component-and-connector view}
-A short discussion of the component-and-connector view with the key
-decompositions if any.
+\ref{fig:finalCompCon1} shows the primary diagram of the component-and-connector view. For readability reasons, we chose to bundle the components related to storing sensor data into the new super-component SensorDataDB and the components related to risk estimations into the new super-component RiskEstimator and keep the decomposition of the GatewayFacade as shown in the third decomposition. Their respective decompositions are shown in Figure 12, Figure 13 and Figure 14.
 
 \begin{figure}[!htp]
     \centering
     %\includegraphics[width=0.8\textwidth]{}
     \missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
     \caption{Primary diagram for the component-and-connector view.
-        }\label{fig:cc_main}
+        }\label{fig:finalCompCon1}
 \end{figure}
 
 \begin{figure}[!htp]
