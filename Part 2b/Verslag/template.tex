@@ -1,0 +1,206 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage[colorlinks, allcolors=black]{hyperref}
+\usepackage{geometry}
+\geometry{tmargin=3cm, bmargin=2.2cm, lmargin=2.2cm, rmargin=2cm}
+\usepackage{todonotes} %Used for the figure placeholders
+
+% Your name and student number must be filled in on the title page found in
+% titlepage.tex.
+
+\begin{document}
+\input{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}\label{sec:introduction}
+
+\section{Overview}\label{sec:overview}
+\subsection{Architectural decisions}
+Briefly discuss your architectural decisions for each non-functional
+requirement.
+Pay attention to the solutions that you employed (in your own terms or using
+tactics and/or patterns).
+
+\paragraph{ReqX\@: requirement name} Provide a brief discussion of the
+decisions related to \emph{ReqX}.\\
+\emph{Employed tactics and patterns: List all patterns and tactics used to
+    achieve ReqX, if any.}
+
+\subsection{Discussion}
+Use this section to discuss your architecture in retrospect.
+For example, what are the strong points of your architecture?
+What are the weak points? Is there anything you would have done otherwise with
+your current experience?
+Are there any remarks about the architecture that you would give to your
+customers?
+Etc.
+
+\section{Client-server view (UML Component diagram)}\label{sec:client-server}
+The context diagram of the client-server view.
+Discuss which components communicate with external components and what these
+external components represent.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Context diagram of the client-server
+        view.}
+    \caption{Context diagram for the client-server view.
+        }\label{fig:cc-context}
+\end{figure}
+
+The primary diagram and accompanying explanation.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Primary diagram of the client-server
+        view.}
+    \caption{Primary diagram of the client-server view.}\label{fig:cs-primary}
+\end{figure}
+
+\subsection{Main architectural decisions}
+Discuss your architectural decisions for the most important requirements in
+more detail using the components of the client-server view.
+Pay attention to the solutions that you employed and the alternatives that you
+considered.
+The explanation here must be self-contained and complete.
+Imagine you had to describe how the architecture supports the core
+functionality to someone that is looking at the client-server view only.
+Hide unnecessary details (these should be shown in the decomposition view).
+
+\subsubsection{ReqX\@: requirement name}
+Describe the design choices related to \emph{ReqX} together with the rationale
+of why these choices where made.
+
+\subsubsection*{Alternatives considered}
+\paragraph{Alternative(s) for choice 1} Explain what alternative(s) you
+considered for this design choice and why they where not selected.
+
+\section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
+Discuss the decompositions of the components of the client-server view which
+you have further decomposed.
+
+\subsection{ComponentX}
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Diagram showing decomposition of
+        ComponentX}
+    \caption{Decomposition of \texttt{ComponentX}}\label{fig:decomp-componentx}
+\end{figure}
+
+Describe the decomposition of \texttt{ComponentX} and how this relates to the
+requirements.
+
+\section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
+Describe the context diagram for the deployment view.
+For example, which protocols are used for communication with external systems
+and why?
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Context diagram for the deployment
+        view.}
+    \caption{Context diagram for the deployment view.}\label{fig:depl_context}
+\end{figure}
+
+The primary deployment diagram itself and accompanying explanation.
+Pay attention to the parts of the deployment diagram which are crucial for
+achieving certain non-functional requirements.
+Also discuss any alternative deployments that you considered.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Primary diagram for the deployment
+        view.}
+    \caption{Primary diagram for the deployment view.}\label{fig:depl_primary}
+\end{figure}
+
+\section{Scenarios}\label{sec:scenarios}
+Illustrate how your architecture fulfills the most important data flows.
+As a rule of thumb, focus on the scenario of the domain description.
+Describe the scenario in terms of architectural components using UML Sequence
+diagrams and further explain the most important interactions in text.
+Illustrating the scenarios serves as a quick validation of the completeness of
+your architecture.
+If you notice at this point that for some reason, certain functionality or
+qualities are not addressed sufficiently in your architecture, it suffices to
+document this, together with a rationale of why this is the case according to
+you.
+You do not have to further refine you architecture at this point.
+
+\subsection{Scenario 1}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram scenario 1}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_scenario1}
+\end{figure}
+
+\appendix
+\section{Element catalog}\label{app:catalog}
+List all components and describe their responsibilities and provided
+interfaces.
+Per interface, list all methods using a Java-like syntax and describe their
+effect and exceptions if any.
+List all elements and interfaces alphabetically for ease of navigation.
+
+\subsection{Component 1}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\section{Defined data types}\label{app:datatypes}
+List and describe all data types defined in your interface specifications. List
+them alphabetically for ease of navigation.
+
+\begin{itemize}
+    \item \texttt{Paramtype1}: Description of data type.
+    \item \texttt{Paramtype2}: Description of data type.
+    \item \texttt{returnType1}: Description of data type.
+\end{itemize}
+
+\end{document}
