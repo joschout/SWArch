@@ -196,7 +196,61 @@ The shards themselves are
 Pingen is nodig voor write bij sharding.
 DocumentStorageManager nodig want twee opslagkanalen, de PDSDB en de DocumentDB
 
-extra methode in PDSDBMngmt
+extra methode in PDSDBMngmt voor de opslag
+
+aparte linkdatabase voor P, want "should not affect the performance of other functionality of the system"
+
+\paragraph{UserFacade for P2}
+we moeten de duplicatie van UserFacade bespreken voor P
+2. De userfacade is toegevoegd om onderscheid te maken tussen Registered Recipients en Unregistered Recipients.
+De userfacade markeert ook documenten als received. De PDSFacade en LinkManager DOEN DIT NIET. Voor r
+
+Dit zowel voor documenten die opgevraagd worden met behulp van een unieke link in een email (voor registered recipients EN voor unregistered recipients) als voor dvia de userfacade. De reden dat we dat op deze plaats doen, en niet bij PDSFacade of LinkManager, is omdat de userfacade de laatste compomnent is waar het document voorbij komt voor he bij de recipient terecht komt. Als we dit in een eerdere component zouden doen, is het mogelijk dat een component dichter bij de recipient faalt zonder dat de gebruiker het document ontvangt en zonder dat dit opgemerkt wordt.
+
+
+DocumentStorageManager is toegevoegd om de nieuwe componenten te koppelen met de vorige decompositie.
+De component synchroniseert de DocumentDB met de PDSDB. Hiermee wordt bedoeld dat documenten bedoeld voor Registered Recipients in beide databases worden opgeslagen.
+
+
+
+
+
+%Ook zorgt de component ervoor dat bij het registreren van een Unregistered Recipient --> opschrijven in een verdere decompositie
+
+Motivatie voor AuthN: je moet ingelogd zijn voor o.a. use case 12.
+Motivatie voor UniqueLinkMgmt: het opvragen van documenten met behulp van een unieke link.
+Motivatie voor PDSDBMgmt: use case 12: the registered recipient indicates that he or she wants to consult his or her personal document store.
+
+Motivatie voor PDSFacade: door een aparte component moet de pdsdb zich net bezighouden met het aggregeren van tussenresultaten bij  het verwerken van queries. De PDSFacade wordt niet gerepliceerd, aangezien de PDSDBLongTermStorageManager ook niet gerepliceerd is, en op zich een bottleneck is. De facade is enkel voor de reads, bij het opslaan van documenten gaat de DocumentStorageManager rechtstreek naar de PDSDB.
+De PDSFacade verzamelt altijd eerst een overview van all the recipients documents DESCRIPTIONS. Subsequently, queries can be performed on this collection. This approach introduces no significant overhead.
+
+
+Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
+LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
+
+Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
+ 
+ 
+
+
+QAS AV2b: hier voldaan, want de documenten worden zowel in de documentdb als in de pdsdb opgeslagen, dus de documenten worden wel nog opgeslagen mocht de pdsdb uitvallen.  Een clear message aan de recipient wordt gegeven met behulp van de NotifyRecipient interface aan otherfunctionality2.
+We hebben twee alternatieve manieren besproken om de drie uur aan documenten op te vangen die mogelijk verloren gaan bij het uitvallen van de PDSDB.
+De eerste maakt gebruikt van een cache. Die cache slaat de documentids en de recipient-ids op die de laatste drie uur gegenereerd zijn. Aangezien de documenten die in de PDSDB horen opgeslagen te worden ook in de documentDB zitten, kunnen dan de documenten van de laatste drie uur door de DocumentStorageManager uit de DocumentDB opgevraagd worden en opgeslagen worden in de opnieuw online gekomen PDSDB. Een nadeel aan deze methode is wel dat wanneer de PDSDB langer dan drie uur offline is, er documenten in de DocumentDB opgeslagen zitten die niet in de PDSDB gestoken worden wanneer die terug online komt. Deze documenten zijn niet meet opvraagbaar.
+Het alternatief is dat wanneer de PDSDB terug online komt, de DocumentStorageManager vergelijkt welke documenten er voor de Registered Recipients in de PDSDB en de DocumentDB opgeslagen zijn. Het voordeel hierbij is dat alle documenten opvraagbaar blijven wanneer de PDSDB terug online komt. Het nadeel is dat dit meer werk inhoudt voor de DocumentStorageManager. Aangezien enkel drie uur vereist zijn, gaan we voor het eerste alternatief.
+De DocumentStorageManager ziet het schrijven in de PDSDB als impliciete ping-berichten waarbij het 
+weet dat de PDSDB nog online is. Wanneer een schrijfrequest faalt, zal er een timer gestart wordt in de cache. Wanneer de PDSDB terug online is, zal deze een eenmalige heartbeat naar de DocumentStorageManager gestuurd worden, waarna hij weet dat hij terug kan schrijven. Hierna worden de documenten met verwijzingen in de cache geschreven naar de PDSDB door de DocumentStorageManager ( die leest uit de DocumentDB en schrijft naar de PDSDB). 
+Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
+
+
+
+USE CASE 12: residual drivers: het opslaan van de recipient id's in de pdsdb --> hoort bij deliveryfunctionality. 
+Ook het inloggen (authenticatie).
+USE CASE 13:  residual drivers: we veronderstellen dat de DocumentStorageManager metadata bij elk document opslaat, like the name of the sender, the data range in which the document should be received and the document type --> hoort bij deliveryfunctionality.
+The metadata is saved in both the pdsdb en database components, because when a user registers, this metadata has to be copied form the one to the other. Dit is is om gemakkelijk de documenten in de pdsdb te kunnen zoeken.
+USE CASE 14:  residual driver: mark as received, puntje 3. --> beter te doen bij de deliveryfunctionality
+USE CASE 15:  residual driver: tracking.
+
+
 
 \subsubsection*{Alternatives considered}
 \paragraph{Alternatives for solution}
