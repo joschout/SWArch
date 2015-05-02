@@ -166,69 +166,66 @@ requirements it is responsible for.
 In this run we decompose \texttt{Otherfunctionality}.
 
 \subsubsection{Selected architectural drivers}
-The non-functional drivers for this decomposition are:
+The non-functional driver for this decomposition is:
 
 \begin{itemize}
-    \item \emph{X1}: name
-    \item \emph{Y3}: name
+    \item \emph{P2}: Document lookups
 \end{itemize}
 
 The related functional drivers are:
 
 \begin{itemize}
-    \item \emph{UCa}: name
-    \item \emph{UCb}: name
-    \item \emph{UCc}: name
+    \item \emph{UC12}: Consult personal document store
+    \item \emph{UC13}: Search documents in personal document store
+    \item \emph{UC14}: Consult document in personal document store
+    \item \emph{UC15}: Download document via unique link
 \end{itemize}
 
 \paragraph{Rationale}
-A short discussion of why these drivers were selected for this decomposition.
+P2 was chosen because it has one of the highest priorities among all remaining non-functional drivers and the domain on which its focus lies complements the previous decomposition perfectly.
 
 \subsubsection{Architectural design}
 \paragraph{Extended functionality of PDSLongTermDocumentManager for P2}
-Discussion of the solution selected for (a part of) one of the architectural
-drivers.
+Ik denk dat we de facade beter laten throttlen Jonas, want die heeft een overzicht van alle requests en weet of dit individuele of bulk (search) requests zijn. Zo zit je niet met users die een halve lijst terugkrijgen.
+\paragraph{Link mapping}
+aparte linkdatabase voor P, want "should not affect the performance of other functionality of the system"
 \paragraph{Separate document and link mapping database for P2}
+To ensure that documents can be looked up via the personal document store or a notification in a timely fashion, we chose to store documents and link mappings (discussed below) in separate database components that are deployed on different machines. This decision prohibits either of those two to be a bottleneck in the document lookup process.
 
 \paragraph{Sharding for document database for P2}
 Note that there must be a (sub)component monitoring the requests to the different shards, to cap the number of requests.
-We want to have the response time of active replication. But actively replicating the whole database might have to high a cost, so we choose sharding. This keeps the fast response time, but has less hardware required.
-
-The shards themselves are
+We want to have the response time of active replication. But actively replicating the whole database might have too high a cost, so we choose sharding. This keeps the fast response time, but has less hardware required.
 
 Pingen is nodig voor write bij sharding.
+
+\paragraph{Document storage manager}
 DocumentStorageManager nodig want twee opslagkanalen, de PDSDB en de DocumentDB
 
 extra methode in PDSDBMngmt voor de opslag
 
-aparte linkdatabase voor P, want "should not affect the performance of other functionality of the system"
+DocumentStorageManager is toegevoegd om de nieuwe componenten te koppelen met de vorige decompositie.
+De component synchroniseert de DocumentDB met de PDSDB. Hiermee wordt bedoeld dat documenten bedoeld voor Registered Recipients in beide databases worden opgeslagen.
 
 \paragraph{UserFacade for P2}
 we moeten de duplicatie van UserFacade bespreken voor P
 2. De userfacade is toegevoegd om onderscheid te maken tussen Registered Recipients en Unregistered Recipients.
-De userfacade markeert ook documenten als received. De PDSFacade en LinkManager DOEN DIT NIET. Voor r
 
-Dit zowel voor documenten die opgevraagd worden met behulp van een unieke link in een email (voor registered recipients EN voor unregistered recipients) als voor dvia de userfacade. De reden dat we dat op deze plaats doen, en niet bij PDSFacade of LinkManager, is omdat de userfacade de laatste compomnent is waar het document voorbij komt voor he bij de recipient terecht komt. Als we dit in een eerdere component zouden doen, is het mogelijk dat een component dichter bij de recipient faalt zonder dat de gebruiker het document ontvangt en zonder dat dit opgemerkt wordt.
-
-
-DocumentStorageManager is toegevoegd om de nieuwe componenten te koppelen met de vorige decompositie.
-De component synchroniseert de DocumentDB met de PDSDB. Hiermee wordt bedoeld dat documenten bedoeld voor Registered Recipients in beide databases worden opgeslagen.
-
-
-
-
-
-%Ook zorgt de component ervoor dat bij het registreren van een Unregistered Recipient --> opschrijven in een verdere decompositie
+De userfacade markeert ook documenten als received. De PDSFacade en LinkManager DOEN DIT NIET.
+Dit zowel voor documenten die opgevraagd worden met behulp van een unieke link in een email (voor registered recipients EN voor unregistered recipients) als voor die via de PDS. De reden dat we dat op deze plaats doen, en niet bij PDSFacade of LinkManager, is omdat de userfacade de laatste compomnent is waar het document voorbij komt voor het bij de recipient terecht komt. Als we dit in een eerdere component zouden doen, is het mogelijk dat een component dichter bij de recipient faalt zonder dat de gebruiker het document ontvangt en zonder dat dit opgemerkt wordt.
 
 Motivatie voor AuthN: je moet ingelogd zijn voor o.a. use case 12.
 Motivatie voor UniqueLinkMgmt: het opvragen van documenten met behulp van een unieke link.
 Motivatie voor PDSDBMgmt: use case 12: the registered recipient indicates that he or she wants to consult his or her personal document store.
 
-Motivatie voor PDSFacade: door een aparte component moet de pdsdb zich net bezighouden met het aggregeren van tussenresultaten bij  het verwerken van queries. De PDSFacade wordt niet gerepliceerd, aangezien de PDSDBLongTermStorageManager ook niet gerepliceerd is, en op zich een bottleneck is. De facade is enkel voor de reads, bij het opslaan van documenten gaat de DocumentStorageManager rechtstreek naar de PDSDB.
+
+
+\paragraph{PDSFacade}
+door een aparte component moet de pdsdb zich niet bezighouden met het aggregeren van tussenresultaten bij  het verwerken van queries. De PDSFacade wordt niet gerepliceerd, aangezien de PDSDBLongTermStorageManager ook niet gerepliceerd is, en op zich een bottleneck is. De facade is enkel voor de reads, bij het opslaan van documenten gaat de DocumentStorageManager rechtstreek naar de PDSDB.
 De PDSFacade verzamelt altijd eerst een overview van all the recipients documents DESCRIPTIONS. Subsequently, queries can be performed on this collection. This approach introduces no significant overhead.
 Bij het opvragen van een document door de userfacade, worden een userid en een documentid naar de PDSFacade doorgestuurd. de PDSFacade gaat eerst de metadata horende bij de docid opvragen, checkt of de userid in de metadata overeen komt met userid. Als dat is wordt vervolgens het document opgevraagd. Als dat niet zo is, wordt een exception gegooid--> bij te schrijven in de element catalog
 
 
+\paragraph{LinkManager} VOORLOPIG NIET NODIG IN DEZE DECOMPOSITIE
 
 Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
 LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
@@ -237,13 +234,14 @@ Does NOT do mapping removal after x years --> there has to be a notification whe
  
  
 
-
+\paragraph{Residual Av2b1 - DocumentStorageCache}
 QAS AV2b: hier voldaan, want de documenten worden zowel in de documentdb als in de pdsdb opgeslagen, dus de documenten worden wel nog opgeslagen mocht de pdsdb uitvallen.  Een clear message aan de recipient wordt gegeven met behulp van de NotifyRecipient interface aan otherfunctionality2.
+Residual Av2b2 : TIJDIGE notification AAN DE USER
+
 We hebben twee alternatieve manieren besproken om de drie uur aan documenten op te vangen die mogelijk verloren gaan bij het uitvallen van de PDSDB.
-De eerste maakt gebruikt van een cache. Die cache slaat de documentids en de recipient-ids op die de laatste drie uur gegenereerd zijn. Aangezien de documenten die in de PDSDB horen opgeslagen te worden ook in de documentDB zitten, kunnen dan de documenten van de laatste drie uur door de DocumentStorageManager uit de DocumentDB opgevraagd worden en opgeslagen worden in de opnieuw online gekomen PDSDB. Een nadeel aan deze methode is wel dat wanneer de PDSDB langer dan drie uur offline is, er documenten in de DocumentDB opgeslagen zitten die niet in de PDSDB gestoken worden wanneer die terug online komt. Deze documenten zijn niet meet opvraagbaar.
+De eerste maakt gebruikt van een cache. Die cache slaat de documentids op die de laatste drie uur gegenereerd zijn. Aangezien de documenten die in de PDSDB horen opgeslagen te worden ook in de documentDB zitten, kunnen dan de documenten van de laatste drie uur door de DocumentStorageManager uit de DocumentDB opgevraagd worden en opgeslagen worden in de opnieuw online gekomen PDSDB. Merk op dat in de docDB zowel de docID (DB key), het doc als de meta data (inclusief recipient ID) opgeslagen wordt, zodat deze info onmiddellijk beschikbaar is bij het overhevelen van docs naar de PDS. Een nadeel aan deze methode is wel dat wanneer de PDSDB langer dan drie uur offline is, er documenten in de DocumentDB opgeslagen zitten die niet in de PDSDB gestoken worden wanneer die terug online komt. Deze documenten zijn niet meet opvraagbaar -> out of scope
 Het alternatief is dat wanneer de PDSDB terug online komt, de DocumentStorageManager vergelijkt welke documenten er voor de Registered Recipients in de PDSDB en de DocumentDB opgeslagen zijn. Het voordeel hierbij is dat alle documenten opvraagbaar blijven wanneer de PDSDB terug online komt. Het nadeel is dat dit meer werk inhoudt voor de DocumentStorageManager. Aangezien enkel drie uur vereist zijn, gaan we voor het eerste alternatief.
-De DocumentStorageManager ziet het schrijven in de PDSDB als impliciete ping-berichten waarbij het 
-weet dat de PDSDB nog online is. Wanneer een schrijfrequest faalt, zal er een timer gestart wordt in de cache. Wanneer de PDSDB terug online is, zal deze een eenmalige heartbeat naar de DocumentStorageManager gestuurd worden, waarna hij weet dat hij terug kan schrijven. Hierna worden de documenten met verwijzingen in de cache geschreven naar de PDSDB door de DocumentStorageManager ( die leest uit de DocumentDB en schrijft naar de PDSDB). 
+De DocumentStorageManager ziet het schrijven in de PDSDB als impliciete ping-berichten waarbij het weet dat de PDSDB nog online is. Wanneer een schrijfrequest faalt, zal er een timer gestart wordt in de cache. Wanneer de PDSDB terug online is, zal deze een eenmalige heartbeat naar de DocumentStorageManager gestuurd worden, waarna hij weet dat hij terug kan schrijven. Hierna worden de documenten (waarvan een id in de cache zit) geschreven naar de PDSDB door de DocumentStorageManager ( die leest uit de DocumentDB en schrijft naar de PDSDB). 
 Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
 
 
