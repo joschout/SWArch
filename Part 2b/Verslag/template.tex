@@ -226,6 +226,8 @@ Motivatie voor PDSDBMgmt: use case 12: the registered recipient indicates that h
 
 Motivatie voor PDSFacade: door een aparte component moet de pdsdb zich net bezighouden met het aggregeren van tussenresultaten bij  het verwerken van queries. De PDSFacade wordt niet gerepliceerd, aangezien de PDSDBLongTermStorageManager ook niet gerepliceerd is, en op zich een bottleneck is. De facade is enkel voor de reads, bij het opslaan van documenten gaat de DocumentStorageManager rechtstreek naar de PDSDB.
 De PDSFacade verzamelt altijd eerst een overview van all the recipients documents DESCRIPTIONS. Subsequently, queries can be performed on this collection. This approach introduces no significant overhead.
+Bij het opvragen van een document door de userfacade, worden een userid en een documentid naar de PDSFacade doorgestuurd. de PDSFacade gaat eerst de metadata horende bij de docid opvragen, checkt of de userid in de metadata overeen komt met userid. Als dat is wordt vervolgens het document opgevraagd. Als dat niet zo is, wordt een exception gegooid--> bij te schrijven in de element catalog
+
 
 
 Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
