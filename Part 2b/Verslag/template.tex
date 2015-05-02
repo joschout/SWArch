@@ -112,20 +112,23 @@ Rationale of the allocation of components to physical nodes.
 \end{figure}
 
 \subsubsection{Interfaces for child modules}
-\subsubsection*{ModuleB}
+\subsubsection*{PDSDB}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentMgmt
     \begin{itemize}
-        \item \texttt{returnType operation1(ParamType param1)} throws TypeOfException
+        \item \texttt{void storeDocument(DocumentId id, Document doc, MetaData md)}
         \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: 
-            \begin{itemize}
-                \item TypeOfException: Describe when this exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided metadata \texttt{md}.
+            \item Exceptions:  None 
         \end{itemize}
 
-        \item \texttt{returnType operation2()}
+        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
+        \begin{itemize}
+            \item Effect: Describe the effect of calling this operation.
+            \item Exceptions: None
+         \end{itemize}
+         
+         \item \texttt{void markReceived(DocumentId id)}
         \begin{itemize}
             \item Effect: Describe the effect of calling this operation.
             \item Exceptions: None
@@ -577,16 +580,44 @@ Per interface, list all methods using a Java-like syntax and describe their
 effect and exceptions if any.
 List all elements and interfaces alphabetically for ease of navigation.
 
-\subsection{Component 1}
+\subsection{Completer}
 \begin{itemize}
     \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item Complete
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{DocumentGenerationManager}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{DocumentGenerationManager} monitors the availability of the \texttt{Generator} using ping/echo. The \texttt{DocumentGenerationManager} keeps track of the jobs assigned to and being processed by the \texttt{Generators}. The \texttt{DocumentGenerationManager} assigns jobs to the \texttt{Generators} in groups of more than one job that are part of the same batch.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} \texttt{Completer}, \texttt{GenerationManager}, \texttt{KeyCache}, \texttt{Scheduler}, \texttt{TemplateCache}
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InsertJobs
     \begin{itemize}
         \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
         \begin{itemize}
@@ -604,7 +635,98 @@ List all elements and interfaces alphabetically for ease of navigation.
         \end{itemize}
     \end{itemize}
 
-    \item InterfaceB
+    \item NotifyCompleted
+    \begin{itemize}
+        \item \texttt{JobBatch notifyCompletedAndGiveMeMore(GeneratorId id)}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Generator}
+\begin{itemize}
+    \item \textbf{Description:} Generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them.   
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item AssignJobs
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item Startup/ShutDown
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+    \item Ping
+    \begin{itemize}
+        \item \texttt{Echo ping()}
+        \begin{itemize}
+            \item Effect: The \texttt{Generator} will respond to the ping request by sending an echo response. This is used by the \texttt{GeneratorManager} to check whether the \texttt{Generator} is available.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\subsection{GenerationManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:}  \texttt{DocumentGenerationManager}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item AssignJobs
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item Startup/ShutDown
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+      \item Ping
     \begin{itemize}
         \item \texttt{returntType2 operation3()}
         \begin{itemize}
@@ -614,14 +736,338 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+\subsection{KeyCache}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:}  \texttt{DocumentGenerationManager}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item GetKey
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{PDSDB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} \texttt{PDSDBReplica}, \texttt{PDSLongTermDocumentManager}, \texttt{PDSReplicationManager}
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item DocumentMgmt
+    \begin{itemize}
+        \item \texttt{void storeDocument(DocumentId id, Document doc, MetaData md)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided metadata \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}
+
+        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
+        \begin{itemize}
+            \item Effect: Describe the effect of calling this operation.
+            \item Exceptions: None
+         \end{itemize}
+         
+         \item \texttt{void markReceived(DocumentId id)}
+        \begin{itemize}
+            \item Effect: Describe the effect of calling this operation.
+            \item Exceptions: None
+         \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{PDSDBReplica}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} \texttt{PDSDB}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item ExtendedDocumentMgmt
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    
+    \item Ping
+    \begin{itemize}
+        \item \texttt{Echo ping()}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDBReplica} will respond to the ping request by sending an echo response. This is used by the \texttt{PDSReplicationManager} to check whether the \texttt{PDSDBReplica} is available.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{PDSLongTermDocumentManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} \texttt{PDSDB}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item DocumentMgmt
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
+
+\subsection{PDSReplicationManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} \texttt{PDSDB}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item  ExtendedDocumentMgmt
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{OtherFunctionality}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item FinalizeDocument
+    \begin{itemize}
+        \item \texttt{void storeAndDeliverDocument(JonId jobid, Document doc) throws SomeException}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherFunctionality} will store the given document \texttt{document} and deliver it.
+            \item Exceptions: None
+
+            \item \texttt{void generationError(JobId jobid, Error error)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item GetBatchData
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+    \item GetTemplate
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+    \item GetKey
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+    \item setStatus
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+    \item NotifyOperator
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+
+\end{itemize}
+
+\subsection{Scheduler}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item GetNextJobs
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InsertJobs
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+      \item GetStatistics
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{TemplateCache}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item GetTemplate
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \section{Defined data types}\label{app:datatypes}
 List and describe all data types defined in your interface specifications. List
 them alphabetically for ease of navigation.
 
 \begin{itemize}
-    \item \texttt{Paramtype1}: Description of data type.
-    \item \texttt{Paramtype2}: Description of data type.
-    \item \texttt{returnType1}: Description of data type.
+	\item \texttt{BatchId}: Description of data type.
+	\item \texttt{Document}: Description of data type.
+	\item \texttt{Echo}: The response to a ping message. This data element does not contain any meaningful data.
+	
+	\item \texttt{Error}: Description of data type.
+    \item \texttt{GeneratordId}: Description of data type.
+    \item \texttt{JobBatch}: Description of data type.
+    \item \texttt{JobId}: Description of data type.
+    \item \texttt{MetaData}: Description of data type.
+    
+    
 \end{itemize}
 
 \end{document}
