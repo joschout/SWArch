@@ -591,7 +591,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item Complete
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{CompletePartialBatchData getComplete(BatchId batchId, List<JobId> jobIds )}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions:
@@ -610,7 +610,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentGenerationManager}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentGenerationManager} monitors the availability of the \texttt{Generator} using ping/echo. The \texttt{DocumentGenerationManager} keeps track of the jobs assigned to and being processed by the \texttt{Generators}. The \texttt{DocumentGenerationManager} assigns jobs to the \texttt{Generators} in groups of more than one job that are part of the same batch.
+    \item \textbf{Description:} The \texttt{DocumentGenerationManager} monitors the availability of the \texttt{Generator} components using the Ping interface. The \texttt{DocumentGenerationManager} keeps track of the jobs assigned to and being processed by the \texttt{Generators}. To minimize the overhead of the job coordination, the \texttt{DocumentGenerationManager} assigns jobs to the \texttt{Generators} in groups of more than one job that are part of the same batch. If a \texttt{Generator} fails to complete its jobs, the \texttt{DocumentGenerationManager} can restart these failed jobs. 
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} \texttt{Completer}, \texttt{GenerationManager}, \texttt{KeyCache}, \texttt{Scheduler}, \texttt{TemplateCache}
 \end{itemize}
@@ -637,17 +637,25 @@ List all elements and interfaces alphabetically for ease of navigation.
 
     \item NotifyCompleted
     \begin{itemize}
-        \item \texttt{JobBatch notifyCompletedAndGiveMeMore(GeneratorId id)}
+        \item \texttt{void notifyCompletedAndGiveMeMore(GeneratorId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{DocumentGenerationManager} gets notified that the document processing jobs assigned to the \texttt{Generator} identified by an \texttt{id} are completed. 
+            %It looks up the \texttt{JobIds} of the jobs assigned to the \texttt{Generator}. It notifies the \texttt{Scheduler} that the job
             \item Exceptions: None
         \end{itemize}
+        
+        \item \texttt{void notifyCompletedAndIAmShuttingDown(GeneratorId id)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
     \end{itemize}
-\end{itemize}
+
 
 \subsection{Generator}
 \begin{itemize}
-    \item \textbf{Description:} Generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them.   
+    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them.   
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -656,7 +664,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item AssignJobs
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void assignJobs(CompletePartialBatchData batchData)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions:
@@ -690,7 +698,7 @@ List all elements and interfaces alphabetically for ease of navigation.
         \end{itemize}
     \end{itemize}
 \end{itemize}
-\subsection{GenerationManager}
+\subsection{GeneratorManager}
 \begin{itemize}
     \item \textbf{Description:} Responsibilities of the component.
     \item \textbf{Super-component:}  \texttt{DocumentGenerationManager}
@@ -699,38 +707,12 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item AssignJobs
+    \item NotifyCompleted
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void notifyCompletedAndGiveMeMore(GeneratorId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item Startup/ShutDown
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-    
-      \item Ping
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{DocumentGenerationManager} gets notified that the document processing jobs assigned to the \texttt{Generator} identified by an \texttt{id} are completed. 
+            %It looks up the \texttt{JobIds} of the jobs assigned to the \texttt{Generator}. It notifies the \texttt{Scheduler} that the job
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -747,19 +729,10 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item GetKey
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -807,15 +780,16 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item ExtendedDocumentMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    % MERK OP: mogelijk is het meer dan een lijst van documenten die over gedragen moet worden. Er staat een goed voorbeeld in de PMS
+        \item \texttt{List<Document> getDocumentsSince(TimeStamp whenFailed)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions:
             \begin{itemize}
                 \item SomeException: Describe when the exception is thrown.
             \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
+% MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
+            \item \texttt{void storeDocuments(ParamType2 param)}
             \begin{itemize}
                 \item Effect: Describe the effect of the operation
                 \item Exceptions: None
@@ -903,7 +877,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item FinalizeDocument
     \begin{itemize}
-        \item \texttt{void storeAndDeliverDocument(JonId jobid, Document doc) throws SomeException}
+        \item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc) throws SomeException}
         \begin{itemize}
             \item Effect: The \texttt{OtherFunctionality} will store the given document \texttt{document} and deliver it.
             \item Exceptions: None
@@ -918,7 +892,21 @@ List all elements and interfaces alphabetically for ease of navigation.
 
     \item GetBatchData
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+        \item \texttt{BatchMetaData getMetaData(BatchId batchId)}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+
+    \item GetKey
+    \begin{itemize}
+        \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
@@ -927,23 +915,14 @@ List all elements and interfaces alphabetically for ease of navigation.
     
     \item GetTemplate
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
-    
-    \item GetKey
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-    
-    \item setStatus
+        
+    \item SetStatus
     \begin{itemize}
         \item \texttt{returntType2 operation3()}
         \begin{itemize}
@@ -954,7 +933,7 @@ List all elements and interfaces alphabetically for ease of navigation.
     
     \item NotifyOperator
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{void notifyOperatorOfPDSDBReplicaFailure(PDSDBReplicaId replicaId, TimeStamp dateTime)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
@@ -974,7 +953,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item GetNextJobs
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Tuple<BatchId, List<JobId>> getNextJobs()}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions:
@@ -982,9 +961,9 @@ List all elements and interfaces alphabetically for ease of navigation.
                 \item SomeException: Describe when the exception is thrown.
             \end{itemize}
 
-            \item \texttt{void operation2(ParamType2 param)}
+            \item \texttt{Tuple<BatchId, List<JobId>>  jobsCompletedAndGiveMeMore(List<JobId>)}
             \begin{itemize}
-                \item Effect: Describe the effect of the operation
+                \item Effect: The \texttt{Scheduler} gets notified that the document processing jobs belonging to the list of \texttt{JobIds} are completed. It returns the a list of \texttt{JobIds} belonging to a batch identified by \texttt{BatchId}. The returned list of \texttt{JobIds} identify document processing jobs which are not yet started.
                 \item Exceptions: None
             \end{itemize}
         \end{itemize}
@@ -1018,21 +997,12 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item GetTemplate
+	\item GetTemplate
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1057,17 +1027,26 @@ List and describe all data types defined in your interface specifications. List
 them alphabetically for ease of navigation.
 
 \begin{itemize}
-	\item \texttt{BatchId}: Description of data type.
+	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system.
+	\item \texttt{BatchMetaData}: A data structure listing the metadata belonging to a batch of jobs. This includes the \texttt{CustomerID} of a Customer Organization, the \texttt{DocumentType} of the documents to be generated, the \texttt{TimeStamp} of when the batch was received, \dots
+	\item \texttt{CompletePartialBatchData}: A complex data structure listing all data a \texttt{Generator} needs to complete document generation jobs that are part of the same batch. It contains an array of \texttt{Tuple<JobId, RawData>}. The \texttt{JobIds} identify jobs that are all part of the same batch. The \texttt{RawData} belongs to these document processing jobs. Also listed in the \texttt{BatchMetaData} are the values of the \texttt{BatchMetaData}, \texttt{Key} and \texttt{Template} data types belonging to the batch.	
+	 \texttt{CompletePartialBatchData} also contains a \texttt{BatchMetaData} entry, a \texttt{Key} and a \texttt{Template}. \emph{Important to note:} a value of CompletePartialBatchData contains all information necessary to generate \textbf{some} jobs of belonging to same batch. It does not have to contain the information of all jobs belonging to same batch.
+	 
+	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system.
 	\item \texttt{Document}: Description of data type.
+	\item \texttt{DocumentId}:
+	\item \texttt{DocumentType}: A piece of data describing the type of a document. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
 	\item \texttt{Echo}: The response to a ping message. This data element does not contain any meaningful data.
-	
 	\item \texttt{Error}: Description of data type.
-    \item \texttt{GeneratordId}: Description of data type.
+    \item \texttt{GeneratordId}: A piece of data uniquely identifying a \texttt{Generator} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     \item \texttt{JobBatch}: Description of data type.
-    \item \texttt{JobId}: Description of data type.
-    \item \texttt{MetaData}: Description of data type.
-    
-    
+    \item \texttt{JobId}: A piece of data uniquely identifying a document processing job in the system.
+    \item \texttt{Key}:
+    \item \texttt{PDSDBReplicaId}:
+    \item \texttt{RawData}: A data structure listing the raw data used in a document processing job.
+    \item \texttt{TimeStamp}: The representation of a time (i.e. date and time of day) in the system.
+    \item \texttt{Template}: A document used as a template for the generation of documents.
+    \item \texttt{TemplateId}: A data structure uniquely identifying a template in the system. It lists three values. It contains \texttt{CustomerId} which identifies the Customer Organization who the template belongs to. It also contains a \texttt{DocumentType}, specifying for which kind of document it is a template for. The last piece of information it contains is a \texttt{TimeStamp} specifying when the system received the template.
 \end{itemize}
 
 \end{document}
