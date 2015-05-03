@@ -188,22 +188,17 @@ P2 was chosen because it has one of the highest priorities among all remaining n
 \paragraph{Extended functionality of PDSLongTermDocumentManager for P2}
 Ik denk dat we de facade beter laten throttlen Jonas, want die heeft een overzicht van alle requests en weet of dit individuele of bulk (search) requests zijn. Zo zit je niet met users die een halve lijst terugkrijgen.
 \paragraph{Link mapping}
-aparte linkdatabase voor P, want "should not affect the performance of other functionality of the system"
-\paragraph{Separate document and link mapping database for P2}
-To ensure that documents can be looked up via the personal document store or a notification in a timely fashion, we chose to store documents and link mappings (discussed below) in separate database components that are deployed on different machines. This decision prohibits either of those two to be a bottleneck in the document lookup process.
-
-\paragraph{Sharding for document database for P2}
-Note that there must be a (sub)component monitoring the requests to the different shards, to cap the number of requests.
-We want to have the response time of active replication. But actively replicating the whole database might have too high a cost, so we choose sharding. This keeps the fast response time, but has less hardware required.
-
-Pingen is nodig voor write bij sharding.
-
-\paragraph{Document storage manager}
-DocumentStorageManager nodig want twee opslagkanalen, de PDSDB en de DocumentDB
+In order to support document lookups via links, which are either unique (unregistered recipient) or part of a notification e-mail (registered recipient), the \texttt{UserFacade} is concerned with the mapping of each incoming link request to the appropriate document, which is either located in the \texttt{PDSDB} (for registered recipients) or in the \texttt{DocumentDB} (for unregistered recipients). The mappings themselves are stored in the \texttt{MappingDB} component and are fetched by the \texttt{UserFacade} when needed.
+\paragraph{Dedicated DocumentDB and LinkMappingDB for P2}
+Since a large number of document lookups and downloads should not affect the performance of other functionality of the system, both link mappings and documents are stored in dedicated databases, each deployed on a different node. This decision ensures that documents can be looked up via the personal document store or a notification in a timely fashion, because it prohibits either of those two components to be a bottleneck in the document lookup process. Since, according to the previous decomposition, the \texttt{PDSDB} is deployed on a separate node too, this component's performance is already satisfactory and no changes need to be made to improve it.
+\paragraph{Sharding for DocumentDB for P2}
+In order to improve performance of the \texttt{DocumentDB}, we chose to partition this database into multiple shards. This approach was driven by the need for fast response time while keeping in mind the high storage cost for documents. More precisely, a \texttt{ShardingManager} is responsible for reading and writing all documents in one of the \texttt{DocumentDBShards}, making sure that every document is stored only once. This sharding technique provides roughly the same advantages in response time as active replication, but is significantly less costly when it comes to storage capacity.
+Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
+\paragraph{DocumentStorageManager}
+The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients). The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above: the component 
 
 extra methode in PDSDBMngmt voor de opslag
 
-DocumentStorageManager is toegevoegd om de nieuwe componenten te koppelen met de vorige decompositie.
 De component synchroniseert de DocumentDB met de PDSDB. Hiermee wordt bedoeld dat documenten bedoeld voor Registered Recipients in beide databases worden opgeslagen.
 
 \paragraph{UserFacade for P2}
