@@ -621,31 +621,32 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{AuthenticationHandler}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{AuthenticationHandler} is responsible for authenticating Rgistered recipients and Customer organizations. The architecture does not specify the means of authentication (e.g. the type of credentials). The credentials are stored in the \texttt{UserDB}
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{AuthenticationHandler} is responsible for authenticating Registered recipients and Customer organizations. The architecture does not specify the means of authentication (e.g. the type of credentials). The credentials are stored in the \texttt{UserDB}.
+    \item \textbf{Super-component:} \texttt{UserFacade}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item AuthN
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{RecipientId getRecipientId(SessionId sessionId) throws NoSuchSessionException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{AuthenticationHandler} fetches and returns the Registered Recipient's identifier corresponding to the \texttt{sessionId} from the \texttt{sessionDB}.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item NoSuchSessionException: Thrown if no session exists with the given identifiers, or if the session belongs to a customer organization.
             \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
+		\end{itemize}
+        \item \texttt{CustomerId getCustomerId(SessionId sessionId) throws NoSuchSessionException}
+        \begin{itemize}
+             \item Effect: The \texttt{AuthenticationHandler} fetches and returns the Customer Organization's identifier corresponding to the \texttt{sessionId} from the \texttt{sessionDB}.
+             \item Exceptions:
+             \begin{itemize}
+                \item NoSuchSessionException: Thrown if no session exists with the given identifiers, or if the session belongs to a registered recipient.
+             \end{itemize}
         \end{itemize}
     \end{itemize}
-
     \item InterfaceB
     \begin{itemize}
         \item \texttt{returntType2 operation3()}
