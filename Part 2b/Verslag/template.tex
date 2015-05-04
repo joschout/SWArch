@@ -577,6 +577,54 @@ Per interface, list all methods using a Java-like syntax and describe their
 effect and exceptions if any.
 List all elements and interfaces alphabetically for ease of navigation.
 
+
+
+
+
+\subsection{Component 1}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
+
+
+
+
+
+
 \subsection{Completer}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{Completer} is responsible for fetching the raw data an applicable meta-data for a group of \texttt{JobIds} when a \texttt{Generator} instance requires a new group of jobs.
@@ -640,6 +688,42 @@ List all elements and interfaces alphabetically for ease of navigation.
         \end{itemize}
     \end{itemize}
 
+\subsection{EmailFacade}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{EmailFacade} is responsible for sending documents to  Unregistered by e-mail when receipt tracking is turned off. When receipt tracking is turned on for an Unregistered Recipient, it sends an e-mail containing a short description of the received document
+    \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 \subsection{Generator}
 \begin{itemize}
@@ -742,29 +826,35 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item DocumentMgmt
     \begin{itemize}
-        \item \texttt{void storeDocument(DocumentId id, Document doc, MetaData md)}
-        \begin{itemize}
-            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided metadata \texttt{md}.
-            \item Exceptions:  None 
-        \end{itemize}
-
         \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
+            \item Effect: The \texttt{PDSDB} will fetch and return the document corresponding to \texttt{DocumentId} id.
             \item Exceptions: None
          \end{itemize}
          
-         \item \texttt{void markReceived(DocumentId id)}
+         \item \texttt{List<Document> getAllDocumentMetaDataOf(RecipientId recipientId)}
         \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
+            \item Effect: The \texttt{PDSDB} will fetch and return all the meta-data of the documents belonging to the Registered Recipient identified by \texttt{recipientId}.
             \item Exceptions: None
+         \end{itemize}   
+% MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
+		\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}
+         
+         \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
+         \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
          \end{itemize}
     \end{itemize}
 \end{itemize}
 
 \subsection{PDSDBReplica}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{PDSDBReplica} is responsible for actually storing the documents.
     \item \textbf{Super-component:} \texttt{PDSDB}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -774,6 +864,15 @@ List all elements and interfaces alphabetically for ease of navigation.
     \item ExtendedDocumentMgmt
     \begin{itemize}
     % MERK OP: mogelijk is het meer dan een lijst van documenten die over gedragen moet worden. Er staat een goed voorbeeld in de PMS
+    	\item \texttt{List<Document> getAllDocumentsOf(TimeStamp whenFailed)}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+        \end{itemize}    
+            
         \item \texttt{List<Document> getDocumentsSince(TimeStamp whenFailed)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
@@ -781,15 +880,45 @@ List all elements and interfaces alphabetically for ease of navigation.
             \begin{itemize}
                 \item SomeException: Describe when the exception is thrown.
             \end{itemize}
+         \end{itemize}   
 % MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
-            \item \texttt{void storeDocuments(ParamType2 param)}
-            \begin{itemize}
+         \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
+         \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+         \end{itemize}
+		 \item \texttt{void storeDocument(DocumentId documentId, Document document, DocumentMetaDate documentMetaData)}
+         \begin{itemize}
+            \item Effect: The \texttt{PDSDBReplica} stores the given document with its \\texttt{DocumentId} and meta-data.
+            \item Exceptions: None
+         \end{itemize}            
+    \end{itemize}
+    
+    \begin{itemize}
+        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will fetch and return the document corresponding to \texttt{DocumentId} id.
+            \item Exceptions: None
+         \end{itemize}
+         
+         \item \texttt{List<Document> getAllDocumentMetaDataOf(RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will fetch and return all the meta-data of the documents belonging to the Registered Recipient identified by \texttt{recipientId}.
+            \item Exceptions: None
+         \end{itemize}   
+% MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
+		\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}
+         
+         \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
+         \begin{itemize}
                 \item Effect: Describe the effect of the operation
                 \item Exceptions: None
-            \end{itemize}
-        \end{itemize}
+         \end{itemize}
     \end{itemize}
-
     
     \item Ping
     \begin{itemize}
@@ -803,7 +932,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{PDSLongTermDocumentManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{PDSLongTermDocumentManager} is responsible for managing the different storage clusters. Each cluster consists of a \texttt{PDSReplicationManager} and one or more \texttt{PDSDBReplica} instances. In the architecture, two clusters are defined. The \texttt{PDSLongTermDocumentManager} reads to and write from clusters, and periodically transfers documents from the one cluster to the other.
     \item \textbf{Super-component:} \texttt{PDSDB}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -812,20 +941,29 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item DocumentMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will fetch and return the document corresponding to \texttt{DocumentId} id.
+            \item Exceptions: None
+         \end{itemize}
+         
+         \item \texttt{List<Document> getAllDocumentMetaDataOf(RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will fetch and return all the meta-data of the documents belonging to the Registered Recipient identified by \texttt{recipientId}.
+            \item Exceptions: None
+         \end{itemize}   
+% MERK OP: in het sequence diagram geeft dit een zeer gekke return waarde terug: OK
+		\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}
+         
+         \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
+         \begin{itemize}
                 \item Effect: Describe the effect of the operation
                 \item Exceptions: None
-            \end{itemize}
-        \end{itemize}
+         \end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -833,7 +971,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{PDSReplicationManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{PDSReplicationManager} is responsible for managing the \texttt{PDSDBReplicas}. The \texttt{PDSReplicationManager} passes read requests to one \texttt{PDSDBReplica} and  writes to all \texttt{PDSDBReplicas}. It monitors their availabilty using the ping/echo.
     \item \textbf{Super-component:} \texttt{PDSDB}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -842,20 +980,29 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item  ExtendedDocumentMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will fetch and return the document corresponding to \texttt{DocumentId} id.
+            \item Exceptions: None
+         \end{itemize}
+         
+         \item \texttt{List<Document> getAllDocumentMetaDataOf(RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will fetch and return all the meta-data of the documents belonging to the Registered Recipient identified by \texttt{recipientId}.
+            \item Exceptions: None
+         \end{itemize}   
+% MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
+		\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}
+         
+         \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
+         \begin{itemize}
                 \item Effect: Describe the effect of the operation
                 \item Exceptions: None
-            \end{itemize}
-        \end{itemize}
+         \end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -930,7 +1077,13 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
         \item \texttt{void notifyOperatorOfPDSDBReplicaFailure(PDSDBReplicaId replicaId, TimeStamp dateTime)}
         \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators.
+            \item Effect: The \texttt{OtherFunctionality} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators. This method is called by a \texttt{PDSReplicationManager}.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{void notifyOperatorOfDocumentGenerationFailure(NotificationMessage msg, TimeStamp whenFailed)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherFunctionality} will send a textual message \texttt{msg} to the eDocs operators, which contains further information about the specific failure. This method is called by the \texttt{DocumentGenerationManager}. More specifically, it is called by the \texttt{GeneratorManager}.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -1002,7 +1155,42 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+\subsection{ZoomitFacade}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{ZoomitFacade} is responsible for sending documents to Unregistered Recipients through Zoomit.
+    \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
+    \item \textbf{Sub-components:} None
+\end{itemize}
 
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 
 
@@ -1022,23 +1210,25 @@ List and describe all data types defined in your interface specifications. List
 them alphabetically for ease of navigation.
 
 \begin{itemize}
-	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system.
+	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
 	\item \texttt{BatchMetaData}: A data structure listing the metadata belonging to a batch of jobs. This includes the \texttt{CustomerID} of a Customer Organization, the \texttt{DocumentType} of the documents to be generated, the \texttt{TimeStamp} of when the batch was received, \dots
 	\item \texttt{CompletePartialBatchData}: A complex data structure listing all data a \texttt{Generator} needs to complete document generation jobs that are part of the same batch. It contains an array of \texttt{Tuple<JobId, RawData>}. The \texttt{JobIds} identify jobs that are all part of the same batch. The \texttt{RawData} belongs to these document processing jobs. Also listed in the \texttt{BatchMetaData} are the values of the \texttt{BatchMetaData}, \texttt{Key} and \texttt{Template} data types belonging to the batch.	
 	 \texttt{CompletePartialBatchData} also contains a \texttt{BatchMetaData} entry, a \texttt{Key} and a \texttt{Template}. \emph{Important to note:} a value of CompletePartialBatchData contains all information necessary to generate \textbf{some} jobs of belonging to same batch. It does not have to contain the information of all jobs belonging to same batch.
 	 
-	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system.
-	\item \texttt{Document}: Description of data type.
-	\item \texttt{DocumentId}:
-	\item \texttt{DocumentType}: A piece of data describing the type of a document. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
+	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	\item \texttt{Document}: A data file corresponding to a document.  The architecture specifies the format of this data type as a PDF-file. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	\item \texttt{DocumentId}: A piece of data uniquely identifying a document in the system.
+	\item \texttt{DocumentType}: A piece of data describing the type of a document. This architecture does not specify the exact format of this data type, but possibilities are a long integer, a string, a URL etc.
 	\item \texttt{Echo}: The response to a ping message. This data element does not contain any meaningful data.
 	\item \texttt{Error}: Description of data type.
     \item \texttt{GeneratordId}: A piece of data uniquely identifying a \texttt{Generator} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     \item \texttt{JobBatch}: Description of data type.
     \item \texttt{JobId}: A piece of data uniquely identifying a document processing job in the system.
-    \item \texttt{Key}:
-    \item \texttt{PDSDBReplicaId}:
+    \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilites are a long integer, a string, a URL etc.
+    \item \texttt{NotificationMessage}: A textual message which can be used to include extra information about the event of the notification.
+    \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     \item \texttt{RawData}: A data structure listing the raw data used in a document processing job.
+    \item \texttt{RecipientId}: A piece of data uniquely identifying a Registered Recipient in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     \item \texttt{TimeStamp}: The representation of a time (i.e. date and time of day) in the system.
     \item \texttt{Template}: A document used as a template for the generation of documents.
     \item \texttt{TemplateId}: A data structure uniquely identifying a template in the system. It lists three values. It contains \texttt{CustomerId} which identifies the Customer Organization who the template belongs to. It also contains a \texttt{DocumentType}, specifying for which kind of document it is a template for. The last piece of information it contains is a \texttt{TimeStamp} specifying when the system received the template.
