@@ -688,6 +688,44 @@ List all elements and interfaces alphabetically for ease of navigation.
         \end{itemize}
     \end{itemize}
 
+\subsection{DocumentStorageManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
 \subsection{EmailFacade}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{EmailFacade} is responsible for sending documents to  Unregistered by e-mail when receipt tracking is turned off. When receipt tracking is turned on for an Unregistered Recipient, it sends an e-mail containing a short description of the received document
@@ -790,6 +828,43 @@ List all elements and interfaces alphabetically for ease of navigation.
         \begin{itemize}
             \item Effect: The \texttt{DocumentGenerationManager} gets notified that the document processing jobs assigned to the \texttt{Generator} identified by an \texttt{id} are completed. 
             %It looks up the \texttt{JobIds} of the jobs assigned to the \texttt{Generator}. It notifies the \texttt{Scheduler} that the job
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{JobFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -1088,6 +1163,43 @@ List all elements and interfaces alphabetically for ease of navigation.
         \end{itemize}
     \end{itemize}
 
+\end{itemize}
+
+\subsection{RawDataFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
 \end{itemize}
 
 \subsection{Scheduler}
