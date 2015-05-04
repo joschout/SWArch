@@ -619,10 +619,116 @@ List all elements and interfaces alphabetically for ease of navigation.
 \end{itemize}
 
 
+\subsection{AuthenticationHandler}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{AuthenticationHandler} is responsible for authenticating Rgistered recipients and Customer organizations. The architecture does not specify the means of authentication (e.g. the type of credentials). The credentials are stored in the \texttt{UserDB}
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
 
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
 
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
 
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
+\subsection{BillingManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{CustomerOrganizationFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 
 \subsection{Completer}
@@ -639,6 +745,117 @@ List all elements and interfaces alphabetically for ease of navigation.
         \item \texttt{CompletePartialBatchData getComplete(BatchId batchId, List<JobId> jobIds )}
         \begin{itemize}
             \item Effect: The \texttt{Completer} fetches data needed by a \texttt{Generator} for generation of the documents corrseponding to the\texttt{JobIds} belonging to the same batch, which is identified by \texttt{BatchId}.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{DB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{DocumentDB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{CustOrgRegistrationManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -725,6 +942,79 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+\subsection{DeliveryFunctionality}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{EDocsFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 \subsection{EmailFacade}
 \begin{itemize}
@@ -765,7 +1055,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{Generator}
 \begin{itemize}
-    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. Document processing jobs are assigned to 
+    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{OtherFunctionality} that it does not have all of the data required to fill in the template.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -881,14 +1171,53 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item GetKey
     \begin{itemize}
-        \item \texttt{Key getKey(CustomerId customerId)}
+        \item \texttt{Key getKey(CustomerId customerId) throws NoSuchKeyException}
         \begin{itemize}
             \item Effect: The \texttt{KeyCache} looks into its cache for the \texttt{Key} belonging to the customer organisation with id \texttt{customerId}. If the \texttt{Key} is in its cache, it returns it. If the \texttt{Key} is not in its cache, it asks \texttt{OtherFunctionality} for the \texttt{Key} and stores it in its cache, after which it returns that \texttt{Key}.
-            \item Exceptions: None
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
 
+\subsection{LinkManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 \subsection{PDSDB}
 \begin{itemize}
@@ -1005,6 +1334,43 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+\subsection{PDSFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
 \subsection{PDSLongTermDocumentManager}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{PDSLongTermDocumentManager} is responsible for managing the different storage clusters. Each cluster consists of a \texttt{PDSReplicationManager} and one or more \texttt{PDSDBReplica} instances. In the architecture, two clusters are defined. The \texttt{PDSLongTermDocumentManager} reads to and write from clusters, and periodically transfers documents from the one cluster to the other.
@@ -1081,6 +1447,43 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+\subsection{Print\&PostalServiceFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
 \subsection{OtherFunctionality}
 \begin{itemize}
     \item \textbf{Description:} Responsibilities of the component.
@@ -1125,7 +1528,10 @@ List all elements and interfaces alphabetically for ease of navigation.
         \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
             \item Effect: The \texttt{OtherFunctionality} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
-            \item Exceptions: None
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
     
@@ -1135,7 +1541,10 @@ List all elements and interfaces alphabetically for ease of navigation.
        % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
             \item Effect:  The \texttt{OtherFunctionality} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
-            \item Exceptions: None
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
         
@@ -1165,7 +1574,118 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \end{itemize}
 
+\subsection{RawDataDB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
 \subsection{RawDataFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{RecipientFacade}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{RecipientRegistrationManager}
 \begin{itemize}
     \item \textbf{Description:} Responsibilities of the component.
     \item \textbf{Super-component:} The direct super-component, if any.
@@ -1247,6 +1767,44 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+\subsection{SessionDB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
 \subsection{TemplateCache}
 \begin{itemize}
     \item \textbf{Description:}  The \texttt{TemplateCache} caches the templates which are most recently used for document generation. The \texttt{Completer} has to fetch a templateevery time a \texttt{Generator} instance requests new jobs, while the template will be the same for all jobs belonging to the same batch. The \texttt{TemplateCache} avoids that the template storage system becomes a bottleneck for document generations. The templates are cached based on the \texttt{CustomerId} of a Customer Organization, the type of the document and the date and time at which the batch was provided by the Customer Organization (in order to account for template updates).
@@ -1262,6 +1820,120 @@ List all elements and interfaces alphabetically for ease of navigation.
        % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
             \item Effect:  The \texttt{TemplateCache} looks into its cache for the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. If the \texttt{Template} is in its cache, it returns it. If the \texttt{Template} is not in its cache, it asks \texttt{OtherFunctionality} for the \texttt{Template} and stores it in its cache, after which it returns that \texttt{Template}.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{TemplateDB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{TriggerManager}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{UserDB}
+\begin{itemize}
+    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Sub-components:} the direct sub-components, if any.
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+
+            \item \texttt{void operation2(ParamType2 param)}
+            \begin{itemize}
+                \item Effect: Describe the effect of the operation
+                \item Exceptions: None
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -1303,17 +1975,6 @@ List all elements and interfaces alphabetically for ease of navigation.
         \end{itemize}
     \end{itemize}
 \end{itemize}
-
-
-
-
-
-
-
-
-
-
-
 
 
 
