@@ -188,17 +188,22 @@ P2 was chosen because it has one of the highest priorities among all remaining n
 \paragraph{Extended functionality of PDSLongTermDocumentManager for P2}
 Ik denk dat we de facade beter laten throttlen Jonas, want die heeft een overzicht van alle requests en weet of dit individuele of bulk (search) requests zijn. Zo zit je niet met users die een halve lijst terugkrijgen.
 \paragraph{Link mapping}
-In order to support document lookups via links, which are either unique (unregistered recipient) or part of a notification e-mail (registered recipient), the \texttt{UserFacade} is concerned with the mapping of each incoming link request to the appropriate document, which is either located in the \texttt{PDSDB} (for registered recipients) or in the \texttt{DocumentDB} (for unregistered recipients). The mappings themselves are stored in the \texttt{MappingDB} component and are fetched by the \texttt{UserFacade} when needed.
-\paragraph{Dedicated DocumentDB and LinkMappingDB for P2}
-Since a large number of document lookups and downloads should not affect the performance of other functionality of the system, both link mappings and documents are stored in dedicated databases, each deployed on a different node. This decision ensures that documents can be looked up via the personal document store or a notification in a timely fashion, because it prohibits either of those two components to be a bottleneck in the document lookup process. Since, according to the previous decomposition, the \texttt{PDSDB} is deployed on a separate node too, this component's performance is already satisfactory and no changes need to be made to improve it.
-\paragraph{Sharding for DocumentDB for P2}
-In order to improve performance of the \texttt{DocumentDB}, we chose to partition this database into multiple shards. This approach was driven by the need for fast response time while keeping in mind the high storage cost for documents. More precisely, a \texttt{ShardingManager} is responsible for reading and writing all documents in one of the \texttt{DocumentDBShards}, making sure that every document is stored only once. This sharding technique provides roughly the same advantages in response time as active replication, but is significantly less costly when it comes to storage capacity.
-Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
-\paragraph{DocumentStorageManager}
-The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients). The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above: the component 
+aparte linkdatabase voor P, want "should not affect the performance of other functionality of the system"
+\paragraph{Separate document and link mapping database for P2}
+To ensure that documents can be looked up via the personal document store or a notification in a timely fashion, we chose to store documents and link mappings (discussed below) in separate database components that are deployed on different machines. This decision prohibits either of those two to be a bottleneck in the document lookup process.
+
+\paragraph{Sharding for document database for P2}
+Note that there must be a (sub)component monitoring the requests to the different shards, to cap the number of requests.
+We want to have the response time of active replication. But actively replicating the whole database might have too high a cost, so we choose sharding. This keeps the fast response time, but has less hardware required.
+
+Pingen is nodig voor write bij sharding.
+
+\paragraph{Document storage manager}
+DocumentStorageManager nodig want twee opslagkanalen, de PDSDB en de DocumentDB
 
 extra methode in PDSDBMngmt voor de opslag
 
+DocumentStorageManager is toegevoegd om de nieuwe componenten te koppelen met de vorige decompositie.
 De component synchroniseert de DocumentDB met de PDSDB. Hiermee wordt bedoeld dat documenten bedoeld voor Registered Recipients in beide databases worden opgeslagen.
 
 \paragraph{UserFacade for P2}
@@ -578,7 +583,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{Completer}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{Completer} is responsible for fetching the raw data an applicable meta-data for a group of \texttt{JobIds} when a \texttt{Generator} instance requires a new group of jobs.
     \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -589,24 +594,15 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
         \item \texttt{CompletePartialBatchData getComplete(BatchId batchId, List<JobId> jobIds )}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
+            \item Effect: The \texttt{Completer} fetches data needed by a \texttt{Generator} for generation of the documents corrseponding to the\texttt{JobIds} belonging to the same batch, which is identified by \texttt{BatchId}.
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
 \end{itemize}
 
 \subsection{DocumentGenerationManager}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentGenerationManager} monitors the availability of the \texttt{Generator} components using the Ping interface. The \texttt{DocumentGenerationManager} keeps track of the jobs assigned to and being processed by the \texttt{Generators}. To minimize the overhead of the job coordination, the \texttt{DocumentGenerationManager} assigns jobs to the \texttt{Generators} in groups of more than one job that are part of the same batch. If a \texttt{Generator} fails to complete its jobs, the \texttt{DocumentGenerationManager} can restart these failed jobs. 
+    \item \textbf{Description:} The \texttt{DocumentGenerationManager} monitors the availability of the \texttt{Generator} components using the Ping interface. The \texttt{DocumentGenerationManager} keeps track of the jobs assigned to and being processed by the \texttt{Generators}. To minimize the overhead of the job coordination, the \texttt{DocumentGenerationManager} assigns jobs to the \texttt{Generators} in groups of more than one job that are part of the same batch. If a \texttt{Generator} fails to complete its jobs, the \texttt{DocumentGenerationManager} can restart these failed jobs. \\ It prioritizes jobs based on thei deadlines ansd schedules them according to \emph{P1}.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} \texttt{Completer}, \texttt{GenerationManager}, \texttt{KeyCache}, \texttt{Scheduler}, \texttt{TemplateCache}
 \end{itemize}
@@ -642,7 +638,7 @@ List all elements and interfaces alphabetically for ease of navigation.
         
         \item \texttt{void notifyCompletedAndIAmShuttingDown(GeneratorId id)}
             \begin{itemize}
-                \item Effect: Describe the effect of the operation
+                \item Effect: The \texttt{DocumentGenerationManager} gets notified that the document processing jobs assigned to the \texttt{Generator} identified by an \texttt{id} are completed. 
                 \item Exceptions: None
             \end{itemize}
         \end{itemize}
@@ -651,7 +647,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{Generator}
 \begin{itemize}
-    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them.   
+    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. Document processing jobs are assigned to 
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -678,9 +674,14 @@ List all elements and interfaces alphabetically for ease of navigation.
 
     \item Startup/ShutDown
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{void startUp(GeneratorId generatorId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: Starts up the \texttt{Generator} instance an gives it the given \texttt{GeneratorId}. 
+            \item Exceptions: None
+        \end{itemize}
+          \item \texttt{void shutDown()}
+        \begin{itemize}
+            \item Effect: The \texttt{Generator} completes its assigned group of document generation jobs and report back completion to the \texttt{DocumentGenerationManager}, after which is shuts down.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -696,7 +697,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \end{itemize}
 \subsection{GeneratorManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{GenerationManager} is responsible for monitoring the \texttt{Generator} instances. It starts up or shuts down these instances based on the number of required instances indicated by the \texttt{Scheduler}.
     \item \textbf{Super-component:}  \texttt{DocumentGenerationManager}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -716,8 +717,8 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{KeyCache}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:}  \texttt{DocumentGenerationManager}
+    \item \textbf{Description:} The \texttt{KeyCache} caches the keys which are most recently used for document generation. The \texttt{Completer} has to fetch a key every time a \texttt{Generator} instance requests new jobs, while the key will be the same for all jobs belonging to the same batch. The \texttt{KeyCache} avoids that the key storage system becomes a bottleneck for document generations. The keys are cached based on the \texttt{CustomerId} of a Customer Organization.
+    \item \textbf{Super-component:}  \texttt{DocumentGenerationManager}.
     \item \textbf{Sub-components:} None
 \end{itemize}
 
@@ -727,7 +728,7 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
         \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{KeyCache} looks into its cache for the \texttt{Key} belonging to the customer organisation with id \texttt{customerId}. If the \texttt{Key} is in its cache, it returns it. If the \texttt{Key} is not in its cache, it asks \texttt{OtherFunctionality} for the \texttt{Key} and stores it in its cache, after which it returns that \texttt{Key}.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -736,7 +737,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{PDSDB}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{PDSDB} component is responsible for storing the database of documents in the personal document stores.  That database is separated from all other persistent data so that its failure \emph{``does not affect the availability of other types of persistent data''}, as required by \emph{Av2}.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} \texttt{PDSDBReplica}, \texttt{PDSLongTermDocumentManager}, \texttt{PDSReplicationManager}
 \end{itemize}
@@ -871,11 +872,12 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item FinalizeDocument
+    \item FinalizeDocument\\
+    Note that the methods in this interface are made idempotent. The methods of this interface are called by \texttt{Generator} instances. 
     \begin{itemize}
-        \item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc) throws SomeException}
+        \item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc)}
         \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} will store the given document \texttt{document} and deliver it.
+            \item Effect: The \texttt{OtherFunctionality} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
             \item Exceptions: None
 
             \item \texttt{void generationError(JobId jobid, Error error)}
@@ -904,25 +906,26 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
         \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{OtherFunctionality} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
     
     \item GetTemplate
     \begin{itemize}
-        \item \texttt{Template getTemplate(TemplateId templateId)}
+        \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, TimeStamp whenReceived)}
+       % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect:  The \texttt{OtherFunctionality} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
         
     \item SetStatus
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{OtherFunctionality} stores the \texttt{JobStatus} as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -931,7 +934,7 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
         \item \texttt{void notifyOperatorOfPDSDBReplicaFailure(PDSDBReplicaId replicaId, TimeStamp dateTime)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{OtherFunctionality} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -940,7 +943,8 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{Scheduler}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{Scheduler} receives the new jobs initiated by a Customer Organization and adds them to a queue of all jobs that have not been processed yet. To lower the size of this queue, the Scheduler is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. The raw data of each job and the meta-data of the batch is stored in \texttt{OtherFunctionality} and fetched by the \texttt{Completer} when needed.\\
+    The \texttt{Scheduler} also indicates to the \texttt{GenerationManager} the number of required \texttt{Generator} instances through its GetStatistics interface.
     \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -951,11 +955,9 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
         \item \texttt{Tuple<BatchId, List<JobId>> getNextJobs()}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{Scheduler} returns the \texttt{JobIds} of the group of jobs that belong to the batch identified by \texttt{BatchId} that should be generated next. This method is called by the \texttt{GeneratorManager} when a \texttt{Generator} instance requires a new group of jobs.
+            \item Exceptions: None
+
 
             \item \texttt{Tuple<BatchId, List<JobId>>  jobsCompletedAndGiveMeMore(List<JobId>)}
             \begin{itemize}
@@ -967,18 +969,18 @@ List all elements and interfaces alphabetically for ease of navigation.
 
     \item InsertJobs
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{void insertJobs(BatchId batchId, List<JobId> jobIds )}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{Scheduler} adds the jobs identified by their \texttt{JobId} to its queue of all jobs that have not been processed yet. To lower the size of this queue, the Scheduler is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. This method provides new jobs synchronously to the \texttt{Scheduler}, which it schedules synchronously. This means that when the method call returns, the given jobs are scheduled.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
     
       \item GetStatistics
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{int getNumberOfFutureJobs()}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{Scheduler} returns the amount of documents that should be generated in the near future. The \texttt{GeneratorManager} queries this method at regular intervals and adjusts the number of \texttt{Generator} instances accordingly.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -986,7 +988,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{TemplateCache}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:}  The \texttt{TemplateCache} caches the templates which are most recently used for document generation. The \texttt{Completer} has to fetch a templateevery time a \texttt{Generator} instance requests new jobs, while the template will be the same for all jobs belonging to the same batch. The \texttt{TemplateCache} avoids that the template storage system becomes a bottleneck for document generations. The templates are cached based on the \texttt{CustomerId} of a Customer Organization, the type of the document and the date and time at which the batch was provided by the Customer Organization (in order to account for template updates).
     \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -995,9 +997,10 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
 	\item GetTemplate
     \begin{itemize}
-        \item \texttt{Template getTemplate(TemplateId templateId)}
+   		\item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, TimeStamp whenReceived)}
+       % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect:  The \texttt{TemplateCache} looks into its cache for the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. If the \texttt{Template} is in its cache, it returns it. If the \texttt{Template} is not in its cache, it asks \texttt{OtherFunctionality} for the \texttt{Template} and stores it in its cache, after which it returns that \texttt{Template}.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
