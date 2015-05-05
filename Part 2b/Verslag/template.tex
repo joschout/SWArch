@@ -1691,18 +1691,21 @@ List all elements and interfaces alphabetically for ease of navigation.
 
             \item \texttt{Boolean logout(SessionId sessionId)}
             \begin{itemize}
-                \item Effect: The \texttt{UserFacade} removes the session corresponding to the \texttt{sessionId}
+                \item Effect: The \texttt{UserFacade} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
                 \item Exceptions: None
             \end{itemize}
         \end{itemize}
     \end{itemize}
 
-    \item InterfaceB
+    \item DoumentMgmt
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{PDSOverview getPDSOverview(SessionId, RecipientId recipientId) throws NotAuthenticatedException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+            \item Effect: The \texttt{RecipientFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. 
+            \item Exceptions:
+             \begin{itemize}
+                \item NotAuthenticatedException: Thrown if the given session identier is invalid.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -2057,6 +2060,8 @@ them alphabetically for ease of navigation.
     \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilites are a long integer, a string, a URL etc.
     
     \item \texttt{NotificationMessage}: A textual message which can be used to include extra information about the event of the notification.
+    
+	\item \texttt{PDSOverview} The overview of a personal document store that can be shown to a Registered Recipient. Through this overview, the Registered Recipient can consult documents. The architecture does not specify the exact format of such an overview, but a likely possibility is an HTML page.
     
     \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     
