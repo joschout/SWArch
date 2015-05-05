@@ -1679,19 +1679,19 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item AuthN
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{RecipientFacade} forwards the given \texttt{credentials} to the \texttt{AuthenticationHandler}, which verifies them and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{RecipientFacade}.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item InvalidCredentialsException: Thrown if the \texttt{AuthenticationHandler} indicated that the given credentials where incorrect.
             \end{itemize}
 
-            \item \texttt{void operation2(ParamType2 param)}
+            \item \texttt{Boolean logout(SessionId sessionId)}
             \begin{itemize}
-                \item Effect: Describe the effect of the operation
+                \item Effect: The \texttt{UserFacade} removes the session corresponding to the \texttt{sessionId}
                 \item Exceptions: None
             \end{itemize}
         \end{itemize}
@@ -1925,7 +1925,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item InterfaceA
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Credentials getRegisteredRecipientCredentials() throws SomeException}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions:
@@ -1953,37 +1953,31 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{UserDB}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{UserDB} stores all information about registered users of the eDocs system, i.e. Customer Organizations and Registered Recipients.
+    \item \textbf{Super-component:} \texttt{DB}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item UserDataMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Credentials getRegisteredRecipientCredentials(RecipientId recipientId) \\throws NoSuchRecipientException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item NoSuchRecipientException: Thrown if no Registered Recipient with the given credentials exists.
             \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+		\end{itemize}
+            
+        \item \texttt{Credentials getCustomerOrganizationCredentials(CustomerId customerId) \\ throws NoSuchCustomerOrganizationException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
