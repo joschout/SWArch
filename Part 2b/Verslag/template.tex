@@ -638,23 +638,44 @@ List all elements and interfaces alphabetically for ease of navigation.
                 \item NoSuchSessionException: Thrown if no session exists with the given identifiers, or if the session belongs to a customer organization.
             \end{itemize}
 		\end{itemize}
+		
         \item \texttt{CustomerId getCustomerId(SessionId sessionId) throws NoSuchSessionException}
         \begin{itemize}
              \item Effect: The \texttt{AuthenticationHandler} fetches and returns the Customer Organization's identifier corresponding to the \texttt{sessionId} from the \texttt{sessionDB}.
              \item Exceptions:
              \begin{itemize}
-                \item NoSuchSessionException: Thrown if no session exists with the given identifiers, or if the session belongs to a registered recipient.
+                \item NoSuchSessionException: Thrown if no session exists with the given identifier, or if the session belongs to a registered recipient.
+             \end{itemize}
+        \end{itemize}
+        
+        \item \texttt{Boolean logout(SessionId sessionId)}
+        \begin{itemize}
+            \item Effect: The \texttt{AuthenticationHandler} will remove the session with the given id from the \texttt{SessionDB}. If no such session exists, nothing is changed and no exception is thrown.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
+        \begin{itemize}
+            \item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{UserDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
+            \item Exceptions: 
+            \begin{itemize}
+                \item InvalidCredentialsException: Thrown if the given credentials are invalid.
              \end{itemize}
         \end{itemize}
     \end{itemize}
-    \item InterfaceB
+    
+    
+	\item CheckSession
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{Map<SessionAttributeKey, SessionAttributeValue> verifySession(SessionId sesionId) throws NoSuchsSessionException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+            \item Effect: The \texttt{AuthenticationHandler} verifies whether a session with the given id exists in the \texttt{SessionDB} and if so, returns all its associated attributes.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchSessionException: Thrown if no session exists with the given identifiers.
+             \end{itemize}
         \end{itemize}
-    \end{itemize}
+    \end{itemize}	
 \end{itemize}
 
 \subsection{BillingManager}
@@ -1770,29 +1791,56 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{SessionDB}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{SessionDB} stores the session identifiers for currently active sessions.
+    \item \textbf{Super-component:} \texttt{UserFacade}
+    \item \textbf{Sub-components:} None.
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item SessionMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{RecipientId getRecipientId(SessionId sessionId) throws NoSuchSessionException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{SessionDB} fetches and returns the Registered Recipient's identifier corresponding to the \texttt{sessionId} from the \texttt{sessionDB}.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item NoSuchSessionException: Thrown if no session exists with the given identifiers, or if the session belongs to a customer organization.
             \end{itemize}
-
-            \item \texttt{void operation2(ParamType2 param)}
-            \begin{itemize}
-                \item Effect: Describe the effect of the operation
-                \item Exceptions: None
-            \end{itemize}
+		\end{itemize}
+		
+        \item \texttt{CustomerId getCustomerId(SessionId sessionId) throws NoSuchSessionException}
+        \begin{itemize}
+             \item Effect: The \texttt{SessionDB} fetches and returns the Customer Organization's identifier corresponding to the \texttt{sessionId} from the \texttt{sessionDB}.
+             \item Exceptions:
+             \begin{itemize}
+                \item NoSuchSessionException: Thrown if no session exists with the given identifier, or if the session belongs to a registered recipient.
+             \end{itemize}
         \end{itemize}
+        
+        \item \texttt{SessionId openSession(RecipientId recipientId)}
+        \begin{itemize}
+             \item Effect: The \texttt{SessionDB} generates a new session identifier for the given \texttt{recipientId} and stores this as an active session.
+             \item Exceptions: None
+        \end{itemize}
+
+        \item \texttt{void closeSession((SessionId sessionId) throws NoSuchSessionException}
+        \begin{itemize}
+             \item Effect: The \texttt{SessionDB} closes the active session associated with the given \texttt{sessionId}.
+             \item Exceptions:
+             \begin{itemize}
+                \item NoSuchSessionException: Thrown if no session exists with the given identifier.
+             \end{itemize}   
+        \end{itemize}   
+        
+        \item \texttt{Map<SessionAttributeKey, SessionAttributeValue> isvalidSession(SessionId sesionId) throws NoSuchsSessionException}
+        \begin{itemize}
+            \item Effect: The \texttt{SessionDB} verifies whether a session with the given id exists in the \texttt{SessionDB} and if so, returns all its associated attributes.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchSessionException: Thrown if no session exists with the given identifiers.
+             \end{itemize}
+        \end{itemize}   
     \end{itemize}
 
     \item InterfaceB
@@ -1985,26 +2033,53 @@ them alphabetically for ease of navigation.
 
 \begin{itemize}
 	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	
 	\item \texttt{BatchMetaData}: A data structure listing the metadata belonging to a batch of jobs. This includes the \texttt{CustomerID} of a Customer Organization, the \texttt{DocumentType} of the documents to be generated, the \texttt{TimeStamp} of when the batch was received, \dots
+	
 	\item \texttt{CompletePartialBatchData}: A complex data structure listing all data a \texttt{Generator} needs to complete document generation jobs that are part of the same batch. It contains an array of \texttt{Tuple<JobId, RawData>}. The \texttt{JobIds} identify jobs that are all part of the same batch. The \texttt{RawData} belongs to these document processing jobs. Also listed in the \texttt{BatchMetaData} are the values of the \texttt{BatchMetaData}, \texttt{Key} and \texttt{Template} data types belonging to the batch.	
+	
 	 \texttt{CompletePartialBatchData} also contains a \texttt{BatchMetaData} entry, a \texttt{Key} and a \texttt{Template}. \emph{Important to note:} a value of CompletePartialBatchData contains all information necessary to generate \textbf{some} jobs of belonging to same batch. It does not have to contain the information of all jobs belonging to same batch.
+
+	\item \texttt{Credentials}: The authentication credentials of a Registered Recipient or Customer Organization. The credentials always contain an identifier of the recipient or customer organization and a proof of his or her identity. The architecture does not specify the specific credentials used, but a possibility is using a username and password.
 	 
 	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	
 	\item \texttt{Document}: A data file corresponding to a document.  The architecture specifies the format of this data type as a PDF-file. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	
 	\item \texttt{DocumentId}: A piece of data uniquely identifying a document in the system.
+	
 	\item \texttt{DocumentType}: A piece of data describing the type of a document. This architecture does not specify the exact format of this data type, but possibilities are a long integer, a string, a URL etc.
+	
 	\item \texttt{Echo}: The response to a ping message. This data element does not contain any meaningful data.
+	
 	\item \texttt{Error}: Description of data type.
+	
     \item \texttt{GeneratordId}: A piece of data uniquely identifying a \texttt{Generator} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    
     \item \texttt{JobBatch}: Description of data type.
+    
     \item \texttt{JobId}: A piece of data uniquely identifying a document processing job in the system.
+    
     \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilites are a long integer, a string, a URL etc.
+    
     \item \texttt{NotificationMessage}: A textual message which can be used to include extra information about the event of the notification.
+    
     \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    
     \item \texttt{RawData}: A data structure listing the raw data used in a document processing job.
+    
     \item \texttt{RecipientId}: A piece of data uniquely identifying a Registered Recipient in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    
+    \item \texttt{SessionId}: A piece of data uniquely identifying a session of a registered recipient of customer organization in the eDocs system. This contains at least the user identifier (i.e. the \texttt{CustomerId} for a customer organization or the \texttt{RecipientId} for a registered recipient) and the time the session was initiated.
+    
+    \item \texttt{SessionAttributeKey}: The key of an attribute attached to a session. This architecture does not specify the exact format of this key. a possible value is a long integer or a flat string.
+    
+    \item \texttt{SessionAttributeValue}: The value of an attribute attached to a session. This value van be of any primitive type.
+    
     \item \texttt{TimeStamp}: The representation of a time (i.e. date and time of day) in the system.
+    
     \item \texttt{Template}: A document used as a template for the generation of documents.
+    
     \item \texttt{TemplateId}: A data structure uniquely identifying a template in the system. It lists three values. It contains \texttt{CustomerId} which identifies the Customer Organization who the template belongs to. It also contains a \texttt{DocumentType}, specifying for which kind of document it is a template for. The last piece of information it contains is a \texttt{TimeStamp} specifying when the system received the template.
 \end{itemize}
 
