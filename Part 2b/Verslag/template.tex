@@ -250,66 +250,12 @@ Responsible for temporarily storing the IDs of all generated documents that are 
 \subparagraph{OtherFunctionality2}
 Encapsulates requirements that are not tackled in this run and cannot be assigned to other introduced components.
 
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{OtherFunctionality.png}
-	\caption{Component-and-connector diagram of the second decomposition.}
-	\label{fig:decomp2}
-\end{figure}
 
-\paragraph{Behaviour}
-If needed and explanation of the behaviour of certain aspects of the design so
-far.
 
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram}
-    \caption{Sequence diagram illustrating a key behavioural aspect.
-        }\label{fig:it1-seq_aspect1}
-\end{figure}
 
-\paragraph{Deployment}
-Rationale of the allocation of components to physical nodes.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
-    \caption{Deployment diagram of this decomposition.
-        }\label{fig:it1-depl_main}
-\end{figure}
-
-\subsubsection{Interfaces for child modules}
 
 \subsubsection*{UserFacade}
 The \texttt{UserFacade} provides three interfaces to the recipient: \textit{AuthN} for authentication, \textit{UniqueLinkMgmt} for document lookups via unique links and \textit{PDSDBMgmt} for access to the personal document store. Links to documents in the PDSDB that are part of a notification e-mail are therefore handled by the latter, in which case the \texttt{UserFacade} also needs to perform a check to see if the requesting recipient is registered in the eDocs system.
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returnType operation1(ParamType param1)} throws TypeOfException
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: 
-            \begin{itemize}
-                \item TypeOfException: Describe when this exception is thrown.
-            \end{itemize}
-        \end{itemize}
-
-        \item \texttt{returnType operation2()}
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: None
-         \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsubsection{Data type definitions}
-Describe per complex data type used in the interfaces what it represents.
-
-\paragraph{returnType} This data element represents X.
-
-\paragraph{ParamType} This data element represents Y.
 
 \subsubsection{Verify and refine}
 This section describes per component which (parts of) the remaining
@@ -324,45 +270,6 @@ The metadata is saved in both the pdsdb en database components, because when a u
 USE CASE 14:  residual driver: mark as received, puntje 3. --> beter te doen bij de deliveryfunctionality
 USE CASE 15:  residual driver: tracking.
 
-\paragraph{ModuleB}
-\begin{itemize}
-    \item \emph{Z1}: name
-    \item \emph{UCd}: name
-\end{itemize}
-
-\paragraph{ModuleC}
-\begin{itemize}
-    \item \emph{UCba}: name\\Description which part of the original use case is
-        the responsibility of this component.
-\end{itemize}
-
-\subsection{Decomposition 3: UserFacade (M1, UC1, UC2, UC3)} NIET VERWIJDEREN WANT LINKMANAGER STAAT HIER AL ERGENS TUSSEN
-\subsubsection{Module to decompose}
-In this run we decompose \texttt{ModuleA}.
-
-\subsubsection{Selected architectural drivers}
-The non-functional drivers for this decomposition are:
-
-\begin{itemize}
-    \item \emph{X1}: name
-    \item \emph{Y3}: name
-\end{itemize}
-
-The related functional drivers are:
-
-\begin{itemize}
-    \item \emph{UCa}: name
-    \item \emph{UCb}: name
-    \item \emph{UCc}: name
-\end{itemize}
-
-\paragraph{Rationale}
-A short discussion of why these drivers were selected for this decomposition.
-
-\subsubsection{Architectural design}
-\paragraph{Topic}
-Discussion of the solution selected for (a part of) one of the architectural
-drivers.
 \paragraph{LinkManager} VOORLOPIG NIET NODIG IN DEZE DECOMPOSITIE
 
 Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
@@ -370,118 +277,25 @@ LinkManager maps link to (document ID, place where the document is stored)-pairs
 
 Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
 
-\subsubsection*{Alternatives considered}
-\paragraph{Alternatives for solution}
-A discussion of the alternative solutions and why that were not selected.
-
-\subsubsection{Instantiation and allocation of functionality}
-\paragraph{Decomposition}
-Main aspects of the resulting decomposition.
-
-\subparagraph{ModuleB}
-Per introduced component a paragraph describing its responsibilities.
-
-\subparagraph{ModuleC}
-Per introduced component a paragraph describing its responsibilities.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
-    \caption{Component-and-connector diagram of this decomposition.
-        }\label{fig:it1-cc_main}
-\end{figure}
-
-\paragraph{Behaviour}
-If needed and explanation of the behaviour of certain aspects of the design so
-far.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram}
-    \caption{Sequence diagram illustrating a key behavioural aspect.
-        }\label{fig:it1-seq_aspect1}
-\end{figure}
-
-\paragraph{Deployment}
-Rationale of the allocation of components to physical nodes.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
-    \caption{Deployment diagram of this decomposition.
-        }\label{fig:it1-depl_main}
-\end{figure}
-
-\subsubsection{Interfaces for child modules}
-\subsubsection*{ModuleB}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returnType operation1(ParamType param1)} throws TypeOfException
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: 
-            \begin{itemize}
-                \item TypeOfException: Describe when this exception is thrown.
-            \end{itemize}
-        \end{itemize}
-
-        \item \texttt{returnType operation2()}
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: None
-         \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsubsection{Data type definitions}
-Describe per complex data type used in the interfaces what it represents.
-
-\paragraph{returnType} This data element represents X.
-
-\paragraph{ParamType} This data element represents Y.
-
-\subsubsection{Verify and refine}
-This section describes per component which (parts of) the remaining
-requirements it is responsible for.
-
-\paragraph{ModuleB}
-\begin{itemize}
-    \item \emph{Z1}: name
-    \item \emph{UCd}: name
-\end{itemize}
-
-\paragraph{ModuleC}
-\begin{itemize}
-    \item \emph{UCba}: name\\Description which part of the original use case is
-        the responsibility of this component.
-\end{itemize}
-
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
 The context diagram of the client-server view.
 Discuss which components communicate with external components and what these
 external components represent.
 
 \begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Context diagram of the client-server
-        view.}
-    \caption{Context diagram for the client-server view.
-        }\label{fig:cc-context}
+	\centering
+	\includegraphics[width=0.8\textwidth]{ContextDiagram.png}
+	\caption{Context diagram for the client-server view.}
+	\label{fig:cc-context}
 \end{figure}
 
 The primary diagram and accompanying explanation.
 
 \begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Primary diagram of the client-server
-        view.}
-    \caption{Primary diagram of the client-server view.}\label{fig:cs-primary}
+	\centering
+	\includegraphics[width=0.8\textwidth]{ClientServerView.png}
+	\caption{Primary diagram of the client-server view.}
+	\label{fig:cs-primary}
 \end{figure}
 
 \subsection{Main architectural decisions}
