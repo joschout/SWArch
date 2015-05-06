@@ -30,163 +30,6 @@ decisions related to \emph{ReqX}.\\
 \emph{Employed tactics and patterns: List all patterns and tactics used to
     achieve ReqX, if any.}
 
-\subsection{Discussion}
-Use this section to discuss your architecture in retrospect.
-For example, what are the strong points of your architecture?
-What are the weak points? Is there anything you would have done otherwise with
-your current experience?
-Are there any remarks about the architecture that you would give to your
-customers?
-Etc.
-
-\section{Attribute-driven design documentation}\label{sec:add}
-\subsection{Decomposition 1: eDocs (X1, Y3, UCa, UCb, UCc)}
-\subsubsection{Module to decompose}
-In the first run, the eDocs System is decomposed as a whole\subsubsection{Selected architectural drivers}
-The non-functional drivers for this decomposition are:
-
-\begin{itemize}
-    \item \emph{X1}: name
-    \item \emph{Y3}: name
-\end{itemize}
-
-The related functional drivers are:
-
-\begin{itemize}
-    \item \emph{UCa}: name
-    \item \emph{UCb}: name
-    \item \emph{UCc}: name
-\end{itemize}
-
-\paragraph{Rationale}
-A short discussion of why these drivers were selected for this decomposition.
-
-\subsubsection{Architectural design}
-\paragraph{Topic}
-Discussion of the solution selected for (a part of) one of the architectural
-drivers.
-
-\subsubsection*{Alternatives considered}
-\paragraph{Alternatives for solution}
-A discussion of the alternative solutions and why that were not selected.
-
-\subsubsection{Instantiation and allocation of functionality}
-\paragraph{Decomposition}
-Main aspects of the resulting decomposition.
-
-\subparagraph{ModuleB}
-Per introduced component a paragraph describing its responsibilities.
-
-\subparagraph{ModuleC}
-Per introduced component a paragraph describing its responsibilities.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
-    \caption{Component-and-connector diagram of this decomposition.
-        }\label{fig:it1-cc_main}
-\end{figure}
-
-\paragraph{Behaviour}
-If needed and explanation of the behaviour of certain aspects of the design so
-far.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram}
-    \caption{Sequence diagram illustrating a key behavioural aspect.
-        }\label{fig:it1-seq_aspect1}
-\end{figure}
-
-\paragraph{Deployment}
-Rationale of the allocation of components to physical nodes.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
-    \caption{Deployment diagram of this decomposition.
-        }\label{fig:it1-depl_main}
-\end{figure}
-
-\subsubsection{Interfaces for child modules}
-\subsubsection*{PDSDB}
-\begin{itemize}
-    \item DocumentMgmt
-    \begin{itemize}
-        \item \texttt{void storeDocument(DocumentId id, Document doc, MetaData md)}
-        \begin{itemize}
-            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided metadata \texttt{md}.
-            \item Exceptions:  None 
-        \end{itemize}
-
-        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: None
-         \end{itemize}
-         
-         \item \texttt{void markReceived(DocumentId id)}
-        \begin{itemize}
-            \item Effect: Describe the effect of calling this operation.
-            \item Exceptions: None
-         \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsubsection{Data type definitions}
-Describe per complex data type used in the interfaces what it represents.
-
-\paragraph{returnType} This data element represents X.
-
-\paragraph{ParamType} This data element represents Y.
-
-\subsubsection{Verify and refine}
-This section describes per component which (parts of) the remaining
-requirements it is responsible for.
-
-\paragraph{ModuleB}
-\begin{itemize}
-    \item \emph{Z1}: name
-    \item \emph{UCd}: name
-\end{itemize}
-
-\paragraph{ModuleC}
-\begin{itemize}
-    \item \emph{UCba}: name\\Description which part of the original use case is
-        the responsibility of this component.
-\end{itemize}
-
-
-\
-\subsection{Decomposition 2: OtherFunctionality(P2, Av2b, UC12, UC13, UC14, UC15)}
-\subsubsection{Module to decompose}
-In this run we decompose \texttt{Otherfunctionality}.
-
-\subsubsection{Selected architectural drivers}
-The non-functional driver for this decomposition is:
-
-\begin{itemize}
-    \item \emph{P2}: Document lookups
-    \item \emph{Av2b}: Temporary storage for PDSDB
-\end{itemize}
-
-The related functional drivers are:
-
-\begin{itemize}
-    \item \emph{UC12}: Consult personal document store
-    \item \emph{UC13}: Search documents in personal document store
-    \item \emph{UC14}: Consult document in personal document store
-    \item \emph{UC15}: Download document via unique link
-\end{itemize}
-
-\paragraph{Rationale}
-P2 and Av2b were chosen because their priorities are amongst the highest ones of all remaining non-functional drivers and the domains on which their focus lies complement the previous decomposition perfectly.
-
-\subsubsection{Architectural design}
-
 \paragraph{Link mapping}
 In order to support document lookups via links, which are either unique (unregistered recipient) or part of a notification e-mail (registered recipient), the \texttt{UserFacade} is concerned with the mapping of each incoming link request to the appropriate document, which is either located in the \texttt{PDSDB} (for registered recipients) or in the \texttt{DocumentDB} (for unregistered recipients). The mappings themselves are stored in the \texttt{MappingDB} component and are fetched by the \texttt{UserFacade} when needed.
 
@@ -201,6 +44,17 @@ Note that there must also be a (sub)component monitoring all requests to the sha
 This component temporarily stores the IDs of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component up to a maximum of 3 hours. When the latter component turns operational again, the \texttt{DocumentStorageManager} retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned IDs and subsequently stores them in the \texttt{PDSDB}. Note that the recipient therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached IDs refer to. \\
 Note that the \texttt{DocumentDB} and the \texttt{PDSDB} store documents in exactly the same way, both including the document itself, its meta data and its ID, although there is no need for the meta data in the former database. This storage tactic ensures that the \texttt{DocumentStorageManager} does not have to fetch or convert any information when transferring documents between both databases, making the transfer as efficient as possible. This does not introduce any overhead to the storage system, since the meta data is but a fraction of the document data. \\
 Finally, we would like to stress that the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are converted into document ID writes to the aforementioned cache. Upon revival of the \texttt{PDSDB}, this database will send a single heartbeat to the \texttt{DocumentStorageManager}, causing this component to begin transferring the missing document data. Once all cached document IDs are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
+
+\subsection{Discussion}
+Use this section to discuss your architecture in retrospect.
+For example, what are the strong points of your architecture?
+What are the weak points? Is there anything you would have done otherwise with
+your current experience?
+Are there any remarks about the architecture that you would give to your
+customers?
+Etc.
+
+
 
 \subparagraph{UserFacade}
 We introduce this component to be able to distinguish between registered recipients and unregistered recipients in the first steps of the document lookup process. The \texttt{UserFacade} also maps incoming links to documents that are located either in the \texttt{PDSDB} or in the \texttt{DocumentDB} by first fetching the correct mapping from the \texttt{LinkMappingDB} mentioned above. Another responsibility of the \texttt{UserFacade} is marking documents as received, since this is the last internal component through which the document is passed before the requesting recipient actually receives it and failure of another component in the document lookup pipeline can no longer prevent this from happening.
@@ -220,7 +74,7 @@ We could just as well do without the previously introduced \texttt{DocumentStora
 
 \subsubsection{Instantiation and allocation of functionality}
 \paragraph{Decomposition}
-Figure \ref{fig:decomp2} shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentDBShard}. This component actually represents multiple instances, each containing a different partition of the document data to accommodate for parallel lookups in different partitions while minimizing storage costs.
+Figure  shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentDBShard}. This component actually represents multiple instances, each containing a different partition of the document data to accommodate for parallel lookups in different partitions while minimizing storage costs.
 The responsibilities of the resulting components are as follows:
 
 \subparagraph{DocumentDB}
