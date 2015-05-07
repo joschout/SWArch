@@ -198,7 +198,7 @@ In order to improve performance of the \texttt{DocumentDB}, we chose to partitio
 Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
 
 \paragraph{DocumentStorageCache for Av2b}
-This component temporarily stores the IDs of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component up to a maximum of 3 hours. When the latter component turns operational again, the \texttt{DocumentStorageManager} retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned IDs and subsequently stores them in the \texttt{PDSDB}. Note that the recipient therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached IDs refer to. \\
+This component temporarily stores the id's of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component up to a maximum of 3 hours. When the latter component turns operational again, the \texttt{DocumentStorageManager} retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned IDs and subsequently stores them in the \texttt{PDSDB}. Note that the recipient therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached IDs refer to. \\
 Note that the \texttt{DocumentDB} and the \texttt{PDSDB} store documents in exactly the same way, both including the document itself, its meta data and its ID, although there is no need for the meta data in the former database. This storage tactic ensures that the \texttt{DocumentStorageManager} does not have to fetch or convert any information when transferring documents between both databases, making the transfer as efficient as possible. This does not introduce any overhead to the storage system, since the meta data is but a fraction of the document data. \\
 Finally, we would like to stress that the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are converted into document ID writes to the aforementioned cache. Upon revival of the \texttt{PDSDB}, this database will send a single heartbeat to the \texttt{DocumentStorageManager}, causing this component to begin transferring the missing document data. Once all cached document IDs are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
 
@@ -1364,9 +1364,9 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
-\subsection{RawDataFacade}
+\subsection{RawDataHandler}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{RawDataHandler} is responsible for verifying the raw data and its entries.
     \item \textbf{Super-component:} The direct super-component, if any.
     \item \textbf{Sub-components:} the direct sub-components, if any.
 \end{itemize}
@@ -1375,12 +1375,12 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item InterfaceA
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void validateRawData(List<RawData> rawData) throws InvalidRawDataException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{RawDataHandler} verifies the received raw data. If it is correct, nothing happens.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item InvalidRawDataException: Thrown if the raw data is invalidated for some reason. This exception can contain a message about why the raw data was invalidated.
             \end{itemize}
         \end{itemize}
     \end{itemize}
