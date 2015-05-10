@@ -39,6 +39,246 @@ Are there any remarks about the architecture that you would give to your
 customers?
 Etc.
 
+\section{Attribute-driven design documentation}\label{sec:add}
+\subsection{Decomposition 1: eDocs (X1, Y3, UCa, UCb, UCc)}
+\subsubsection{Module to decompose}
+In the first run, the eDocs System is decomposed as a whole\subsubsection{Selected architectural drivers}
+The non-functional drivers for this decomposition are:
+
+\begin{itemize}
+    \item \emph{X1}: name
+    \item \emph{Y3}: name
+\end{itemize}
+
+The related functional drivers are:
+
+\begin{itemize}
+    \item \emph{UCa}: name
+    \item \emph{UCb}: name
+    \item \emph{UCc}: name
+\end{itemize}
+
+\paragraph{Rationale}
+A short discussion of why these drivers were selected for this decomposition.
+
+\subsubsection{Architectural design}
+\paragraph{Topic}
+Discussion of the solution selected for (a part of) one of the architectural
+drivers.
+
+\subsubsection*{Alternatives considered}
+\paragraph{Alternatives for solution}
+A discussion of the alternative solutions and why that were not selected.
+
+\subsubsection{Instantiation and allocation of functionality}
+\paragraph{Decomposition}
+Main aspects of the resulting decomposition.
+
+\subparagraph{ModuleB}
+Per introduced component a paragraph describing its responsibilities.
+
+\subparagraph{ModuleC}
+Per introduced component a paragraph describing its responsibilities.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=0.8\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Component-and-connector diagram}
+    \caption{Component-and-connector diagram of this decomposition.
+        }\label{fig:it1-cc_main}
+\end{figure}
+
+\paragraph{Behaviour}
+If needed and explanation of the behaviour of certain aspects of the design so
+far.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=0.8\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram}
+    \caption{Sequence diagram illustrating a key behavioural aspect.
+        }\label{fig:it1-seq_aspect1}
+\end{figure}
+
+\paragraph{Deployment}
+Rationale of the allocation of components to physical nodes.
+
+\begin{figure}[!htp]
+    \centering
+    %\includegraphics[width=0.8\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Deployment diagram}
+    \caption{Deployment diagram of this decomposition.
+        }\label{fig:it1-depl_main}
+\end{figure}
+
+\subsubsection{Interfaces for child modules}
+\subsubsection*{PDSDB}
+\begin{itemize}
+    \item DocumentMgmt
+    \begin{itemize}
+        \item \texttt{void storeDocument(DocumentId id, Document doc, MetaData md)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided metadata \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}
+
+        \item \texttt{Tuple<Document, MetaData> getDocument(DocumentId id)}
+        \begin{itemize}
+            \item Effect: Describe the effect of calling this operation.
+            \item Exceptions: None
+         \end{itemize}
+         
+         \item \texttt{void markReceived(DocumentId id)}
+        \begin{itemize}
+            \item Effect: Describe the effect of calling this operation.
+            \item Exceptions: None
+         \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Data type definitions}
+Describe per complex data type used in the interfaces what it represents.
+
+\paragraph{returnType} This data element represents X.
+
+\paragraph{ParamType} This data element represents Y.
+
+\subsubsection{Verify and refine}
+This section describes per component which (parts of) the remaining
+requirements it is responsible for.
+
+\paragraph{ModuleB}
+\begin{itemize}
+    \item \emph{Z1}: name
+    \item \emph{UCd}: name
+\end{itemize}
+
+\paragraph{ModuleC}
+\begin{itemize}
+    \item \emph{UCba}: name\\Description which part of the original use case is
+        the responsibility of this component.
+\end{itemize}
+
+
+\
+\subsection{Decomposition 2: OtherFunctionality(P2, Av2b, UC12, UC13, UC14, UC15)}
+\subsubsection{Module to decompose}
+In this run we decompose \texttt{Otherfunctionality}.
+
+\subsubsection{Selected architectural drivers}
+The non-functional driver for this decomposition is:
+
+\begin{itemize}
+    \item \emph{P2}: Document lookups
+    \item \emph{Av2b}: Temporary storage for PDSDB
+\end{itemize}
+
+The related functional drivers are:
+
+\begin{itemize}
+    \item \emph{UC12}: Consult personal document store
+    \item \emph{UC13}: Search documents in personal document store
+    \item \emph{UC14}: Consult document in personal document store
+    \item \emph{UC15}: Download document via unique link
+\end{itemize}
+
+\paragraph{Rationale}
+P2 and Av2b were chosen because their priorities are amongst the highest ones of all remaining non-functional drivers and the domains on which their focus lies complement the previous decomposition perfectly.
+
+\subsubsection{Architectural design}
+
+\paragraph{Link mapping}
+In order to support document lookups via links, which are either unique (unregistered recipient) or part of a notification e-mail (registered recipient), the \texttt{UserFacade} is concerned with the mapping of each incoming link request to the appropriate document, which is either located in the \texttt{PDSDB} (for registered recipients) or in the \texttt{DocumentDB} (for unregistered recipients). The mappings themselves are stored in the \texttt{MappingDB} component and are fetched by the \texttt{UserFacade} when needed.
+
+\paragraph{Dedicated DocumentDB and LinkMappingDB for P2}
+Since a large number of document lookups and downloads should not affect the performance of other functionality of the system, both link mappings and documents are stored in dedicated databases, each deployed on a different node. This decision ensures that documents can be looked up via the personal document store or a notification in a timely fashion, because it prohibits either of those two components to be a bottleneck in the document lookup process. Since, according to the previous decomposition, the \texttt{PDSDB} is deployed on a separate node too, this component's performance is already satisfactory and no changes need to be made to improve it.
+
+\paragraph{Sharding for DocumentDB for P2}
+In order to improve performance of the \texttt{DocumentDB}, we chose to partition this database into multiple shards. This approach was driven by the need for fast response time while keeping in mind the high storage cost for documents. More precisely, a \texttt{ShardingManager} is responsible for reading and writing all documents in one of the \texttt{DocumentDBShards}, making sure that every document is stored only once. This sharding technique provides roughly the same advantages in response time as active replication, but is significantly less costly when it comes to storage capacity.
+Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
+
+\paragraph{DocumentStorageCache for Av2b}
+% MERK OP: De DocumentDB en PSDDB slaan documenten NIET meer op dezelfde manier op. De DocumentDB slaat het email adres van een document mee op, indien het document naar een email adres opgestuurd is. Dit omdat bij het registeren documenten op basis van email adres opgevraagd moeten kunnen worden. In de DocumentDB zit GEEN RecipientId. In de PDSDB zit er daarentegen WEL een RecipientId, maar GEEN emailadres opgeslagen.
+
+This component temporarily stores the id's of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component up to a maximum of 3 hours. When the latter component turns operational again, the \texttt{DocumentStorageManager} retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned id's and subsequently stores them in the \texttt{PDSDB}. Note that the recipient therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached id's refer to. \\
+Note that the \texttt{DocumentDB} and the \texttt{PDSDB} store documents in exactly the same way, both including the document itself, its meta data and its id, although there is no need for the meta data in the former database. This storage tactic ensures that the \texttt{DocumentStorageManager} does not have to fetch or convert any information when transferring documents between both databases, making the transfer as efficient as possible. This does not introduce any overhead to the storage system, since the meta data is but a fraction of the document data. \\
+Finally, we would like to stress that the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are converted into document id writes to the aforementioned cache. Upon revival of the \texttt{PDSDB}, this database will send a single heartbeat to the \texttt{DocumentStorageManager}, causing this component to begin transferring the missing document data. Once all cached document IDs are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
+
+\subparagraph{UserFacade}
+We introduce this component to be able to distinguish between registered recipients and unregistered recipients in the first steps of the document lookup process. The \texttt{UserFacade} also maps incoming links to documents that are located either in the \texttt{PDSDB} or in the \texttt{DocumentDB} by first fetching the correct mapping from the \texttt{LinkMappingDB} mentioned above. Another responsibility of the \texttt{UserFacade} is marking documents as received, since this is the last internal component through which the document is passed before the requesting recipient actually receives it and failure of another component in the document lookup pipeline can no longer prevent this from happening.
+
+\subparagraph{PDSFacade}
+This component handles all read requests that are intended for the personal document store. This extra level of indirection calculates and aggregates all intermediate query results as to relieve the \texttt{PDSDB} of this burden, which is also the reason why both components are best deployed on different nodes. Upon querying the personal document store, this component first collects the recipient's documents' meta data and subsequently performs queries on this collection. This approach introduces no significant overhead, because only those documents that are needed, will be fetched in their entirety. It is also the responsibility of the \texttt{PDSFacade} to check the recipient's ID against the recipient ID that can be retrieved from the document meta data and to only pass on those documents for which they are a match.
+
+\subparagraph{DocumentStorageManager}
+The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
+
+\subsubsection*{Alternatives considered}
+
+\paragraph{Alternative for DocumentStorageCache}
+We could just as well do without the previously introduced \texttt{DocumentStorageCache} by letting the \texttt{DocumentStorageManager} actively look for documents in the \texttt{DocumentDB} that are not yet, but should be, present in the \texttt{PDSDB} upon revival of the \texttt{PDSDB}. A clear advantage of this approach is that the downtime of the \texttt{PDSDB} component is no longer restricted by the aforementioned 3-hour cache. An important disadvantage, however, lies in the fact that the \texttt{DocumentStorageManager} is burdened with a significant amount of extra work and will require more expensive hardware to cope with this. Since the support for a longer downtime of the \texttt{PDSDB} is out of scope, this approach was not chosen.
+
+%Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
+
+\subsubsection{Instantiation and allocation of functionality}
+\paragraph{Decomposition}
+Figure \ref{fig:decomp2} shows the components resulting from the decomposition in this run. Extra attention is required concerning the \texttt{DocumentDBShard}. This component actually represents multiple instances, each containing a different partition of the document data to accommodate for parallel lookups in different partitions while minimizing storage costs.
+The responsibilities of the resulting components are as follows:
+
+\subparagraph{DocumentDB}
+Responsible for storing all generated documents.
+
+\subparagraph{ShardingManager}
+Responsible for managing all reads and writes to the \texttt{DocumentDBShards}.
+
+\subparagraph{DocumentDBShard}
+Responsible for storing a partition of the documents in the \texttt{DocumentDB}
+
+\subparagraph{LinkMappingDB}
+Responsible for storing the mappings between links and document locations.
+
+\subparagraph{UserFacade}
+We introduce this component to be able to distinguish between registered recipients and unregistered recipients in the first steps of the document lookup process. The \texttt{UserFacade} also maps incoming links to documents that are located either in the \texttt{PDSDB} or in the \texttt{DocumentDB} by first fetching the correct mapping from the \texttt{LinkMappingDB} mentioned above. Another responsibility of the \texttt{UserFacade} is marking documents as received, since this is the last internal component through which the document is passed before the requesting recipient actually receives it and failure of another component in the document lookup pipeline can no longer prevent this from happening.
+
+\subparagraph{PDSFacade}
+This component handles all read requests that are intended for the personal document store. This extra level of indirection calculates and aggregates all intermediate query results as to relieve the \texttt{PDSDB} of this burden, which is also the reason why both components are best deployed on different nodes. Upon querying the personal document store, this component first collects the recipient's documents' meta data and subsequently performs queries on this collection. This approach introduces no significant overhead, because only those documents that are needed, will be fetched in their entirety. It is also the responsibility of the \texttt{PDSFacade} to check the recipient's ID against the recipient ID that can be retrieved from the document meta data and to only pass on those documents for which they are a match.
+
+\subparagraph{DocumentStorageManager}
+The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
+
+\subparagraph{DocumentStorageCache}
+Responsible for temporarily storing the IDs of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component.
+
+\subparagraph{OtherFunctionality2}
+Encapsulates requirements that are not tackled in this run and cannot be assigned to other introduced components.
+
+
+
+
+
+\subsubsection*{UserFacade}
+The \texttt{UserFacade} provides three interfaces to the recipient: \textit{AuthN} for authentication, \textit{UniqueLinkMgmt} for document lookups via unique links and \textit{PDSDBMgmt} for access to the personal document store. Links to documents in the PDSDB that are part of a notification e-mail are therefore handled by the latter, in which case the \texttt{UserFacade} also needs to perform a check to see if the requesting recipient is registered in the eDocs system.
+
+\subsubsection{Verify and refine}
+This section describes per component which (parts of) the remaining
+requirements it is responsible for.
+
+Residual Av2b2 : TIJDIGE notification AAN DE USER
+
+USE CASE 12: residual drivers: het opslaan van de recipient id's in de pdsdb --> hoort bij deliveryfunctionality. --> voorlopig verondersteld dat recipientID in meta data zit die samen met doc opgeslagen wordt in zowel docDB als PDS
+Ook het inloggen (authenticatie).
+USE CASE 13:  residual drivers: we veronderstellen dat de DocumentStorageManager metadata bij elk document opslaat, like the name of the sender, the data range in which the document should be received and the document type --> hoort bij deliveryfunctionality.
+The metadata is saved in both the pdsdb en database components, because when a user registers, this metadata has to be copied form the one to the other. Dit is om gemakkelijk de documenten in de pdsdb te kunnen zoeken.
+USE CASE 14:  residual driver: mark as received, puntje 3. --> beter te doen bij de deliveryfunctionality
+USE CASE 15:  residual driver: tracking.
+
+\paragraph{LinkManager} VOORLOPIG NIET NODIG IN DEZE DECOMPOSITIE
+
+Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
+LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
+
+Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
+
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
 The context diagram of the client-server view.
 Discuss which components communicate with external components and what these
@@ -78,139 +318,21 @@ of why these choices where made.
 \paragraph{Alternative(s) for choice 1} Explain what alternative(s) you
 considered for this design choice and why they where not selected.
 
-\paragraph{Link mapping}
-In order to support document lookups via links, which are either unique (unregistered recipient) or part of a notification e-mail (registered recipient), the \texttt{UserFacade} is concerned with the mapping of each incoming link request to the appropriate document, which is either located in the \texttt{PDSDB} (for registered recipients) or in the \texttt{DocumentDB} (for unregistered recipients). The mappings themselves are stored in the \texttt{MappingDB} component and are fetched by the \texttt{UserFacade} when needed.
-
-\paragraph{Dedicated DocumentDB and LinkMappingDB for P2}
-Since a large number of document lookups and downloads should not affect the performance of other functionality of the system, both link mappings and documents are stored in dedicated databases, each deployed on a different node. This decision ensures that documents can be looked up via the personal document store or a notification in a timely fashion, because it prohibits either of those two components to be a bottleneck in the document lookup process. Since, according to the previous decomposition, the \texttt{PDSDB} is deployed on a separate node too, this component's performance is already satisfactory and no changes need to be made to improve it.
-
-\paragraph{Sharding for DocumentDB for P2}
-In order to improve performance of the \texttt{DocumentDB}, we chose to partition this database into multiple shards. This approach was driven by the need for fast response time while keeping in mind the high storage cost for documents. More precisely, a \texttt{ShardingManager} is responsible for reading and writing all documents in one of the \texttt{DocumentDBShards}, making sure that every document is stored only once. This sharding technique provides roughly the same advantages in response time as active replication, but is significantly less costly when it comes to storage capacity.
-Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
-
-\paragraph{DocumentStorageCache for Av2b}
-% MERK OP: De DocumentDB en PSDDB slaan documenten NIET meer op dezelfde manier op. De DocumentDB slaat het email adres van een document mee op, indien het document naar een email adres opgestuurd is. Dit omdat bij het registeren documenten op basis van email adres opgevraagd moeten kunnen worden. In de DocumentDB zit GEEN RecipientId. In de PDSDB zit er daarentegen WEL een RecipientId, maar GEEN emailadres opgeslagen.
-
-This component temporarily stores the id's of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component up to a maximum of 3 hours. When the latter component turns operational again, the \texttt{DocumentStorageManager} retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned id's and subsequently stores them in the \texttt{PDSDB}. Note that the recipient therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached id's refer to. \\
-Note that the \texttt{DocumentDB} and the \texttt{PDSDB} store documents in exactly the same way, both including the document itself, its meta data and its id, although there is no need for the meta data in the former database. This storage tactic ensures that the \texttt{DocumentStorageManager} does not have to fetch or convert any information when transferring documents between both databases, making the transfer as efficient as possible. This does not introduce any overhead to the storage system, since the meta data is but a fraction of the document data. \\
-Finally, we would like to stress that the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are converted into document id writes to the aforementioned cache. Upon revival of the \texttt{PDSDB}, this database will send a single heartbeat to the \texttt{DocumentStorageManager}, causing this component to begin transferring the missing document data. Once all cached document IDs are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
-
-\paragraph{Alternative for DocumentStorageCache}
-We could just as well do without the previously introduced \texttt{DocumentStorageCache} by letting the \texttt{DocumentStorageManager} actively look for documents in the \texttt{DocumentDB} that are not yet, but should be, present in the \texttt{PDSDB} upon revival of the \texttt{PDSDB}. A clear advantage of this approach is that the downtime of the \texttt{PDSDB} component is no longer restricted by the aforementioned 3-hour cache. An important disadvantage, however, lies in the fact that the \texttt{DocumentStorageManager} is burdened with a significant amount of extra work and will require more expensive hardware to cope with this. Since the support for a longer downtime of the \texttt{PDSDB} is out of scope, this approach was not chosen.
-
-%Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
-
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
 Discuss the decompositions of the components of the client-server view which
 you have further decomposed.
 
-\paragraph{LinkManager}
-Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
-LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
-
-Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
-
-\paragraph{UserFacade}
-We introduce this component to be able to distinguish between registered recipients and unregistered recipients in the first steps of the document lookup process. The \texttt{UserFacade} also maps incoming links to documents that are located either in the \texttt{PDSDB} or in the \texttt{DocumentDB} by first fetching the correct mapping from the \texttt{LinkMappingDB} mentioned above. Another responsibility of the \texttt{UserFacade} is marking documents as received, since this is the last internal component through which the document is passed before the requesting recipient actually receives it and failure of another component in the document lookup pipeline can no longer prevent this from happening. \\
-The \texttt{UserFacade} provides three interfaces to the recipient: \textit{AuthN} for authentication, \textit{UniqueLinkMgmt} for document lookups via unique links and \textit{PDSDBMgmt} for access to the personal document store. Links to documents in the PDSDB that are part of a notification e-mail are therefore handled by the latter, in which case the \texttt{UserFacade} also needs to perform a check to see if the requesting recipient is registered in the eDocs system.
-
-\paragraph{PDSFacade}
-This component handles all read requests that are intended for the personal document store. This extra level of indirection calculates and aggregates all intermediate query results as to relieve the \texttt{PDSDB} of this burden, which is also the reason why both components are best deployed on different nodes. Upon querying the personal document store, this component first collects the recipient's documents' meta data and subsequently performs queries on this collection. This approach introduces no significant overhead, because only those documents that are needed, will be fetched in their entirety. It is also the responsibility of the \texttt{PDSFacade} to check the recipient's ID against the recipient ID that can be retrieved from the document meta data and to only pass on those documents for which they are a match.
-
-\paragraph{DocumentStorageManager}
-The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
-
-\subparagraph{DocumentDB}
-Responsible for storing all generated documents.
-
-\subparagraph{ShardingManager}
-Responsible for managing all reads and writes to the \texttt{DocumentDBShards}.
-
-\subparagraph{DocumentDBShard}
-Responsible for storing a partition of the documents in the \texttt{DocumentDB}. This component actually represents multiple instances, each containing a different partition of the document data to accommodate for parallel lookups in different partitions while minimizing storage costs.
-
-\subparagraph{LinkMappingDB}
-Responsible for storing the mappings between links and document locations.
-
-\subparagraph{DocumentStorageCache}
-Responsible for temporarily storing the IDs of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component.
-
-\subparagraph{OtherFunctionality2}
-Encapsulates requirements that are not tackled in this run and cannot be assigned to other introduced components.
-Residual Av2b2 : TIJDIGE notification AAN DE USER
-USE CASE 12: residual drivers: het opslaan van de recipient id's in de pdsdb --> hoort bij deliveryfunctionality. --> voorlopig verondersteld dat recipientID in meta data zit die samen met doc opgeslagen wordt in zowel docDB als PDS
-Ook het inloggen (authenticatie).
-USE CASE 13:  residual drivers: we veronderstellen dat de DocumentStorageManager metadata bij elk document opslaat, like the name of the sender, the data range in which the document should be received and the document type --> hoort bij deliveryfunctionality.
-The metadata is saved in both the pdsdb en database components, because when a user registers, this metadata has to be copied form the one to the other. Dit is om gemakkelijk de documenten in de pdsdb te kunnen zoeken.
-USE CASE 14:  residual driver: mark as received, puntje 3. --> beter te doen bij de deliveryfunctionality
-USE CASE 15:  residual driver: tracking.
-
-\subsection{DeliveryFunctionality}
+\subsection{ComponentX}
 \begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
-    \caption{Decomposition of \texttt{DeliveryFunctionality}}
-    \label{fig:decomp-DeliveryFunctionality}
+    \centering
+    %\includegraphics[width=\textwidth]{}
+    \missingfigure[figwidth=0.8\textwidth]{Diagram showing decomposition of
+        ComponentX}
+    \caption{Decomposition of \texttt{ComponentX}}\label{fig:decomp-componentx}
 \end{figure}
 
-Describe the decomposition of \texttt{DeliveryFunctionality} and how this relates to the
+Describe the decomposition of \texttt{ComponentX} and how this relates to the
 requirements.
-
-\subsection{DocumentDB}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{DocumentDB.png}
-	\caption{Decomposition of \texttt{DocumentDB}}
-	\label{fig:decomp-DocumentDB}
-\end{figure}
-
-\subsection{DocumentGenerationManager}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{DocumentGenerationManager.png}
-	\caption{Decomposition of \texttt{DocumentGenerationManager}}
-	\label{fig:decomp-DocumentGenerationManager}
-\end{figure}
-
-\subsection{DocumentStorageFunctionality}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{DocumentStorageFunctionality.png}
-	\caption{Decomposition of \texttt{DocumentStorageFunctionality}}
-	\label{fig:decomp-DocumentStorageFunctionality}
-\end{figure}
-
-\subsection{JobManager}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{JobManager.png}
-	\caption{Decomposition of \texttt{JobManager}}
-	\label{fig:decomp-JobManager}
-\end{figure}
-
-\subsection{LinkFunctionality}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{LinkFunctionality.png}
-	\caption{Decomposition of \texttt{LinkFunctionality}}
-	\label{fig:decomp-LinkFunctionality}
-\end{figure}
-
-\subsection{PDSDB}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{PDSDB.png}
-	\caption{Decomposition of \texttt{PDSDB}}
-	\label{fig:decomp-PDSDB}
-\end{figure}
-
-\subsection{UserFunctionality}
-\begin{figure}[!htp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{UserFunctionality.png}
-	\caption{Decomposition of \texttt{UserFunctionality}}
-	\label{fig:decomp-UserFunctionality}
-\end{figure}
 
 \section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
 Describe the context diagram for the deployment view.
@@ -1589,11 +1711,11 @@ them alphabetically for ease of navigation.
 	 
 	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
 	
-	\item \texttt{Document}: A data file corresponding to a document.  The architecture specifies the format of this data type as a PDF-file. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	\item \texttt{Document}: A data file corresponding to a document.  The architecture specifies the format of this data type as a PDF-file. 
 	
 	\item \texttt{DocumentId}: A piece of data uniquely identifying a document in the system.
 
-	\item \texttt{DocumentMetaData}: The meta-data stored with a document.	
+	\item \texttt{DocumentMetaData}: The meta-data stored with a document in the \texttt{DocumentDB}. This meta-data differs from the \texttt{PDSDBMetaData}, in that it does not contain a \texttt{UserId}, but it does contain an \texttt{Email} address.
 	
 	\item \texttt{DocumentPriority}: A data type representing the priority of document generation jobs. They have values representing the Critical, Diamond, Gold and Silver priorities. The exact format of this data type is not specified by the architecture.
 	
@@ -1616,6 +1738,9 @@ them alphabetically for ease of navigation.
 	\item \texttt{PDSOverview} The overview of a personal document store that can be shown to a Registered Recipient. Through this overview, the Registered Recipient can consult documents. The architecture does not specify the exact format of such an overview, but a likely possibility is an HTML page.
     
     \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    
+    \item \texttt{PDSDBMetaData}: The meta-data stored with a document in the \texttt{PDSDB}. This meta-data differs from the \texttt{DocumentMetaData}, in that it does not contain a \texttt{Email} address, but it does contain a \texttt{UserID}.
+    
     
     \item \texttt{RawData}: A data structure listing the raw data used in a document processing job.
     
