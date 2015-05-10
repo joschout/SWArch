@@ -1498,7 +1498,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
     \item InsertJobs
     \begin{itemize}
-        \item \texttt{void insertJobs(BatchId batchId, List<JobId> jobIds )}
+        \item \texttt{void insertJobs(BatchId batchId, TimeStamp deadline, List<JobId> jobIds )}
         \begin{itemize}
             \item Effect: The \texttt{Scheduler} adds the jobs identified by their \texttt{JobId} to its queue of all jobs that have not been processed yet. To lower the size of this queue, the Scheduler is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. This method provides new jobs synchronously to the \texttt{Scheduler}, which it schedules synchronously. This means that when the method call returns, the given jobs are scheduled.
             \item Exceptions: None
