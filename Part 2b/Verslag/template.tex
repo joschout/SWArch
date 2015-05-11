@@ -25,7 +25,7 @@ requirement.
 Pay attention to the solutions that you employed (in your own terms or using
 tactics and/or patterns).
 
-\paragraph{Av1a & Av2a\@: Notifying the appropriate operator within 1 minute} Provide a brief discussion of the
+\paragraph{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute} Provide a brief discussion of the
 decisions related to \emph{ReqX}.\\
 \emph{Employed tactics and patterns: List all patterns and tactics used to
     achieve ReqX, if any.}
@@ -55,9 +55,9 @@ Since a large number of document lookups and downloads should not affect the per
 
 \paragraph{M1\@: New type of document: bank statements}
 
-\paragraph{M2\@: Multiple print & postal services}
+\paragraph{M2\@: Multiple print \& postal services}
 
-\paragraph{M3\@: Dynamic selection of the cheapest of print & postal services}
+\paragraph{M3\@: Dynamic selection of the cheapest of print \& postal services}
 
 \subsection{Discussion}
 Use this section to discuss your architecture in retrospect.
@@ -336,6 +336,43 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
+
+
+\subsection{ChannelDispatcher}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{ChannelDispatcher} is responsible for choosing the correct delivery channel for a 
+    \item \textbf{Super-component:} \texttt{Deliveryfunctionality}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item InterfaceA
+    \begin{itemize}
+        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions:
+            \begin{itemize}
+                \item SomeException: Describe when the exception is thrown.
+            \end{itemize}
+		\end{itemize}
+        \item \texttt{void operation2(ParamType2 param)}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+
+    \item InterfaceB
+    \begin{itemize}
+        \item \texttt{returntType2 operation3()}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
 \subsection{CustomerOrganizationClient}
 \begin{itemize}
@@ -810,7 +847,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{Generator}
 \begin{itemize}
-    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{DeliveryrFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{OtherFunctionality} that it does not have all of the data required to fill in the template.
+    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{DeliveryrFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{NotificationHandler} that it does not have all of the data required to fill in the template.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -955,62 +992,62 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item SetStatus
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
+            \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}
+    
+	\item GetBatchData
+    \begin{itemize}
+        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{BatchMetaData getMetaData(BatchId batchId)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
-    \end{itemize}
+    \end{itemize}   
 \end{itemize}
 
 \subsection{JobManager}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{JobManager} is responsible creating jobs and storing them. It is responsible for retrieving data connected to a specific job. It can retrieve the raw data or customer organization info for specific jobs. The \texttt{JobFacade} is also used for marking jobs as sent and received.
-    \item \textbf{Super-component:} \texttt{OtherFunctionality}
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} \texttt{JobFacade} , \texttt{JobDBShardingManager} and \texttt{JobDBShard}
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item SetStatus
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
-
-    \item InterfaceB
+    
+	\item GetBatchData
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
-    \end{itemize}
+        \item \texttt{BatchMetaData getMetaData(BatchId batchId)}
+        \begin{itemize}
+            \item Effect: Describe the effect of the operation
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}    
+    
 \end{itemize}
 
 \subsection{KeyCache}
@@ -1026,7 +1063,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \begin{itemize}
         \item \texttt{Key getKey(CustomerId customerId) throws NoSuchKeyException}
         \begin{itemize}
-            \item Effect: The \texttt{KeyCache} looks into its cache for the \texttt{Key} belonging to the customer organisation with id \texttt{customerId}. If the \texttt{Key} is in its cache, it returns it. If the \texttt{Key} is not in its cache, it asks \texttt{OtherFunctionality} for the \texttt{Key} and stores it in its cache, after which it returns that \texttt{Key}.
+            \item Effect: The \texttt{KeyCache} looks into its cache for the \texttt{Key} belonging to the customer organisation with id \texttt{customerId}. If the \texttt{Key} is in its cache, it returns it. If the \texttt{Key} is not in its cache, it asks \texttt{OtherDB} for the \texttt{Key} and stores it in its cache, after which it returns that \texttt{Key}.
             \item Exceptions:
             \begin{itemize}
                 \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
@@ -1512,53 +1549,11 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \end{itemize}
     \end{itemize}
 
-    \item GetBatchData
-    \begin{itemize}
-        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-        \item \texttt{BatchMetaData getMetaData(BatchId batchId)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
 
-    \item GetKey
-    \begin{itemize}
-        \item \texttt{Key getKey(CustomerId customerId)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-    
-    \item GetTemplate
-    \begin{itemize}
-        \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
-       % \item \texttt{Template getTemplate(TemplateId templateId)}
-        \begin{itemize}
-            \item Effect:  The \texttt{OtherFunctionality} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
+
+
         
-    \item SetStatus
-    \begin{itemize}
-        \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} stores the \texttt{JobStatus} as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+
     
     \item NotifyOperator
     \begin{itemize}
@@ -1586,29 +1581,28 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+        \item GetKey
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{OtherFunctionality} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
             \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
         \end{itemize}
     \end{itemize}
-
-    \item InterfaceB
+    
+    \item GetTemplate
     \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+        \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
+       % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+            \item Effect:  The \texttt{OtherFunctionality} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1786,7 +1780,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{Scheduler}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{Scheduler} receives the new jobs initiated by a Customer Organization and adds them to a queue of all jobs that have not been processed yet. To lower the size of this queue, the Scheduler is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. The raw data of each job and the meta-data of the batch is stored in \texttt{OtherFunctionality} and fetched by the \texttt{Completer} when needed.\\
+    \item \textbf{Description:} The \texttt{Scheduler} receives the new jobs initiated by a Customer Organization and adds them to a queue of all jobs that have not been processed yet. To lower the size of this queue, the Scheduler is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. The raw data of each job and the meta-data of the batch is stored in \texttt{OtherDB} and fetched by the \texttt{Completer} when needed.\\
     The \texttt{Scheduler} also indicates to the \texttt{GenerationManager} the number of required \texttt{Generator} instances through its GetStatistics interface.
     \item \textbf{Super-component:} \texttt{DocumentGenerationManager}
     \item \textbf{Sub-components:} None
@@ -1900,7 +1894,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
    		\item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, TimeStamp whenReceived)}
        % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
-            \item Effect:  The \texttt{TemplateCache} looks into its cache for the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. If the \texttt{Template} is in its cache, it returns it. If the \texttt{Template} is not in its cache, it asks \texttt{OtherFunctionality} for the \texttt{Template} and stores it in its cache, after which it returns that \texttt{Template}.
+            \item Effect:  The \texttt{TemplateCache} looks into its cache for the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. If the \texttt{Template} is in its cache, it returns it. If the \texttt{Template} is not in its cache, it asks \texttt{OtherDB} for the \texttt{Template} and stores it in its cache, after which it returns that \texttt{Template}.
             \item Exceptions:
             \begin{itemize}
                 \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
