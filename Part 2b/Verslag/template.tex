@@ -322,17 +322,72 @@ considered for this design choice and why they where not selected.
 Discuss the decompositions of the components of the client-server view which
 you have further decomposed.
 
-\subsection{ComponentX}
+\subsection{DeliveryFunctionality}
 \begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Diagram showing decomposition of
-        ComponentX}
-    \caption{Decomposition of \texttt{ComponentX}}\label{fig:decomp-componentx}
+	\centering
+	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
+	\caption{Decomposition of \texttt{DeliveryFunctionality}}
+	\label{fig:decomp-DeliveryFunctionality}
 \end{figure}
 
 Describe the decomposition of \texttt{ComponentX} and how this relates to the
 requirements.
+
+\subsection{DocumentDB}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{DocumentDB.png}
+	\caption{Decomposition of \texttt{DocumentDB}}
+	\label{fig:decomp-DocumentDB}
+\end{figure}
+
+\subsection{DocumentGenerationManager}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{DocumentGenerationManager.png}
+	\caption{Decomposition of \texttt{DocumentGenerationManager}}
+	\label{fig:decomp-DocumentGenerationManager}
+\end{figure}
+
+\subsection{DocumentStorageFunctionality}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{DocumentStorageFunctionality.png}
+	\caption{Decomposition of \texttt{DocumentStorageFunctionality}}
+	\label{fig:decomp-DocumentStorageFunctionality}
+\end{figure}
+
+\subsection{JobManager}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{JobManager.png}
+	\caption{Decomposition of \texttt{JobManager}}
+	\label{fig:decomp-JobManager}
+\end{figure}
+
+\subsection{LinkFunctionality}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{LinkFunctionality.png}
+	\caption{Decomposition of \texttt{LinkFunctionality}}
+	\label{fig:decomp-LinkFunctionality}
+\end{figure}
+
+\subsection{PDSDB}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{PDSDB.png}
+	\caption{Decomposition of \texttt{PDSDB}}
+	\label{fig:decomp-PDSDB}
+\end{figure}
+
+\subsection{UserFunctionality}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{UserFunctionality.png}
+	\caption{Decomposition of \texttt{UserFunctionality}}
+	\label{fig:decomp-UserFunctionality}
+\end{figure}
 
 \section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
 Describe the context diagram for the deployment view.
@@ -340,11 +395,10 @@ For example, which protocols are used for communication with external systems
 and why?
 
 \begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Context diagram for the deployment
-        view.}
-    \caption{Context diagram for the deployment view.}\label{fig:depl_context}
+	\centering
+	\includegraphics[width=0.8\textwidth]{ContextDeployment.png}
+    \caption{Context diagram for the deployment view.}
+    \label{fig:depl_context}
 \end{figure}
 
 The primary deployment diagram itself and accompanying explanation.
@@ -354,10 +408,9 @@ Also discuss any alternative deployments that you considered.
 
 \begin{figure}[!htp]
     \centering
-    %\includegraphics[width=\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Primary diagram for the deployment
-        view.}
-    \caption{Primary diagram for the deployment view.}\label{fig:depl_primary}
+	\includegraphics[width=0.8\textwidth]{TotalDeployment.png}
+    \caption{Primary diagram for the deployment view.}
+    \label{fig:depl_primary}
 \end{figure}
 
 \section{Scenarios}\label{sec:scenarios}
