@@ -337,7 +337,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \subsection{BillingManager}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{BillingManager} is responsible for all billing tasks. This includes billing the Customer Organization for the generation and delivery of non-recurring document processing jobs.
-    \item \textbf{Super-component:} \texttt{OtherFunctionality}
+    \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
 
@@ -443,7 +443,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \subsection{DocumentDB}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{DocumentDB} is responsible  for actually storing all the documents. It stores documents regardless of the fact of a document is also stored in the \texttt{PDSDB} It receives read and write requests from the \texttt{DocumentStoragManager}.
-    \item \textbf{Super-component:} \texttt{OtherFunctionality}
+    \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} \texttt{DocumentDBShardingManager} and \texttt{DocumentDBShard}
 \end{itemize}
 
@@ -478,7 +478,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentDBShard}
 \begin{itemize}
-    \item \textbf{Description:} A \texttt{DocumentDBShard} is responsible for storing part of all the documents.
+    \item \textbf{Description:} A \texttt{DocumentDBShard} is responsible for storing a partition of all the documents.
     \item \textbf{Super-component:} \texttt{DocumentDB}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -514,7 +514,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentDBShardingManager}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentDBShardingManager} manages the storage of the documents over multiple \texttt{DocumenDBShards}.
+    \item \textbf{Description:} The \texttt{DocumentDBShardingManager} manages the storage of the documents over multiple \texttt{DocumentDBShards}.
     \item \textbf{Super-component:} The \texttt{DocumentDB}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -625,10 +625,10 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentStorageFunctionality}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentStorageManager} is possible for storing the generated documents in the correct database. If the document belongs to a registered recipient, it sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}. Otherwise, it only sends a write request to the \texttt{DocumentDB}, which stores all the documents.\\
-    It is also responsible for copying documents from the \texttt{DocumentDB} to the \texttt{PDSDB} when an Unregistered Recipient registers to the eDocs system.\\ Another responsibility of the \texttt{DeliveryFunctionality} is storing at least 3 hours of documents when the \texttt{PDSDB}
-    \item \textbf{Super-component:} \texttt{OtherFunctionality}
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{DocumentStorageManager} is responsible for storing the generated documents in the correct database. If the document belongs to a registered recipient, it sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}. Otherwise, it only sends a write request to the \texttt{DocumentDB}, which stores all the documents.\\
+    It is also responsible for copying documents from the \texttt{DocumentDB} to the \texttt{PDSDB} when an Unregistered Recipient registers to the eDocs system.\\ Another responsibility of the \texttt{DeliveryFunctionality} is storing at least 3 hours of documents when the \texttt{PDSDB} fails.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} \texttt{DocumentStorageCache} and \texttt{DocumentStorageManager}
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -663,9 +663,10 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentStorageManager}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentStorageManager} is responsible for storing
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{DocumentStorageManager} is responsible for storing the generated documents in the correct database. If the document belongs to a registered recipient, it sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}. Otherwise, it only sends a write request to the \texttt{DocumentDB}, which stores all the documents.\\
+    It is also responsible for copying documents from the \texttt{DocumentDB} to the \texttt{PDSDB} when an Unregistered Recipient registers to the eDocs system.\\ Another responsibility of the \texttt{DocumentStorageManager} is storing at least 3 hours of documents when the \texttt{PDSDB} fails.
+    \item \textbf{Super-component:} \texttt{DocumentStoragefunctionlity}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -694,8 +695,8 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DeliveryFunctionality}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Description:} The \texttt{DeliveryFunctionality} is responsible  for delivering the documents generated by eDocs to the recipients. 
+    \item \textbf{Super-component:} \texttt{ChannelDispatcher}, \texttt{EmailFacade}, \texttt{Print\&PostalServiceFacade}, \texttt{ZoomitFacade} and \texttt{ZoomitDeliveryCache}
     \item \textbf{Sub-components:} the direct sub-components, if any.
 \end{itemize}
 
@@ -725,9 +726,9 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{EDocsAdminClient}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{EDocsAdminClient} is external to the eDocs system and represents a client device of an administrator of eDocs that communicates with the eDocs System.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -759,42 +760,12 @@ List all elements and interfaces alphabetically for ease of navigation.
     \end{itemize}
 \end{itemize}
 
-\subsection{EDocsFacade}
-\begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
 \subsection{EmailChannel}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{EmailChannel} is responsible for the delivery emails.
+It is external to the eDocs system and represents a mail server of an e-mail provider.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None.
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -828,7 +799,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{EmailFacade}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{EmailFacade} is responsible for sending documents to  Unregistered by e-mail when receipt tracking is turned off. When receipt tracking is turned on for an Unregistered Recipient, it sends an e-mail containing a short description of the received document
+    \item \textbf{Description:} The \texttt{EmailFacade} is responsible for creating and sending emails used in the delivery of documents. It will send documents to  Unregistered recipients by e-mail when receipt tracking is turned off. When receipt tracking is turned on for an Unregistered Recipient, it will send an e-mail containing a short description of the received document and a unique link, which can be followed to get document. For Registered Recipients, it will send an e-mail containing a short description of the document and a link to the document.
     \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -859,7 +830,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{Generator}
 \begin{itemize}
-    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{OtherFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{OtherFunctionality} that it does not have all of the data required to fill in the template.
+    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{DeliveryrFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{OtherFunctionality} that it does not have all of the data required to fill in the template.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -924,9 +895,9 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{JobDBShard}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{JobDBShard} is responsible for storing partition of all the jobs.
+    \item \textbf{Super-component:} \texttt{JobManager}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -960,9 +931,9 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{JobDBShardingManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{JobDBShardingManager} manages the storage of the documents over multiple \texttt{JobDBShards}.
+    \item \textbf{Super-component:} \texttt{JobManager}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -997,9 +968,9 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{JobFacade}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{JobFacade} is responsible creating jobs and storing them using the \texttt{JobDBShadingManager} over different \texttt{JobDBShards}. It is responsible for retrieving data connected to a specific job. It can retrieve the raw data or customer organization info for specific jobs. The \texttt{JobFacade} is also used for marking jobs as sent and received.
+    \item \textbf{Super-component:} \texttt{JobManager}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1033,8 +1004,8 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{JobManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
+    \item \textbf{Description:} The \texttt{JobManager} is responsible creating jobs and storing them. It is responsible for retrieving data connected to a specific job. It can retrieve the raw data or customer organization info for specific jobs. The \texttt{JobFacade} is also used for marking jobs as sent and received.
+    \item \textbf{Super-component:} \texttt{OtherFunctionality}
     \item \textbf{Sub-components:} the direct sub-components, if any.
 \end{itemize}
 
