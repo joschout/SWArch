@@ -19,11 +19,11 @@
 \newpage
 
 \section{Introduction}\label{sec:introduction}
-The goal of this project was to design a document processing system. In this document, we describe the final architecture, which was designed based on the requirements from the domain analysis and the priorities of these requirements given by our stakeholders. 
+The goal of this project was to design a document processing system. In this document, we describe the final architecture, which was designed based on the requirements from the domain analysis and the priorities of these requirements given by our stakeholders.
 Section \ref{sec:overview} lists the architectural decisions for all non-functional requirements and discusses the final architecture.
 Section \ref{sec:client-server} provides and discusses the main context and decomposition diagrams of our architecture (i.e. the context and primary diagram of the component-and-connector view) along with a discussion of the main architectural decisions involved.
 Section \ref{sec:decomposition} provides and discusses the more fine-grained decompositions of some of the major components in the main decomposition.
-Section \ref{sec:deployment} provides and discusses the deployment of the components of the component-and-connector view on physical nodes. 
+Section \ref{sec:deployment} provides and discusses the deployment of the components of the component-and-connector view on physical nodes.
 Finally, Section \ref{sec:scenarios} illustrates how our architecture accomplishes the most important functionality and data flows using sequence diagrams.
 Afterwards, Appendix \ref*{app:catalog} lists and describes all components of the component-and-connector view and their interfaces and Appendix \ref*{app:datatypes} lists and describes the data types used in these interfaces.
 \section{Overview}\label{sec:overview}
@@ -77,9 +77,14 @@ We could just as well do without the previously introduced \texttt{DocumentStora
 %Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
 
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
-The context diagram of the client-server view.
-Discuss which components communicate with external components and what these
-external components represent.
+The context diagram of the component-and-connector view is given in Figure \ref{fig:cc-context}. As shown, six distinct types of external components communicate with the system:
+(i) the EDocsAdminClient represents a client device of an administrator of eDocs that communicates with the eDocs System,
+(ii) the CustomerOrganizationClient represents a client device of a Customer Organization (i.e. Customer Administrator and Customer Information System) that communicates with the eDocs System,
+(iii) the RecipientClient represents a client device of an unregistered or registered recipient of eDocs that communicates with the eDocs System,
+(iv) the ZoomitChannel represents the servers of Zoomit to which documents can be sent for further delivery,
+(v) the Print\&PostalServiceChannel represents the servers of a print \& postal service to which documents can be sent for further delivery,
+(vi) the EmailChannel represents a mail server of an e-mail provider to which documents can be sent for further delivery.
+Notice that each external interface on the client side is provided by a separate facade component and that each delivery channel interfaces with the \texttt{DeliveryFunctionality} component.
 
 \begin{figure}[!htp]
 	\centering
