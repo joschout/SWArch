@@ -7,6 +7,7 @@
 \geometry{tmargin=3cm, bmargin=2.2cm, lmargin=2.2cm, rmargin=2cm}
 \usepackage{todonotes} %Used for the figure placeholders
 \graphicspath{{Images/}}
+\usepackage{placeins}
 
 % Your name and student number must be filled in on the title page found in
 % titlepage.tex.
@@ -18,18 +19,19 @@
 \newpage
 
 \section{Introduction}\label{sec:introduction}
-The goal of this project was to develop  an architecture for a system for document processing. This part of the project consisted of 
+The goal of this project was to design a document processing system. In this document, we describe the final architecture, which was designed based on the requirements from the domain analysis and the priorities of these requirements given by our stakeholders. 
+Section \ref{sec:overview} lists the architectural decisions for all non-functional requirements and discusses the final architecture.
+Section \ref{sec:client-server} provides and discusses the main context and decomposition diagrams of our architecture (i.e. the context and primary diagram of the component-and-connector view) along with a discussion of the main architectural decisions involved.
+Section \ref{sec:decomposition} provides and discusses the more fine-grained decompositions of some of the major components in the main decomposition.
+Section \ref{sec:deployment} provides and discusses the deployment of the components of the component-and-connector view on physical nodes. 
+Finally, Section \ref{sec:scenarios} illustrates how our architecture accomplishes the most important functionality and data flows using sequence diagrams.
+Afterwards, Appendix \ref*{app:catalog} lists and describes all components of the component-and-connector view and their interfaces and Appendix \ref*{app:datatypes} lists and describes the data types used in these interfaces.
 \section{Overview}\label{sec:overview}
+This section gives a high-level but complete overview of the system: it lists the design decisions for all non-functional requirements and provides a discussion concerning the strong and weak points of the architecture.
 \subsection{Architectural decisions}
-Briefly discuss your architectural decisions for each non-functional
-requirement.
-Pay attention to the solutions that you employed (in your own terms or using
-tactics and/or patterns).
+In this section, we give an overview of the architectural decisions made in our architecture in order to achieve the requirements given in the domain analysis.
 
-\paragraph{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute} Provide a brief discussion of the
-decisions related to \emph{ReqX}.\\
-\emph{Employed tactics and patterns: List all patterns and tactics used to
-    achieve ReqX, if any.}
+\paragraph{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute}
 
 \paragraph{Av1b\@: Storing the status of an individual job}
 
@@ -85,6 +87,7 @@ external components represent.
 	\caption{Context diagram for the client-server view.}
 	\label{fig:cc-context}
 \end{figure}
+\FloatBarrier
 
 The primary diagram and accompanying explanation.
 
@@ -94,6 +97,7 @@ The primary diagram and accompanying explanation.
 	\caption{Primary diagram of the client-server view.}
 	\label{fig:cs-primary}
 \end{figure}
+\FloatBarrier
 
 \subsection{Main architectural decisions}
 Discuss your architectural decisions for the most important requirements in
@@ -139,6 +143,7 @@ you have further decomposed.
 	\caption{Decomposition of \texttt{DeliveryFunctionality}}
 	\label{fig:decomp-DeliveryFunctionality}
 \end{figure}
+\FloatBarrier
 
 Describe the decomposition of \texttt{ComponentX} and how this relates to the
 requirements.
@@ -150,6 +155,7 @@ requirements.
 	\caption{Decomposition of \texttt{DocumentDB}}
 	\label{fig:decomp-DocumentDB}
 \end{figure}
+\FloatBarrier
 
 \subsection{DocumentGenerationManager}
 \begin{figure}[!htp]
@@ -158,6 +164,7 @@ requirements.
 	\caption{Decomposition of \texttt{DocumentGenerationManager}}
 	\label{fig:decomp-DocumentGenerationManager}
 \end{figure}
+\FloatBarrier
 
 \subsection{DocumentStorageFunctionality}
 \begin{figure}[!htp]
@@ -166,6 +173,7 @@ requirements.
 	\caption{Decomposition of \texttt{DocumentStorageFunctionality}}
 	\label{fig:decomp-DocumentStorageFunctionality}
 \end{figure}
+\FloatBarrier
 
 \subsection{JobManager}
 \begin{figure}[!htp]
@@ -174,6 +182,7 @@ requirements.
 	\caption{Decomposition of \texttt{JobManager}}
 	\label{fig:decomp-JobManager}
 \end{figure}
+\FloatBarrier
 
 \subsection{LinkFunctionality}
 \begin{figure}[!htp]
@@ -182,6 +191,7 @@ requirements.
 	\caption{Decomposition of \texttt{LinkFunctionality}}
 	\label{fig:decomp-LinkFunctionality}
 \end{figure}
+\FloatBarrier
 
 \subsection{PDSDB}
 \begin{figure}[!htp]
@@ -190,6 +200,7 @@ requirements.
 	\caption{Decomposition of \texttt{PDSDB}}
 	\label{fig:decomp-PDSDB}
 \end{figure}
+\FloatBarrier
 
 \subsection{UserFunctionality}
 \begin{figure}[!htp]
@@ -198,6 +209,7 @@ requirements.
 	\caption{Decomposition of \texttt{UserFunctionality}}
 	\label{fig:decomp-UserFunctionality}
 \end{figure}
+\FloatBarrier
 
 \section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
 Describe the context diagram for the deployment view.
@@ -210,6 +222,7 @@ and why?
     \caption{Context diagram for the deployment view.}
     \label{fig:depl_context}
 \end{figure}
+\FloatBarrier
 
 The primary deployment diagram itself and accompanying explanation.
 Pay attention to the parts of the deployment diagram which are crucial for
@@ -222,6 +235,7 @@ Also discuss any alternative deployments that you considered.
     \caption{Primary diagram for the deployment view.}
     \label{fig:depl_primary}
 \end{figure}
+\FloatBarrier
 
 \section{Scenarios}\label{sec:scenarios}
 Illustrate how your architecture fulfills the most important data flows.
@@ -247,6 +261,7 @@ Show the complete scenario using one or more sequence diagrams.
     \caption{The system behavior for the first scenario.
         }\label{fig:seq_scenario1}
 \end{figure}
+\FloatBarrier
 
 \appendix
 \section{Element catalog}\label{app:catalog}
