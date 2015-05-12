@@ -32,6 +32,9 @@ This section gives a high-level but complete overview of the system: it lists th
 In this section, we give an overview of the architectural decisions made in our architecture in order to achieve the requirements given in the domain analysis.
 
 \paragraph{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute}
+Av1a and Av2a require the system to notify the an eDocs operator within 1 minute. To achieve this, the NotificationHandler 
+
+keeps track of the next deadline for each gateway, which the gateway provides with each new sensor data update. As such, these updates are considered as implicit heartbeats. To achieve the latter, the GatewayFacade is pinged by the AvailabilityMonitor, which is deployed on another node. For more details, we refer to Sec- tion 4.1.1, Section 5.2 and Section 6.
 
 \paragraph{Av1b\@: Storing the status of an individual job}
 
@@ -77,6 +80,7 @@ We could just as well do without the previously introduced \texttt{DocumentStora
 %Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
 
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
+\paragraph{Context diagram}
 The context diagram of the component-and-connector view is given in Figure \ref{fig:cc-context}. As shown, six distinct types of external components communicate with the system:
 (i) the EDocsAdminClient represents a client device of an administrator of eDocs that communicates with the eDocs System,
 (ii) the CustomerOrganizationClient represents a client device of a Customer Organization (i.e. Customer Administrator and Customer Information System) that communicates with the eDocs System,
@@ -94,7 +98,8 @@ Notice that each external interface on the client side is provided by a separate
 \end{figure}
 \FloatBarrier
 
-The primary diagram and accompanying explanation.
+\paragraph{Primary diagram}
+The main component-and-connector view is shown in Figure \ref{fig:cs-primary}. All components that were decomposed further are highlighted. The DeliveryFunctionality is further decomposed in Section \ref{subsec:decomp-DeliveryFunctionality}, the DocumentDB in Section \ref{subsec:decomp-DocumentDB}, the DocumentGenerationManager in Section \ref{subsec:decomp-DocumentGenerationManager}, the DocumentStorageFunctionality in Section \ref{subsec:decomp-DocumentStorageFunctionality}, the JobManager in Section \ref{subsec:decomp-JobManager}, the LinkMappingFunctionality in Section \ref{subsec:decomp-LinkMappingFunctionality}, the PDSDB in Section \ref{subsec:decomp-PDSDB} and the UserFunctionality in Section \ref{subsec:decomp-UserFunctionality}. The descriptions of all components in Figure \ref{fig:cs-primary}, their sub-components and their interfaces are given in Appendix \ref*{app:catalog}.
 
 \begin{figure}[!htp]
 	\centering
@@ -124,7 +129,6 @@ This component handles all read requests that are intended for the personal docu
 The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
 
 \paragraph{LinkManager}
-
 Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
 LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
 Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
@@ -141,7 +145,7 @@ considered for this design choice and why they where not selected.
 Discuss the decompositions of the components of the client-server view which
 you have further decomposed.
 
-\subsection{DeliveryFunctionality}
+\subsection{DeliveryFunctionality}\label{subsec:decomp-DeliveryFunctionality}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
@@ -153,7 +157,7 @@ you have further decomposed.
 Describe the decomposition of \texttt{ComponentX} and how this relates to the
 requirements.
 
-\subsection{DocumentDB}
+\subsection{DocumentDB}\label{subsec:decomp-DocumentDB}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DocumentDB.png}
@@ -162,7 +166,7 @@ requirements.
 \end{figure}
 \FloatBarrier
 
-\subsection{DocumentGenerationManager}
+\subsection{DocumentGenerationManager}\label{subsec:decomp-DocumentGenerationManager}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DocumentGenerationManager.png}
@@ -171,7 +175,7 @@ requirements.
 \end{figure}
 \FloatBarrier
 
-\subsection{DocumentStorageFunctionality}
+\subsection{DocumentStorageFunctionality}\label{subsec:decomp-DocumentStorageFunctionality}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DocumentStorageFunctionality.png}
@@ -180,7 +184,7 @@ requirements.
 \end{figure}
 \FloatBarrier
 
-\subsection{JobManager}
+\subsection{JobManager}\label{subsec:decomp-JobManager}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{JobManager.png}
@@ -189,16 +193,16 @@ requirements.
 \end{figure}
 \FloatBarrier
 
-\subsection{LinkFunctionality}
+\subsection{LinkMappingFunctionality}\label{subsec:decomp-LinkMappingFunctionality}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{LinkMappingFunctionality.png}
-	\caption{Decomposition of \texttt{LinkFunctionality}}
-	\label{fig:decomp-LinkFunctionality}
+	\caption{Decomposition of \texttt{LinkMappingFunctionality}}
+	\label{fig:decomp-LinkMappingFunctionality}
 \end{figure}
 \FloatBarrier
 
-\subsection{PDSDB}
+\subsection{PDSDB}\label{subsec:decomp-PDSDB}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{PDSDB.png}
@@ -207,7 +211,7 @@ requirements.
 \end{figure}
 \FloatBarrier
 
-\subsection{UserFunctionality}
+\subsection{UserFunctionality}\label{subsec:decomp-UserFunctionality}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{UserFunctionality.png}
