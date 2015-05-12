@@ -274,7 +274,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 \subsection{AuthenticationHandler}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{AuthenticationHandler} is responsible for authenticating Registered recipients and Customer organizations. The architecture does not specify the means of authentication (e.g. the type of credentials). The credentials are stored in the \texttt{UserDB}.
-    \item \textbf{Super-component:} \texttt{UserFacade}
+    \item \textbf{Super-component:} \texttt{UserFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
 
@@ -356,33 +356,24 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{ChannelDispatcher}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{ChannelDispatcher} is responsible for choosing the correct delivery channel for a 
+    \item \textbf{Description:} The \texttt{ChannelDispatcher} is responsible for choosing the correct delivery channel for a generated document. It also forwards the document to the \texttt{DocumentStorageManager}, which will store the document.
     \item \textbf{Super-component:} \texttt{Deliveryfunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item FinalizeDocument\\
+    Note that the methods in this interface are made idempotent. The methods of this interface are called by \texttt{Generator} instances. 
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    
+        \item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{ChannelDispatcher} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
             \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+		\end{itemize}
+		
+        \item \texttt{void generationError(JobId jobid, Error error)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
@@ -832,7 +823,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{EmailFacade}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{EmailFacade} is responsible for creating and sending emails used in the delivery of documents. It will send documents to  Unregistered recipients by e-mail when receipt tracking is turned off. When receipt tracking is turned on for an Unregistered Recipient, it will send an e-mail containing a short description of the received document and a unique link, which can be followed to get document. For Registered Recipients, it will send an e-mail containing a short description of the document and a link to the document.
+    \item \textbf{Description:} The \texttt{EmailFacade} is responsible for creating and sending emails used in the delivery of documents. It will send documents to  Unregistered recipients by e-mail when receipt tracking is turned off. When receipt tracking is turned on for an Unregistered Recipient, it will send an e-mail containing a short description of the received document and a unique link, which can be followed to get document. For Registered Recipients, it will send an e-mail containing a short description of the document and a link to the document. It also marks jobs as sent using the \texttt{JobManager}.
     \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -863,7 +854,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{Generator}
 \begin{itemize}
-    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{DeliveryrFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{NotificationHandler} that it does not have all of the data required to fill in the template.
+    \item \textbf{Description:} A \texttt{Generator} generates the documents and forwards them to \texttt{DeliveryFunctionality} to store and deliver them. Its availability is monitored by the \texttt{DocumenGenerationManager} with the Ping interface. A \texttt{Generator} is also responsible of notifying the \texttt{NotificationHandler} that it does not have all of the data required to fill in the template.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -1036,7 +1027,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item \textbf{Description:} The \texttt{JobManager} is responsible creating jobs and storing them. It is responsible for retrieving data connected to a specific job. It can retrieve the raw data or customer organization info for specific jobs. The \texttt{JobFacade} is also used for marking jobs as sent and received.
     \item \textbf{Super-component:} None
-    \item \textbf{Sub-components:} \texttt{JobFacade} , \texttt{JobDBShardingManager} and \texttt{JobDBShard}
+    \item \textbf{Sub-components:} \texttt{JobFacade}, \texttt{JobDBShardingManager} and \texttt{JobDBShard}
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1090,9 +1081,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{LinkMappingDB}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{LinkMappingDB} is responsible for actually storing a mapping between unique links and \texttt{DocumentIds}. With this information, it also stores information about where a document can be found, i.e. only in the \texttt{DocumentDB} or both in the \texttt{PDSDB} and the \texttt{DocumentDB}.
+    \item \textbf{Super-component:} \texttt{LinkMappingFunctionality}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1126,9 +1117,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{LinkMappingManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{LinkMappingManager} is responsible for creating unique links which points to a document. It also sends read and write requests to the \texttt{LinkMappingDB} to get and store the mappings between the unique links and the documents.
+    \item \textbf{Super-component:} \texttt{LinkMappingFunctionality}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1157,9 +1148,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{LinkMappingFunctionality}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{LinkMappingFunctionality} is responsible for creating unique links which point to documents. It is also responsible for storing these mappings and ultimately mapping a link to a document.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} \texttt{LinkMappingManager} and \texttt{LinkMappingFunctionality}
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1431,9 +1422,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{Print\&PostalServiceChannel}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:}  The \texttt{Print\&PostalServiceChannel} is responsible for the printing the document and sending it by mail. It is external to the eDocs system and represents the servers of a print \&postal service.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1467,9 +1458,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{Print\&PostalServiceFacade}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{Print\&PostalServiceFacade} is responsible for delivering a document to the \texttt{Print\&PostalChannel}, so it can be printed and sent by mail. It also marks jobs as sent using the \texttt{JobManager}.
+    \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1504,95 +1495,34 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{NotificationHandler}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-
-\subsection{OtherFunctionality}
-\begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
+    \item \textbf{Description:} The \texttt{NotificationHandler} is responsible for sending notifications to the appropriate parties, e.g. the eDocs operators and the customer administrators.
     \item \textbf{Super-component:} None
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item FinalizeDocument\\
-    Note that the methods in this interface are made idempotent. The methods of this interface are called by \texttt{Generator} instances. 
-    \begin{itemize}
-    
-        \item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
-            \item Exceptions: None
-		\end{itemize}
-		
-        \item \texttt{void generationError(JobId jobid, Error error)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-
-
-
-        
-
-    
     \item NotifyOperator
     \begin{itemize}
         \item \texttt{void notifyOperatorOfPDSDBReplicaFailure(PDSDBReplicaId replicaId, TimeStamp dateTime)}
         \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators. This method is called by a \texttt{PDSReplicationManager}.
+            \item Effect: The \texttt{NotificationHandler} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators. This method is called by a \texttt{PDSReplicationManager}.
             \item Exceptions: None
         \end{itemize}
         
         \item \texttt{void notifyOperatorOfDocumentGenerationFailure(NotificationMessage msg,\\ TimeStamp whenFailed)}
         \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} will send a textual message \texttt{msg} to the eDocs operators, which contains further information about the specific failure. This method is called by the \texttt{DocumentGenerationManager}. More specifically, it is called by the \texttt{GeneratorManager}.
+            \item Effect: The \texttt{NotificationHandler} will send a textual message \texttt{msg} to the eDocs operators, which contains further information about the specific failure. This method is called by the \texttt{DocumentGenerationManager}. More specifically, it is called by the \texttt{GeneratorManager}.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
-
 \end{itemize}
 
 \subsection{OtherDB}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{OtherDB} is responsible for storing all information that is not required to be stored separately by non-functional requirements. For example, it stores the raw data and data about customer organizations and registered recipients. It also stores the templates for documents and the keys of customer organizations to sign the documents during generation.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1601,7 +1531,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \begin{itemize}
         \item \texttt{Key getKey(CustomerId customerId)}
         \begin{itemize}
-            \item Effect: The \texttt{OtherFunctionality} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
+            \item Effect: The \texttt{OtherDB} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
             \item Exceptions:
             \begin{itemize}
                 \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
@@ -1614,51 +1544,41 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
        % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
-            \item Effect:  The \texttt{OtherFunctionality} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
+            \item Effect: The \texttt{OtherDB} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
             \item Exceptions:
             \begin{itemize}
                 \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
             \end{itemize}
         \end{itemize}
     \end{itemize}
-\end{itemize}
-
-\subsection{RawDataDB}
-\begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item InterfaceA
+    
+    \item UserDataMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Credentials getRegisteredRecipientCredentials(RecipientId recipientId) \\throws NoSuchRecipientException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item NoSuchRecipientException: Thrown if no Registered Recipient with the given credentials exists.
             \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+		\end{itemize}
+            
+        \item \texttt{Credentials getCustomerOrganizationCredentials(CustomerId customerId) \\ throws NoSuchCustomerOrganizationException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
 
 \subsection{RecipientClient}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{RecipientClient} is external to the eDocs system and represents a client device of an unregistered or registered recipient of eDocs that communicates with the eDocs System.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1692,9 +1612,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{RawDataHandler}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{RawDataHandler} is responsible for verifying the raw data and its entries.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{RawDataHandler} is responsible for verifying the raw data and its entries. It forwards the validated raw data to the \texttt{JobManager} to create jobs.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1723,9 +1643,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{RecipientFacade}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{RecipientFacade} is responsible for the interaction of Registered and Unregistered Recipients with the eDocs system. It provides methods for authentication, for consulting the personal document store, for downloading documents, \dots
+    \item \textbf{Super-component:} \texttt{Userfunctionality}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1742,7 +1662,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
             \item \texttt{Boolean logout(SessionId sessionId)}
             \begin{itemize}
-                \item Effect: The \texttt{UserFacade} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
+                \item Effect: The \texttt{RecipientFacade} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
                 \item Exceptions: None
             \end{itemize}
         \end{itemize}
@@ -1765,9 +1685,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{RegistrationManager}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{RegistrationManager} is responsible for the registration or unregistered recipients and customer organizations. For the registration of unregistered recipients, the \texttt{RegistrationManager} gets called by the \texttt{RecipientFacade}, as recipients can register themselves. Customer organizations get registered by an eDocs operator, so the \texttt{EDocsAdminClient} calls those methods.
+    \item \textbf{Super-component:} \texttt{UserFunctionality}
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1842,7 +1762,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \subsection{SessionDB}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{SessionDB} stores the session identifiers for currently active sessions.
-    \item \textbf{Super-component:} \texttt{UserFacade}
+    \item \textbf{Super-component:} \texttt{UserFunctionality}
     \item \textbf{Sub-components:} None.
 \end{itemize}
 
@@ -1919,86 +1839,11 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \end{itemize}
 \end{itemize}
 
-\subsection{TemplateDB}
-\begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsection{TriggerManager}
-\begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{Credentials getRegisteredRecipientCredentials() throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsection{UserDB}
-\begin{itemize}
-    \item \textbf{Description:} The \texttt{UserDB} stores all information about registered users of the eDocs system, i.e. Customer Organizations and Registered Recipients.
-    \item \textbf{Super-component:} \texttt{DB}
-    \item \textbf{Sub-components:} None
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item UserDataMgmt
-    \begin{itemize}
-        \item \texttt{Credentials getRegisteredRecipientCredentials(RecipientId recipientId) \\throws NoSuchRecipientException}
-        \begin{itemize}
-            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchRecipientException: Thrown if no Registered Recipient with the given credentials exists.
-            \end{itemize}
-		\end{itemize}
-            
-        \item \texttt{Credentials getCustomerOrganizationCredentials(CustomerId customerId) \\ throws NoSuchCustomerOrganizationException}
-        \begin{itemize}
-            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
 \subsection{UserFunctionality}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{UserFunctionality} is responsible for the interaction of registered recipients, unregistered recipients, customer organizations and eDocs operators with the eDocs system. It provides methods to register, to login and to logout, to consult the personal document store and download documents, to consult the status of document processing jobs, \dots
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} \texttt{RecipientFacade}, \texttt{CustomerOrganizationClient}, \texttt{EDocsadminfacade},\texttt{RegistrationManager} \texttt{AuthenticationHandler} and \texttt{SessionDB}
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -2032,9 +1877,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{ZoomitChannel}
 \begin{itemize}
-    \item \textbf{Description:} Responsibilities of the component.
-    \item \textbf{Super-component:} The direct super-component, if any.
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Description:} The \texttt{ZoomitChannel} is responsible for delivering documents via Zoomit. It is external to the system and represents the servers of Zoomit to which a document can be sent.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -2068,7 +1913,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{ZoomitFacade}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{ZoomitFacade} is responsible for sending documents to Unregistered Recipients through Zoomit.
+    \item \textbf{Description:} The \texttt{ZoomitFacade} is responsible for sending documents to Unregistered Recipients through Zoomit. It is also responsible for receiving messages from Zoomit when a document has been received by Zoomit or when a Zoomit user as received his or her document. The \texttt{ZoomitFacade} can use the \texttt{JobManager} to mark jobs as sent or received.
     \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
