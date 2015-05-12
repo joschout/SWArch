@@ -19,7 +19,7 @@
 \newpage
 
 \section{Introduction}\label{sec:introduction}
-The goal of this project was to design a document processing system. In this document, we describe the final architecture, which was designed based on the requirements from the domain analysis and the priorities of these requirements given by our stakeholders.
+The goal of this project was to design a document processing system. In this document, we describe the final architecture, which was designed based on the requirements from the domain analysis and the priorities of these requirements given by our stakeholders. The provided initial architecture was used as a starting point to achieve this.
 Section \ref{sec:overview} lists the architectural decisions for all non-functional requirements and discusses the final architecture.
 Section \ref{sec:client-server} provides and discusses the main context and decomposition diagrams of our architecture (i.e. the context and primary diagram of the component-and-connector view) along with a discussion of the main architectural decisions involved.
 Section \ref{sec:decomposition} provides and discusses the more fine-grained decompositions of some of the major components in the main decomposition.
@@ -29,23 +29,21 @@ Afterwards, Appendix \ref*{app:catalog} lists and describes all components of th
 \section{Overview}\label{sec:overview}
 This section gives a high-level but complete overview of the system: it lists the design decisions for all non-functional requirements and provides a discussion concerning the strong and weak points of the architecture.
 \subsection{Architectural decisions}
-In this section, we give an overview of the architectural decisions made in our architecture in order to achieve the requirements given in the domain analysis.
+In this section, we give an overview of the architectural decisions made in our architecture in order to achieve the requirements given in the domain analysis and the residual drivers given in the provided initial architecture. However, we will not repeat any decisions that were already documented in this provided initial architecture as they can be found there.
 
 \paragraph{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute}
-Av1a and Av2a require the system to notify the an eDocs operator within 1 minute. To achieve this, the NotificationHandler 
-
-keeps track of the next deadline for each gateway, which the gateway provides with each new sensor data update. As such, these updates are considered as implicit heartbeats. To achieve the latter, the GatewayFacade is pinged by the AvailabilityMonitor, which is deployed on another node. For more details, we refer to Sec- tion 4.1.1, Section 5.2 and Section 6.
+\textit{Av1a} and \textit{Av2a} require the system to notify the an eDocs operator within 1 minute. To achieve this, the \texttt{NotificationHandler} forwards all incoming operator notifications to the \texttt{EDocsAdminFacade}, which in turn delivers these to the external \texttt{EDocsAdminFacade}. To ensure that notifications get sent to the eDocs operator in a timely fashion, both the \texttt{EDocsAdminFacade} and the \texttt{NotificationHandler} are deployed on the same node, which is separated from all other nodes to increase performance. For more details, we refer to Section \ref{subsubsec:Av1a-Av2a} and Section \ref{sec:deployment}.
 
 \paragraph{Av1b\@: Storing the status of an individual job}
+\textit{Av1b} requires the system to store the status of an individual job. To achieve this, the \texttt{JobManager} accepts all read and write requests regarding the storage of job data, including status information. For more details, we refer to Section \ref{subsubsec:Av1b} and Section \ref{subsec:decomp-JobManager}.
 
 \paragraph{Av2b\@: Temporarily storing documents that should be delivered via the personal document store for at least 3 hours in case the PDSDB is unavailable and providing a clear message to users in order to fail gracefully}
-\subparagraph{DocumentStorageCache}
+\textit{Av2b} requires (1) documents that should be delivered via the personal document store to be cached for at least 3 hours in case of unavailability and (2) providing a clear message to the recipient in this case. To achieve this, we introduced the \texttt{DocumentStorageCache}: this component temporarily stores the \texttt{DocumentIds} and corresponding \texttt{UserIds} of all generated documents that are to be delivered to the \texttt{PDSDB} during downtime of the latter component up to a maximum of 3 hours.
+When the \texttt{PDSDB} turns operational again, it notifies the \texttt{DocumentStorageManager} with a sign of life, which in turn retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned ids and subsequently stores them in the \texttt{PDSDB} after conversion of the \texttt{DocumentMetaData}. \\
+Note that the user therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached ids refer to. During this time, the \\
+Finally, we would like to stress that the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are internally converted into \texttt{DocumentId} and \texttt{UserId} writes to the aforementioned cache. Once the \texttt{PDSDB} is operational again and all cached ids are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
+For more details, we refer to Section 4.1.2, Section 5.4 and Section 6.
 % MERK OP: De DocumentDB en PSDDB slaan documenten NIET meer op dezelfde manier op. De DocumentDB slaat het email adres van een document mee op, indien het document naar een email adres opgestuurd is. Dit omdat bij het registeren documenten op basis van email adres opgevraagd moeten kunnen worden. In de DocumentDB zit GEEN RecipientId. In de PDSDB zit er daarentegen WEL een RecipientId, maar GEEN emailadres opgeslagen.
-This component temporarily stores the id's of all generated documents that are to be delivered through the personal document store during downtime of the \texttt{PDSDB} component up to a maximum of 3 hours. When the latter component turns operational again, the \texttt{DocumentStorageManager} retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned id's and subsequently stores them in the \texttt{PDSDB}. Note that the recipient therefore perceives a maximum total downtime of 3 hours plus the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached id's refer to. \\
-Note that the \texttt{DocumentDB} and the \texttt{PDSDB} store documents in exactly the same way, both including the document itself, its meta data and its id, although there is no need for the meta data in the former database. This storage tactic ensures that the \texttt{DocumentStorageManager} does not have to fetch or convert any information when transferring documents between both databases, making the transfer as efficient as possible. This does not introduce any overhead to the storage system, since the meta data is but a fraction of the document data. \\
-Finally, we would like to stress that the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are converted into document id writes to the aforementioned cache. Upon revival of the \texttt{PDSDB}, this database will send a single heartbeat to the \texttt{DocumentStorageManager}, causing this component to begin transferring the missing document data. Once all cached document IDs are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
-
-\paragraph{Av1b\@: Storing the status of an individual job}
 
 \paragraph{Av3\@: Zoomit failure}
 
@@ -133,13 +131,28 @@ Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: l
 LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
 Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
 
-\subsubsection{ReqX\@: requirement name}
+\subsubsection{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute}\label{subsubsec:Av1a-Av2a}
 Describe the design choices related to \emph{ReqX} together with the rationale
 of why these choices where made.
-
 \subsubsection*{Alternatives considered}
 \paragraph{Alternative(s) for choice 1} Explain what alternative(s) you
 considered for this design choice and why they where not selected.
+
+\subsubsection{Av1b\@: Storing the status of an individual job}\label{subsubsec:Av1b}
+
+\subsubsection{Av2b\@: Temporarily storing documents that should be delivered via the personal document store for at least 3 hours in case the PDSDB is unavailable and providing a clear message to users in order to fail gracefully}\label{subsubsec:Av2b}
+
+\subsubsection{Av3\@: Zoomit failure}\label{subsubsec:Av3}
+
+\subsubsection{P2\@: Document lookups}\label{subsubsec:P2}
+
+\subsubsection{P3\@: Status overview for customer administrators}\label{subsubsec:P3}
+
+\subsubsection{M1\@: New type of document: bank statements}\label{subsubsec:M1}
+
+\subsubsection{M2\@: Multiple print \& postal services}\label{subsubsec:M2}
+
+\subsubsection{M3\@: Dynamic selection of the cheapest of print \& postal services}\label{subsubsec:M3}
 
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
 Discuss the decompositions of the components of the client-server view which
