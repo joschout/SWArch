@@ -261,7 +261,54 @@ Show the complete scenario using one or more sequence diagrams.
     \caption{The system behavior for the first scenario.
         }\label{fig:seq_scenario1}
 \end{figure}
+
+
+\subsection{A registered recipient logs in}
+Figure \ref{fig:seq_UC1LogIn} depicts the sequence diagram of a Registered Recipient logging in, according to \emph{UC1: Log in}. The Registered Recipient provides his details to the \texttt{RecipientFacade}. The \texttt{Authentication} compares these credentials to those stored in the \texttt{OtherDB}. if the given credentials match the stored credentials, a new session is opened in the \texttt{SessionDB} and the corresponding session identifier is returned to the registered recipient. Otherwise, an InvalidCredentialsException is thrown.\\
+Note that the use case \emph{UC1: Log in} also has the Customer Organization as a primary actor. The login procedure for customer organizations is almost identical to the procedure for registered recipient, which is why we do not provide a separate sequence diagram for this primary actor. Compared to figure \ref{fig:seq_UC1LogIn}, the Customer Organization sends it login request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Also, another method call to \texttt{OtherDB} is used to ask for the credentials of a customer organization.
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_UC1LogIn.png}
+    \caption{The login behaviour of a Registered Recipient.
+        }\label{fig:seq_UC1LogIn}
+\end{figure}
+
+\subsection{A registered recipient logs out}
+Figure \ref{fig:seq_UC2LogOut} shows the behaviour of a Registered Recipient logging out, according to \emph{UC2: Log out}. The Registered Recipient provides his recipient id and session id to the \texttt{RecipienntFacade}. The \texttt{AuthenticationHandler} first verifies the session (figure \ref{fig:seq_UC2LogOut}). If the session is valid, it logs out the Registered Recipient.\\ Note that the logout procedure for Customer Organizations is almost the same. The only difference is that the Customer Organization sends his logout request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Because of this reason, we do not give a separate sequence diagram for the Customer Organization logging out.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_UC2LogOut.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_UC2LogOut}
+\end{figure}
+
+
+
+\subsection{Updating a document template}
+Figure \ref{fig:seq_UC20UpdateDocumentTemplate} shows the flow when a Customer Administrator updates the template used for generating documents of a given type. It corresponds to \emph{UC20: Update document template}. It consists of two main parts. First, the customer administrator asks what the possible document types are that the customer organization is allowed to generate. The system verifies whether the session of the customer administrator is valid (as detailed in figure \ref{fig:seq_VerifySession} and then returns a list of the allowed document types using the \texttt{OtherDB}.  Together with the allowed document types, it returns the  time when the currently stored templates corresponding to the document types were uploaded.\\
+Secondly, the customer administrator provides the document type it wants to update and the new template to the \texttt{CustomerOrganizationFacade}. After verifying the validity of the session again (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganization} asks the \texttt{OtherDB} to check whether the document type provided by the customer organization is valid and allowed. If it is not allowed or invalid, an InvalidDocumentTypeException gets thrown. Otherwise, the \texttt{CustomerOrganizationFacade} stores the template in the \texttt{OtherDB} together with the time when it has received the template, the document type and the customer organization id.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_UC20UpdateDocumentTemplate.png}
+
+    
+    \caption{The system behavior for updating a document template.
+        }\label{fig:seq_UC20UpdateDocumentTemplate}
+\end{figure}
+
+\subsection{Verifying a session}
+Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid0 The \texttt{AuthenticationHandler} uses the \texttt{SessionDB} to verify whether each incoming session identifier belongs to an existing session. If it belongs to an existing session, the corresponding session attributes are returned to the caller, otherwise an NoSuchSessionException is thrown.
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_VerifySession.png}
+    \caption{verifySession: sequence diagram depicting the verification whether a session is valid.
+        }\label{fig:seq_VerifySession}
+\end{figure}
+
 \FloatBarrier
+
 
 \appendix
 \section{Element catalog}\label{app:catalog}
@@ -343,20 +390,33 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item CostRegistrationMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void addDocumentGenerationCost(CustomerId cuId, JobId jobId, DocumentPriority priority)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{BillingManager} adds the cost for generation documents corresponding to the job identified by \texttt{jobId} to the bill of the customer organization identified by \texttt{cuId}. The document had a priority \texttt{priority}. This method is called by the \texttt{GenerationManager}.
+            \item Exceptions: None
         \end{itemize}
+        
+		\item \texttt{void addDocumentDeliveryCostbyEmail(CustomerId cuId, JobId jobId)}       
+        \begin{itemize}
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by e-mail to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Exceptions: None
+        \end{itemize} 
+
+		\item \texttt{void addDocumentDeliveryCostbyPrintAndPostalService(CustomerId cuId, JobId jobId)}       
+        \begin{itemize}
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by e-mail to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Exceptions: None
+        \end{itemize} 
+        
+		\item \texttt{void addDocumentDeliveryCostbyZoomit(CustomerId cuId, JobId jobId)}       
+        \begin{itemize}
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by Zoomit to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Exceptions: None
+        \end{itemize}                
     \end{itemize}
 \end{itemize}
-
-
 
 \subsection{ChannelDispatcher}
 \begin{itemize}
@@ -370,7 +430,6 @@ List all elements and interfaces alphabetically for ease of navigation.
     \item FinalizeDocument\\
     Note that the methods in this interface are made idempotent. The methods of this interface are called by \texttt{Generator} instances. 
     \begin{itemize}
-    
         \item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc)}
         \begin{itemize}
             \item Effect: The \texttt{ChannelDispatcher} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
@@ -404,20 +463,12 @@ List all elements and interfaces alphabetically for ease of navigation.
                 \item SomeException: Describe when the exception is thrown.
             \end{itemize}
 		\end{itemize}
+		
         \item \texttt{void operation2(ParamType2 param)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+        \end{itemize}  
     \end{itemize}
 \end{itemize}
 
@@ -430,24 +481,49 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item AuthN
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+           \item \texttt{Boolean logout(SessionId sessionId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{AuthenticationHandler} will remove the session with the given id from the \texttt{SessionDB}. If no such session exists, nothing is changed and no exception is thrown.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
+        \begin{itemize}
+            \item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{UserDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
+            \item Exceptions: 
+            \begin{itemize}
+                \item InvalidCredentialsException: Thrown if the given credentials are invalid.
+             \end{itemize}
+        \end{itemize}
+     \end{itemize}  
+      
+    \item TemplateMgmt
+    \begin{itemize}
+    	\item \texttt{List<Tuple<DocumentType,TimeStamp>> getPossibleDocumentTypes(SessionId sessionId, CustomerId cuId) throws NotAuthenticatedException}
+        \begin{itemize}
+            \item Effect: The \texttt{CustomerOrganizationClient} will return a list of the document types that the customer organization is allowed to generate. It also indicates the current template for each document type by returning for each document type the time when the last template was uploaded.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+            	\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
             \end{itemize}
-		\end{itemize}
-		
-        \item \texttt{void operation2(ParamType2 param)}
+        \end{itemize}
+        
+   	\item \texttt{Boolean updateDocumentTemplate(SessionId sessionId, CustomerId cuId, DocumentType documentType, Template template) throws NotAuthenticatedException, InvalidDocumentTypeException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}  
+            \item Effect: The \texttt{CustomerOrganizationClient} will update the current template for the given \texttt{documentType} to the given \texttt{template} for the customer organization identified by \texttt{cuId}. Returns true when it succeeds.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+            	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+            \end{itemize}
+        \end{itemize}        
     \end{itemize}
 \end{itemize}
+
+
+
 
 \subsection{Completer}
 \begin{itemize}
@@ -1543,7 +1619,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \end{itemize}
     \end{itemize}
     
-    \item GetTemplate
+    \item TemplateMgmt
     \begin{itemize}
         \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
        % \item \texttt{Template getTemplate(TemplateId templateId)}
@@ -1554,13 +1630,23 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
             \end{itemize}
         \end{itemize}
+        
+   		\item \texttt{Boolean storeDocumentTemplate(CustomerId cuId, DocumentType documentType, Template template, TimeStamp whenReceived) throws InvalidDocumentTypeException}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given template with the given time stamp for the customer organization identified by the given \texttt{CustomerId}.
+            \item Exceptions:
+            \begin{itemize}
+            	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+            \end{itemize}
+        \end{itemize}          
+        
     \end{itemize}
     
     \item UserDataMgmt
     \begin{itemize}
         \item \texttt{Credentials getRegisteredRecipientCredentials(RecipientId recipientId) \\throws NoSuchRecipientException}
         \begin{itemize}
-            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
+            \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
             \item Exceptions:
             \begin{itemize}
                 \item NoSuchRecipientException: Thrown if no Registered Recipient with the given credentials exists.
@@ -1569,12 +1655,20 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             
         \item \texttt{Credentials getCustomerOrganizationCredentials(CustomerId customerId) \\ throws NoSuchCustomerOrganizationException}
         \begin{itemize}
-            \item Effect: The \texttt{UserDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
+            \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
             \item Exceptions:
             \begin{itemize}
                 \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
             \end{itemize}
         \end{itemize}
+        
+		\item \texttt{List<Tuple<DocumentType, TimeStamp>> getPossibleDocumentTypes(CustomerId customerId)}
+		\begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the a list of document types that the Customer Organization identified by \texttt{customerId} can generate. For each document type, it also returns the time when the last \texttt{Template} for that document type was uploaded.  
+            \item Exceptions: None
+        \end{itemize}
+		  
+        
     \end{itemize}
 \end{itemize}
 
@@ -1663,16 +1757,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \begin{itemize}
                 \item InvalidCredentialsException: Thrown if the \texttt{AuthenticationHandler} indicated that the given credentials where incorrect.
             \end{itemize}
-
-            \item \texttt{Boolean logout(SessionId sessionId)}
+		\end{itemize}
+		
+        \item \texttt{Boolean logout(SessionId sessionId)}
             \begin{itemize}
                 \item Effect: The \texttt{RecipientFacade} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
                 \item Exceptions: None
             \end{itemize}
         \end{itemize}
-    \end{itemize}
+    
 
-    \item DoumentMgmt
+    \item DocumentMgmt
     \begin{itemize}
         \item \texttt{PDSOverview getPDSOverview(SessionId, RecipientId recipientId)\\ throws NotAuthenticatedException, PDSUnavailableException}
         \begin{itemize}
@@ -1798,7 +1893,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
              \item Exceptions: None
         \end{itemize}
 
-        \item \texttt{void closeSession((SessionId sessionId) throws NoSuchSessionException}
+        \item \texttt{void closeSession(SessionId sessionId) throws NoSuchSessionException}
         \begin{itemize}
              \item Effect: The \texttt{SessionDB} closes the active session associated with the given \texttt{sessionId}.
              \item Exceptions:
