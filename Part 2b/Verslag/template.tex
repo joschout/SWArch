@@ -321,7 +321,7 @@ Secondly, the customer administrator provides the document type it wants to upda
 \end{figure}
 
 \subsection{Verifying a session}
-Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid0 The \texttt{AuthenticationHandler} uses the \texttt{SessionDB} to verify whether each incoming session identifier belongs to an existing session. If it belongs to an existing session, the corresponding session attributes are returned to the caller, otherwise an NoSuchSessionException is thrown.
+Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid. The \texttt{AuthenticationHandler} uses the \texttt{SessionDB} to verify whether each incoming session identifier belongs to an existing session. If it belongs to an existing session, the corresponding session attributes are returned to the caller, otherwise an NoSuchSessionException is thrown.
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=\textwidth]{Seq_VerifySession.png}
@@ -331,6 +331,34 @@ Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid
 
 \FloatBarrier
 
+\subsection{Initiating document processing}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_UC3InitiateDocumentProcessing.png}
+    \caption{VerifyRawData: verification whether the raw data is valid.
+        }\label{fig:seq_UC3InitiateDocumentProcessing}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_VerifyRawData.png}
+    \caption{VerifyRawData: verification whether the raw data is valid.
+        }\label{fig:seq_VerifyRawData}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_CreateJobs.png}
+    \caption{CreateJobs: the \texttt{JobManager creates jobs and forwards them to be scheduled by the \texttt{Scheduler}}.
+        }\label{fig:seq_CreateJobs}
+\end{figure}
+
+
+
+\FloatBarrier
 
 \appendix
 \section{Element catalog}\label{app:catalog}
@@ -541,6 +569,20 @@ List all elements and interfaces alphabetically for ease of navigation.
             	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
             \end{itemize}
         \end{itemize}        
+    \end{itemize}
+    
+    \item InitiateDocumentProcessing
+    \begin{itemize}
+    	\item \texttt{List<RawData> generateDocumentsNonRecurring(CustomerId cuid, SessionId sessionId, \\DocumentType docType, RawDataPacket rawDataPacket, BatchMetaData batchMetaData,\\ DocumentPriority priority) throws NotAuthenticatedException, InvalidDocumentTypeException, InvalidRawDataPackageException }
+    	 \begin{itemize}
+            \item Effect: The \texttt{CustomerOrganizationFacade} gets an indication from a customer organization with customer identifier \texttt{cuid}  to start a nonrecurring batch of document processing jobs. The documents to be generated should be of document type \texttt{docType}. The information necessary to generate the documents is given in  a \texttt{RawDataPacket} containing all the info about the raw data entries of the batch, and the \texttt{batchMetaData}. After verification of the session identifier, the \texttt{CustomerOrganizationFacade} will put a \texttt{TimeStamp} of the time when this method is called in the \texttt{batchMetaData} and forward its arguments to the \texttt{RawDataHandler}, while indicating it is a nonrecurring batch of document that should be generated.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+            	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+            	\item InvalidRawDataPackageException: Thrown if the raw data package contains an error (e.g. an invalid Excel file or incorrectly formatted XML).
+            \end{itemize}
+        \end{itemize}  	
     \end{itemize}
 \end{itemize}
 
