@@ -345,12 +345,17 @@ Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid
 \FloatBarrier
 
 \subsection{Initiating document processing}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+Figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows how a customer organization initiates a batch of document processing jobs. Recurring and non-recurring batches are indicated using the \texttt{isRecurring} boolean value. If the batch is non-recurring, the customer organization can indicate another priority than the default priority of that customer organization if the batch sould be handled with another priority than the default priority.  For recurring batches, it does not matter if a priority is given, as the default priority will be used. the customer organization also delivers the raw data as a \texttt{rawDataPackage} and the meta-data of the batch to the \texttt{CustomerOrganizationFacade}. After verification of the session identifier (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganizationFacade} will put a \texttt{TimeStamp} of the time when this method is called in the \texttt{batchMetaData} and forward all the information to \texttt{RawDataHandler}, while alsp indicating if the batch is (non-)recurring.\\
+
+Figure \ref{fig:seq_VerifyRawData} depicts the first part of the method call in \texttt{RawDataHandler}, which will verify whether the raw data is valid. First, \texttt{RawDataHandler} checks whether the customer organization is allowed to generated the given document type. If it is allowed, the received raw data packet will be validated, e.g  there will be checked whether the content of the received Excel file can be read or whether a received XML file is correctly formatted. If it is not valid, an exception is thrown. Otherwise, depending on if the batch is  recurring, the \texttt{RawDataHandler} will query the SLA in the \texttt{OtherDB} to check if the number of raw data entries in the raw data package is allowed. If the number of entries exceeds this maximum, an exception is thrown. Next, each individual entry will be checked on validity, so the \texttt{RawdataHandler} knows which \texttt{RawData} entries are valid and which are not.\\
+
+After verification, figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows that the \texttt{RawDataHandler} will only use the given priority if the batch is non-recurring. Otherwise, it will use the default priority. The deadline of the document processing jobs is calculated and put into the \texttt{BatchMetaData}, after which the \texttt{RawData} entries and \texttt{BatchMetaData} is stored in the \texttt{OtherDB}. The \texttt{RawDataHandler} asks the \texttt{JobFacade} to create jobs for the valid raw data entries and to initiate document processing for those jobs.\\
+
+Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storing jobs for the valid raw data entries, after which it inserts these jobs into the \texttt{Scheduler}.
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{Seq_UC3InitiateDocumentProcessing.png}
+    \includegraphics[width=0.8\textwidth]{Seq_UC3InitiateDocumentProcessing.png}
     \caption{VerifyRawData: verification whether the raw data is valid.
         }\label{fig:seq_UC3InitiateDocumentProcessing}
 \end{figure}
@@ -369,7 +374,16 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_CreateJobs}
 \end{figure}
 
+\subsection{Consult document in personal document store}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
 
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_UC14ConsultDocumentInPDS.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_scenario1}
+\end{figure}
 
 \FloatBarrier
 
@@ -586,14 +600,15 @@ List all elements and interfaces alphabetically for ease of navigation.
     
     \item InitiateDocumentProcessing
     \begin{itemize}
-    	\item \texttt{List<RawData> generateDocumentsNonRecurring(CustomerId cuid, SessionId sessionId, \\DocumentType docType, RawDataPacket rawDataPacket, BatchMetaData batchMetaData,\\ DocumentPriority priority) throws NotAuthenticatedException, InvalidDocumentTypeException, InvalidRawDataPackageException }
+    	\item \texttt{List<RawData> generateDocuments(CustomerId cuid, SessionId sessionId, \\DocumentType docType, RawDataPacket rawDataPacket, BatchMetaData batchMetaData,\\ DocumentPriority priority, Boolean isRecurring) throws NotAuthenticatedException,\\ InvalidDocumentTypeException, InvalidRawDataPackageException, ToManyRawDataEntriesException }
     	 \begin{itemize}
-            \item Effect: The \texttt{CustomerOrganizationFacade} gets an indication from a customer organization with customer identifier \texttt{cuid}  to start a nonrecurring batch of document processing jobs. The documents to be generated should be of document type \texttt{docType}. The information necessary to generate the documents is given in  a \texttt{RawDataPacket} containing all the info about the raw data entries of the batch, and the \texttt{batchMetaData}. After verification of the session identifier, the \texttt{CustomerOrganizationFacade} will put a \texttt{TimeStamp} of the time when this method is called in the \texttt{batchMetaData} and forward its arguments to the \texttt{RawDataHandler}, while indicating it is a nonrecurring batch of document that should be generated.
+            \item Effect: The \texttt{CustomerOrganizationFacade} gets an indication from a customer organization with customer identifier \texttt{cuid}  to start a batch of document processing jobs. The documents to be generated should be of document type \texttt{docType}. The boolean \texttt{isRecurring} indicates whether the batch is recurring or non-recurring. The information necessary to generate the documents is given in  a \texttt{RawDataPacket} containing all the info about the raw data entries of the batch, and the \texttt{batchMetaData}. After verification of the session identifier, the \texttt{CustomerOrganizationFacade} will put a \texttt{TimeStamp} of the time when this method is called in the \texttt{batchMetaData} and forward its arguments to the \texttt{RawDataHandler}, while indicating if it is a recurring or non-recurring batch of document that should be generated.
             \item Exceptions:
             \begin{itemize}
             	\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
             	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
             	\item InvalidRawDataPackageException: Thrown if the raw data package contains an error (e.g. an invalid Excel file or incorrectly formatted XML).
+            	\item ToManyRawDataEntriesException: Thrown if the batch is a recurring batch and contains more raw data entries than maximally allowed for this batch.
             \end{itemize}
         \end{itemize}  	
     \end{itemize}
@@ -1177,7 +1192,19 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
-    \end{itemize}   
+    \end{itemize}  
+    
+    \item JobMgmt
+    \begin{itemize}
+    	\item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
+    	\begin{itemize}
+            \item Effect: The \texttt{JobFacade} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
+            \item Exceptions: None
+        \end{itemize}
+    	
+    	
+    	
+    \end{itemize}
 \end{itemize}
 
 \subsection{JobManager}
@@ -1716,7 +1743,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
             \end{itemize}
         \end{itemize}          
-        
     \end{itemize}
     
     \item UserDataMgmt
@@ -1743,10 +1769,57 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 		\begin{itemize}
             \item Effect: The \texttt{OtherDB} returns the a list of document types that the Customer Organization identified by \texttt{customerId} can generate. For each document type, it also returns the time when the last \texttt{Template} for that document type was uploaded.  
             \item Exceptions: None
-        \end{itemize}
-		  
+        \end{itemize} 
         
+		\item \texttt{Boolean isAllowedDocumentType(CustomerId cuid, DocumentType docType)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} checks in the SLA of the customer organization with customer identifier \texttt{cuid} if the document type \texttt{docType} is allowed. It returns true if it is allowed, otherwise it returns false.
+			\item Exceptions: None
+		\end{itemize}		        
+        
+        	\item \texttt{void indicateWhichRecurringBatch(CustomerId cuid, BatchMetaData batchMetaData) }        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} stores to which of the recurring batches of the customer organisation identified by \texttt{cuid} this batch corresponds. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
+			\item Exceptions: None
+		\end{itemize}	
+     
+           \item \texttt{int getNumberOfDocumentsMaximallyAllowed(CustomerId cuid, BatchMetaData batchMetaData) }        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns the number of documents that is maximally allowed for the customer organization identified by \texttt{cuid} for this recurring batch. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
+			\item Exceptions: None
+		\end{itemize}     
     \end{itemize}
+    
+	\item BatchDataMgmt
+    \begin{itemize}
+        \item \texttt{BatchId storeBatchMetaData(BatchMetaData batchMetaData)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given \texttt{batchMetaData} and returns the batch identifier with which this meta-data can be queried.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{BatchMetaData getBatchMetaData(BatchId batchId)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the meta-data if the batch identified by the given \texttt{batchId}.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}    
+    
+    	\item RawDataMgmt
+    \begin{itemize}
+        \item \texttt{List<RawDataId> storeRawData(List<RawData> rawDataEntries)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given raw data entries. It returns the identifiers of the stored raw data entries.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{List<RawData> getRawData(List<RawDataId> rawDataIds)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the raw data entries corresponding to the given raw dat identifiers.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize} 
+    
 \end{itemize}
 
 \subsection{RecipientClient}
@@ -1794,26 +1867,19 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item InputRawDara
     \begin{itemize}
-        \item \texttt{void validateRawData(List<RawData> rawData) throws InvalidRawDataException}
+        \item \texttt{List<RawData> generateDocuments(customerId coid, DocumentType docType, RawDataPacket rawDataPacket, BatchMetaData batchMetaData, DocumetPriority priority, Bolean isRecurring) throws InvalidDocumentTypeException, InvalidRawDataPackageException,\\ ToManyRawDataEntriesException}
         \begin{itemize}
-            \item Effect: The \texttt{RawDataHandler} verifies the received raw data. If it is correct, nothing happens.
+            \item Effect: The \texttt{RawDataHandler} verifies the received raw data. If it is correct, it stores the raw data and batch meta-data in the \texttt{OtherDB}. It calculates the deadline of the document processing and informs the \texttt{JobFacade} to create jobs and initiate document processing for the valid raw data entries. It returns a list of the invalid raw data entries.
             \item Exceptions:
             \begin{itemize}
-                \item InvalidRawDataException: Thrown if the raw data is invalidated for some reason. This exception can contain a message about why the raw data was invalidated.
+                \item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+            	\item InvalidRawDataPackageException: Thrown if the raw data package contains an error (e.g. an invalid Excel file or incorrectly formatted XML).
+            	\item ToManyRawDataEntriesException: Thrown if the batch is a recurring batch and contains more raw data entries than maximally allowed for this batch.
             \end{itemize}
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+    \end{itemize} 
 \end{itemize}
 
 \subsection{RecipientFacade}
@@ -2160,7 +2226,11 @@ them alphabetically for ease of navigation.
     
     \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     
-    \item \texttt{RawData}: A data structure listing the raw data used in a document processing job.
+    \item \texttt{RawData}: A data structure listing a raw data entry used in a document processing job.
+    
+    \item \texttt{RawDataPacket}: A data structure containing all the raw data entries in a batch, given by the customer organization to the \texttt{CustomerOrganizationFacade}. The architecture does not specify this data structure, but possibilities are an XML file or Excell file.
+    
+    \item \texttt{RawDataId}: A piece of data uniquely identifying a raw data entry in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     
     \item \texttt{RecipientId}: A piece of data uniquely identifying a Registered Recipient in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     
