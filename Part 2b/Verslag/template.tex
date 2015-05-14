@@ -377,6 +377,32 @@ Show the complete scenario using one or more sequence diagrams.
 
 \FloatBarrier
 
+\subsection{Delivering a document via the personal document store}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{Seq_InitiateDocumentDelivery.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_InitiateDocumentdelivery}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Seq_StoreDocRegisteredRecipient.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_StoreDocRegisteredRecipient}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{Seq_StoreDocPDS.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_StoreDocPDS}
+\end{figure}
+
+
 \appendix
 \section{Element catalog}\label{app:catalog}
 In this section, we list all the components and the interfaces they provide. Per component, we describe its responsibilities, declare its super-component (if any) and list its sub-components (if any).
@@ -854,23 +880,11 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentStorageMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void markAsReceived(DocumentId documentId, TimeStamp whenReceived)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{DocumentStorageManager} marks the document identified by the given document identifier as received, by storing the given time in the document meta-data of the document. The given time is the time when the recipient should have received the document. Note that this method only has effect the first time it is called for a valid document identifier and time stamp.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -1123,6 +1137,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item JobDBMgmt
     \begin{itemize}
+	    \item \texttt{RawData getRawData(JobId jobId)}
+        \begin{itemize}
+            \item Effect: The \texttt{JobDBShardingManager} returns the raw data entry corresponding to the job identified by the given job identifier.
+            \item Exceptions: None
+        \end{itemize}    
+    
      	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
@@ -1155,6 +1175,14 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     
 	\item GetBatchData
     \begin{itemize}
+        \item \texttt{RawData getRawData(JobId jobId)}
+        \begin{itemize}
+            \item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
+            \item Exceptions: None
+        \end{itemize}
+        
+        
+        
         \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
@@ -1206,6 +1234,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     
 	\item GetBatchData
     \begin{itemize}
+        \item \texttt{RawData getRawData(JobId jobId)}
+        \begin{itemize}
+            \item Effect: The \texttt{JobManager} returns the raw data entry corresponding to the job identified by the given job identifier.
+            \item Exceptions: None
+        \end{itemize}    
+    
         \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
         \begin{itemize}
             \item Effect: Describe the effect of the operation
@@ -1846,7 +1880,13 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         
         \item \texttt{List<RawData> getRawData(List<RawDataId> rawDataIds)}
         \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the raw data entries corresponding to the given raw dat identifiers.
+            \item Effect: The \texttt{OtherDB} returns the raw data entries corresponding to the given raw data identifiers.
+            \item Exceptions: None
+        \end{itemize}
+        
+            \item \texttt{RawData getRawData(RawDataId rawDataId)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the raw data entry corresponding to the given raw data identifier.
             \item Exceptions: None
         \end{itemize}
     \end{itemize} 
