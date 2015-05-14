@@ -39,7 +39,7 @@ For more details, we refer to Section \ref{subsubsec:Av1a-Av2a} and Section \ref
 \textit{Av1b} requires the system to store the status of an individual job. To achieve this, the \texttt{JobManager} accepts all read and write requests regarding the storage of job data, including status information.\\
 For more details, we refer to Section \ref{subsubsec:Av1b} and Section \ref{subsec:decomp-JobManager}.
 
-\paragraph{Av2b\@: Temporarily storing documents that should be delivered via the personal document store for at least 3 hours in case the PDSDB is unavailable and providing a clear message to users in order to fail gracefully}
+\paragraph{Av2b\@: Temporary storage and user notification during PDSDB failure}
 \textit{Av2b} requires (1) documents that should be delivered via the personal document store to be cached for at least 3 hours in case of unavailability and (2) providing a clear message to the recipient in this case. To achieve this, we introduced the \texttt{DocumentStorageCache}: this component temporarily stores the \texttt{DocumentIds} and corresponding \texttt{UserIds} of all generated documents that are to be delivered to the \texttt{PDSDB} during downtime of the latter component up to a maximum of 3 hours. When the \texttt{PDSDB} turns operational again, it notifies the \texttt{DocumentStorageManager} with a sign of life, which in turn retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned ids and subsequently stores them in the \texttt{PDSDB} after conversion of the \texttt{DocumentMetaData}.\\
 Note that the user therefore perceives a maximum total downtime of 3 hours and that the \texttt{RecipientFacade} is in charge of presenting the user with a clear error message after having performed a read request in his or her behalf that has failed due to the unavailability of the \texttt{PDSDB}. However, during the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached ids refer to, it is possible that the user is not able to access (part of) his or her documents via the \texttt{PDSDB}, more specifically those that are still being transferred. Since the requirements do not demand the user to be able to regain full functionality of his or her personal document store at once, finding a better alternative for this gradual revival of the \texttt{PDSDB} is out of scope.\\
 Finally, we would like to stress that the \texttt{DocumentStorageManager} and the \texttt{PDSDB} are necessarily deployed on different nodes for the former to be able to do its caching job while the latter is not operational during downtime. More precisely, the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are internally converted into pairs of \texttt{DocumentId}-\texttt{UserId} writes to the aforementioned cache. Once the \texttt{PDSDB} is operational again and all cached ids are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.\\
@@ -72,6 +72,8 @@ For more details, we refer to Section \ref{subsubsec:M1}, Section \ref{sec:clien
 For more details, we refer to Section \ref{subsubsec:M2} and Section \ref{subsec:decomp-DeliveryFunctionality}.
 
 \paragraph{M3\@: Dynamic selection of the cheapest of print \& postal services}
+\textit{M3} requires the system to be easily extendible in order to be able to (1) employ multiple print \& postal services across the world, (2) receive the daily price and capacity of each print \& postal service and (3) dynamically select (i.e. on a daily basis) the most suited print \& postal service based on the system's document processing load, the price of the service and the location to which the documents should be sent. To achieve this, the \texttt{Print\&PostalServiceFacade} encapsulates all changes that might need to be made in order to seamlessly incorporate this new functionality in the system. More precisely, this component will only require (1) an additional external interface to each of the employed print \& postal services, (2) an internal interface to the \texttt{OtherDB} to consult all SLAs in order to retrieve the approximate location and size of all batches for the day and (3) its internal structure to be adapted to the new functionality.
+For more details, we refer to Section \ref{subsubsec:M3} and Section \ref{subsec:decomp-DeliveryFunctionality}.
 
 \subsection{Discussion}
 GEEN JOBFACADE MEER
@@ -82,11 +84,6 @@ your current experience?
 Are there any remarks about the architecture that you would give to your
 customers?
 Etc.
-
-\paragraph{Alternative for DocumentStorageCache}
-We could just as well do without the previously introduced \texttt{DocumentStorageCache} by letting the \texttt{DocumentStorageManager} actively look for documents in the \texttt{DocumentDB} that are not yet, but should be, present in the \texttt{PDSDB} upon revival of the \texttt{PDSDB}. A clear advantage of this approach is that the downtime of the \texttt{PDSDB} component is no longer restricted by the aforementioned 3-hour cache. An important disadvantage, however, lies in the fact that the \texttt{DocumentStorageManager} is burdened with a significant amount of extra work and will require more expensive hardware to cope with this. Since the support for a longer downtime of the \texttt{PDSDB} is out of scope, this approach was not chosen.
-
-%Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
 
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
 \paragraph{Context diagram}
@@ -119,54 +116,40 @@ The main component-and-connector view is shown in Figure \ref{fig:cs-primary}. A
 \FloatBarrier
 
 \subsection{Main architectural decisions}
-Discuss your architectural decisions for the most important requirements in
-more detail using the components of the client-server view.
-Pay attention to the solutions that you employed and the alternatives that you
-considered.
-The explanation here must be self-contained and complete.
-Imagine you had to describe how the architecture supports the core
-functionality to someone that is looking at the client-server view only.
-Hide unnecessary details (these should be shown in the decomposition view).
-
-\paragraph{UserFacade}
-We introduce this component to be able to distinguish between registered recipients and unregistered recipients in the first steps of the document lookup process. The \texttt{UserFacade} also maps incoming links to documents that are located either in the \texttt{PDSDB} or in the \texttt{DocumentDB} by first fetching the correct mapping from the \texttt{LinkMappingDB} mentioned above. Another responsibility of the \texttt{UserFacade} is marking documents as received, since this is the last internal component through which the document is passed before the requesting recipient actually receives it and failure of another component in the document lookup pipeline can no longer prevent this from happening.
-
-\paragraph{PDSFacade}
-This component handles all read requests that are intended for the personal document store. This extra level of indirection calculates and aggregates all intermediate query results as to relieve the \texttt{PDSDB} of this burden, which is also the reason why both components are best deployed on different nodes. Upon querying the personal document store, this component first collects the recipient's documents' meta data and subsequently performs queries on this collection. This approach introduces no significant overhead, because only those documents that are needed, will be fetched in their entirety. It is also the responsibility of the \texttt{PDSFacade} to check the recipient's ID against the recipient ID that can be retrieved from the document meta data and to only pass on those documents for which they are a match.
-
-\paragraph{DocumentStorageManager}
-The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
-
-\paragraph{LinkManager}
-Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
-LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
-Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
+Figure \ref{fig:cs-primary} provides the overall description of the architecture and illustrates the most important architectural decisions for achieving the required qualities. Here we document how our architecture fulfils the most important qualities (based on the priorities given by the stakeholders). Although the qualities that were already discussed in the provided initial architecture will not be analysed any further here, their residual drivers will. The resulting qualities thus consist of Av1a \& Av2a: Notifying the appropriate operator within 1 minute, Av1b: Storing the status of an individual job and Av2b: Temporary storage and user notification during PDSDB failure. In addition, we also highlight P2: Document lookups, because of the importance of this quality to a significant part of the recipient base.
 
 \subsubsection{Av1a \& Av2a\@: Notifying the appropriate operator within 1 minute}\label{subsubsec:Av1a-Av2a}
-Describe the design choices related to \emph{ReqX} together with the rationale
-of why these choices where made.
+\textit{Av1a} and \textit{Av2a} require the system to notify the an eDocs operator within 1 minute. To achieve this, the \texttt{NotificationHandler} handles all incoming notifications and forwards all those that are destined for an eDocs operator to the \texttt{EDocsAdminFacade}, which in turn delivers these to the external \texttt{EDocsAdminFacade}. To ensure that notifications get sent to the eDocs operator in a timely fashion, both the \texttt{EDocsAdminFacade} and the \texttt{NotificationHandler} are deployed on the same node, which is separated from all other nodes to increase performance.
 \subsubsection*{Alternatives considered}
 \paragraph{Alternative(s) for choice 1} Explain what alternative(s) you
 considered for this design choice and why they where not selected.
 
 \subsubsection{Av1b\@: Storing the status of an individual job}\label{subsubsec:Av1b}
+\textit{Av1b} requires the system to store the status of an individual job. To achieve this, the \texttt{JobManager} accepts all read and write requests regarding the storage of job data, including status information.
+\subsubsection*{Alternatives considered}
+\paragraph{Alternative(s) for choice 1} Explain what alternative(s) you
+considered for this design choice and why they where not selected.
 
-\subsubsection{Av2b\@: Temporarily storing documents that should be delivered via the personal document store for at least 3 hours in case the PDSDB is unavailable and providing a clear message to users in order to fail gracefully}\label{subsubsec:Av2b}
+\subsubsection{Av2b\@: Temporary storage and user notification during PDSDB failure}\label{subsubsec:Av2b}
+\textit{Av2b} requires (1) documents that should be delivered via the personal document store to be cached for at least 3 hours in case of unavailability and (2) providing a clear message to the recipient in this case. To achieve this, we introduced the \texttt{DocumentStorageCache}: this component temporarily stores the \texttt{DocumentIds} and corresponding \texttt{UserIds} of all generated documents that are to be delivered to the \texttt{PDSDB} during downtime of the latter component up to a maximum of 3 hours. When the \texttt{PDSDB} turns operational again, it notifies the \texttt{DocumentStorageManager} with a sign of life, which in turn retrieves all documents and their corresponding meta data from the \texttt{DocumentDB} using the previously mentioned ids and subsequently stores them in the \texttt{PDSDB} after conversion of the \texttt{DocumentMetaData}.\\
+Note that the user therefore perceives a maximum total downtime of 3 hours and that the \texttt{RecipientFacade} is in charge of presenting the user with a clear error message after having performed a read request in his or her behalf that has failed due to the unavailability of the \texttt{PDSDB}. However, during the time needed for the \texttt{DocumentStorageManager} to transfer all documents and meta data that the cached ids refer to, it is possible that the user is not able to access (part of) his or her documents via the \texttt{PDSDB}, more specifically those that are still being transferred. Since the requirements do not demand the user to be able to regain full functionality of his or her personal document store at once, finding a better alternative for this gradual revival of the \texttt{PDSDB} is out of scope.\\
+Finally, we would like to stress that the \texttt{DocumentStorageManager} and the \texttt{PDSDB} are necessarily deployed on different nodes for the former to be able to do its caching job while the latter is not operational during downtime. More precisely, the \texttt{DocumentStorageManager} implicitly pings the \texttt{PDSDB} when storing document data in it. The echo message then, in turn, consists of the write confirmation that is subsequently received. If one of those writes should fail, all subsequent writes are internally converted into pairs of \texttt{DocumentId}-\texttt{UserId} writes to the aforementioned cache. Once the \texttt{PDSDB} is operational again and all cached ids are processed, subsequent writes to the \texttt{PDSDB} will no longer be redirected through the \texttt{DocumentStorageCache}.
 % MERK OP: De DocumentDB en PSDDB slaan documenten NIET meer op dezelfde manier op. De DocumentDB slaat het email adres van een document mee op, indien het document naar een email adres opgestuurd is. Dit omdat bij het registeren documenten op basis van email adres opgevraagd moeten kunnen worden. In de DocumentDB zit GEEN RecipientId. In de PDSDB zit er daarentegen WEL een RecipientId, maar GEEN emailadres opgeslagen.
+\subsubsection*{Alternatives considered}
+\paragraph{Alternative for DocumentStorageCache}
+We could just as well do without the previously introduced \texttt{DocumentStorageCache} by letting the \texttt{DocumentStorageManager} actively look for documents in the \texttt{DocumentDB} that are not yet, but should be, present in the \texttt{PDSDB} upon revival of the \texttt{PDSDB}. A clear advantage of this approach is that the downtime of the \texttt{PDSDB} component is no longer restricted by the aforementioned 3-hour cache. An important disadvantage, however, lies in the fact that the \texttt{DocumentStorageManager} is burdened with a significant amount of extra work and will require more expensive hardware to cope with this. Since the support for a longer downtime of the \texttt{PDSDB} is out of scope, this approach was not chosen.
 
-\subsubsection{Av3\@: Zoomit failure}\label{subsubsec:Av3}
+%Merk op: als alternatief hadden we gedacht aan GEEN actieve heartbeat vanuit de PDSDB bij het online komen, maar bij een schrijfpoging naar de PDSDB als impliciete ping wanneer er een document opgeslagen wordt. Het probleem hierbij is dat wanneer er al even geen documenten genereerd zijn maar er toch noch documentreferenties in de cache zitten en op dat moment de PDSDB online komt, een registered recipient die documenten niet kan opvragen.
 
 \subsubsection{P2\@: Document lookups}\label{subsubsec:P2}
+\textit{P2} requires the system to be able to (1) respond to all incoming document requests in a timely fashion, (2) throttle excessive requests when the arrival rate is larger than a certain request specific value (determined by the requirements) so that the non-excessive ones continue to be handled in a timely fashion and (3) make sure that the performance of all other functionality of the system remains unaffected in case of a large number of requests. To achieve this, all potential bottleneck components that support the document lookup process are deployed on separate nodes. More precisely, the \texttt{RecipientFacade} and the \texttt{LinkMappingFunctionality} both reside on the same exclusive node as to increase the performance of these components and the communication between them (i.e. when a recipient has presented the former component with a link for which it has to determine the document it maps to). Both the \texttt{AuthenticationHandler} and the \texttt{SessionDB} are also deployed on the same individual node as to not let the authentication subprocess decrease the performance of the document lookup process. The \texttt{PDSFacade} is deployed on the \texttt{PDSDBManagerNode} (discussed in the provided initial architecture), along with the \texttt{PDSLongTermManager} and the two \texttt{PDSReplicationManagers}, as to increase communication performance between this \texttt{PDSFacade} and the \texttt{PDSDB} supercomponent. Notice that \textit{Av1} already demands the \texttt{PDSDB} to be deployed separate from all other functionality according to the provided initial architecture and that \textit{P2} can rely on this design decision to deliver an optimally increased (taking the availability constraints of \textit{Av1} into account) performance of this supercomponent.\\
+Because the \texttt{DocumentDB}, like the \texttt{PDSDB}, stores a large amount of documents and correspondingly handles a large amount of document requests, its documents are partitioned across several \texttt{DocumentDBShards} that each reside on their own \texttt{DocumentDBShardNode}. This sharding technique results in a performance increase that is statistically equivalent to the one that is achieved by active replication, but it is significantly less costly regarding storage costs (which is more of a concern for documents than for other kinds of data). In order to further increase performance of the \texttt{DocumentDB}, the \texttt{DocumentDBShardingManager}, which is in charge of managing all \texttt{DocumentDBShards} and forwarding read and write requests to the appropriate ones, is also deployed on an individual node.\\
+Finally, both the \texttt{DocumentDB} and the \texttt{PDSDB} have the ability to throttle excessive read requests from the \texttt{RecipientFacade} (all other requests remain unaffected) when the rate of these incoming requests exceeds a certain request specific value (determined by the requirements). Also note that the performance of all other functionality of the system remains unaffected even at this maximum, since all potential bottleneck components that support the document lookup process are deployed on separate nodes, effectively increasing their performance (as discussed above) and thereby providing both an increased level of performance for the document lookup process and a sufficient level of performance for all other functionality.
 \subparagraph{Sharding for DocumentDB for P2}
 Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
-
-\subsubsection{P3\@: Status overview for customer administrators}\label{subsubsec:P3}
-
-\subsubsection{M1\@: New type of document: bank statements}\label{subsubsec:M1}
-
-\subsubsection{M2\@: Multiple print \& postal services}\label{subsubsec:M2}
-
-\subsubsection{M3\@: Dynamic selection of the cheapest of print \& postal services}\label{subsubsec:M3}
+\subsubsection*{Alternatives considered}
+\paragraph{Alternative(s) for choice 1} Explain what alternative(s) you
+considered for this design choice and why they where not selected.
 
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
 Discuss the decompositions of the components of the client-server view which
@@ -203,6 +186,7 @@ requirements.
 \FloatBarrier
 
 \subsection{DocumentStorageFunctionality}\label{subsec:decomp-DocumentStorageFunctionality}
+The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DocumentStorageFunctionality.png}
@@ -221,6 +205,9 @@ requirements.
 \FloatBarrier
 
 \subsection{LinkMappingFunctionality}\label{subsec:decomp-LinkMappingFunctionality}
+Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
+LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
+Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{LinkMappingFunctionality.png}
@@ -1967,7 +1954,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsection{RecipientFacade}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{RecipientFacade} is responsible for the interaction of Registered and Unregistered Recipients with the eDocs system. It provides methods for authentication, for consulting the personal document store, for downloading documents, \dots
+    \item \textbf{Description:} The \texttt{RecipientFacade} is responsible for the interaction of Registered and Unregistered Recipients with the eDocs system. It provides methods for authentication, for consulting the personal document store, for downloading documents, \dots Another responsibility of the \texttt{UserFacade} is marking documents as received, since this is the last internal component through which the document is passed before the requesting recipient actually receives it and failure of another component in the document lookup process can no longer prevent this from happening.
     \item \textbf{Super-component:} \texttt{Userfunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
