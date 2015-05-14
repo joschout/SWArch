@@ -382,16 +382,38 @@ Show the complete scenario using one or more sequence diagrams.
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{Seq_InitiateDocumentDelivery.png}
-    \caption{The system behavior for the first scenario.
+    \includegraphics[width=\textwidth]{InitiateDocumentDelivery.png}
+    \caption{A \texttt{Generator} instance asks the \texttt{ChannelDispatcher} to store and deliver a document.
         }\label{fig:seq_InitiateDocumentdelivery}
 \end{figure}
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=0.8\textwidth]{Seq_StoreDocRegisteredRecipient.png}
+    \includegraphics[width=0.8\textwidth]{DeliverViaEmail.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_DeliverViaEmail}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{StoringDocumentForRegisteredRecipients.png}
     \caption{The system behavior for the first scenario.
         }\label{fig:seq_StoreDocRegisteredRecipient}
+\end{figure}
+
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{SendMailRegisteredRecipient.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_SendMailRegisteredRecipient}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{SendMailUnregisteredRecipientReceiptTracking.png}
+    \caption{The system behavior for the first scenario.
+        }\label{fig:seq_SendMailUnregisteredRecipientReceiptTracking}
 \end{figure}
 
 \begin{figure}[!htp]
@@ -401,6 +423,7 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_StoreDocPDS}
 \end{figure}
 
+\FloatBarrier
 
 \appendix
 \section{Element catalog}\label{app:catalog}
@@ -1141,7 +1164,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{JobDBShardingManager} returns the raw data entry corresponding to the job identified by the given job identifier.
             \item Exceptions: None
         \end{itemize}    
-    
+
      	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
@@ -1187,9 +1210,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
-        \item \texttt{BatchMetaData getMetaData(BatchId batchId)}
+        \item \texttt{BatchMetaData getBatchMetaData(JobId jobId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{JobFacade} returns the meta-data of the batch of the document processing job identified by the given job identifier.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}  
@@ -1244,9 +1267,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
-        \item \texttt{BatchMetaData getMetaData(BatchId batchId)}
+        \item \texttt{BatchMetaData getBatchMetaData(BatchId batchId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{JobManager} returns the meta-data of the batch of the document processing job identified by the given job identifier.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}    
