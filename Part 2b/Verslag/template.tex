@@ -333,13 +333,14 @@ Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid
 \FloatBarrier
 
 \subsection{Initiating document processing}
-Figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows how a customer organization initiates a batch of document processing jobs. Recurring and non-recurring batches are indicated using the \texttt{isRecurring} boolean value. If the batch is non-recurring, the customer organization can indicate another priority than the default priority of that customer organization if the batch should be handled with another priority than the default priority.  For recurring batches, it does not matter if a priority is given, as the default priority will be used. The customer organization also delivers the raw data as a \texttt{rawDataPackage}. After verification of the session identifier (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards this together with all its arguments except of the \texttt{sessionid} to \texttt{RawDataHandler}, while also indicating if the batch is (non-)recurring.\\
+Figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows how a customer organization initiates a batch of document processing jobs. Recurring and non-recurring batches are indicated using the \texttt{isRecurring} boolean value. If the batch is non-recurring, the customer organization can indicate another priority than the default priority of that customer organization if the batch should be handled with another priority than the default priority.  For recurring batches, it does not matter if a priority is given, as the default priority will be used. The customer organization also delivers the raw data as a \texttt{rawDataPackage}. After verification of the session identifier (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards this together with all its arguments except for the \texttt{sessionid} to \texttt{RawDataHandler}, while also indicating if the batch is (non-)recurring.\\
 
-Figure \ref{fig:seq_VerifyRawData} depicts the first part of the method call in \texttt{RawDataHandler}, which will verify whether the raw data is valid. First, \texttt{RawDataHandler} checks whether the customer organization is allowed to generated the given document type. If it is allowed, the received raw data packet will be validated, e.g  there will be checked whether the content of the received Excel file can be read or whether a received XML file is correctly formatted. If it is not valid, an exception is thrown. Otherwise, depending on if the batch is  recurring, the \texttt{RawDataHandler} will query the SLA in the \texttt{OtherDB} to check if the number of raw data entries in the raw data package is allowed. If the number of entries exceeds this maximum, an exception is thrown. Next, each individual entry will be checked on validity, so the \texttt{RawdataHandler} knows which \texttt{RawData} entries are valid and which are not.\\
+Figure \ref{fig:seq_VerifyRawData} depicts the first part of the method call in the \texttt{RawDataHandler}, which will verify whether the raw data is valid. First, \texttt{RawDataHandler} checks whether the customer organization is allowed to generated the given document type. If it is allowed, the received raw data packet will be validated, e.g  there will be checked whether the content of the received Excel file can be read or whether a received XML file is correctly formatted. If it is not valid, an exception is thrown. Otherwise, depending on if the batch is  recurring, the \texttt{RawDataHandler} will query the SLA in the \texttt{OtherDB} to check if the number of raw data entries in the raw data package is allowed. If the number of entries exceeds this maximum, an exception is thrown. Next, each individual entry will be checked on validity, so the \texttt{RawdataHandler} knows which \texttt{RawData} entries are valid and which are not.\\
 
-After verification, figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows that the \texttt{RawDataHandler} will only use the given priority if the batch is non-recurring. Otherwise, it will use the default priority. The deadline of the document processing jobs is calculated and put into the \texttt{BatchMetaData}, after which the \texttt{RawData} entries and \texttt{BatchMetaData} are stored in the \texttt{OtherDB}. The \texttt{RawDataHandler} asks the \texttt{JobFacade} to create jobs for the valid raw data entries and to initiate document processing for those jobs.\\
+After verification, figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows that the \texttt{RawDataHandler} will only use the given priority if the batch is non-recurring. Otherwise, it will use the default priority. The deadline of the document processing jobs is calculated and a \texttt{BatchMetaData} object is generated, bundling the information about the batch. The \texttt{RawDataHandler} will store the \texttt{RawData} entries and \texttt{BatchMetaData} in the \texttt{OtherDB}. It asks the \texttt{JobFacade} to create jobs for the valid raw data entries and to initiate document processing for those jobs. Finally, it will return the invalid raw data entries to the Customer Organization.\\
 
-Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storing jobs for the valid raw data entries, after which it inserts these jobs into the \texttt{Scheduler}.
+Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storing jobs for the valid raw data entries, after which it inserts these jobs into the \texttt{Scheduler}.\\
+
 
 \begin{figure}[!htp]
     \centering
@@ -1119,30 +1120,16 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item JobDBMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+     	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -1187,8 +1174,14 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Exceptions: None
         \end{itemize}
     	
-    	
-    	
+    	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -1223,7 +1216,24 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Exceptions: None
         \end{itemize}
     \end{itemize}    
-    
+
+    \item JobMgmt
+    \begin{itemize}
+    	\item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
+    	\begin{itemize}
+            \item Effect: The \texttt{JobManager} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
+            \item Exceptions: None
+        \end{itemize}
+    	
+    	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}
+    \end{itemize}     
 \end{itemize}
 
 \subsection{KeyCache}
@@ -1394,6 +1404,14 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item PDSUnavailableException: Thrown if the personal document store is unavailable.
             \end{itemize}
 		\end{itemize}
+		
+		 \item \texttt{Boolean isDocumentOfRecipient(DocumentId documentId, RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} returns true when the document identified by the given document identifier belongs to the Registered Recipient identified by the given recipient identifier. Otherwise, it returns false.
+            \item Exceptions: None
+		\end{itemize}
+		
+		
     \end{itemize}
 \end{itemize}
 
@@ -1454,6 +1472,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{PDSDBReplica} fetches and returns the meta-data of all the documents of the Registered Recipient identified by \texttt{recipientId}.
             \item Exceptions: None
          \end{itemize}
+
+ 		\item \texttt{Boolean isDocumentOfRecipient(DocumentId documentId, RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} returns true when the document identified by the given document identifier belongs to the Registered Recipient identified by the given recipient identifier. Otherwise, it returns false.
+            \item Exceptions: None
+		\end{itemize}           
     \end{itemize}
     
     \item Ping
@@ -1497,6 +1521,11 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \end{itemize}
         \end{itemize}
      
+ 		\item \texttt{Boolean isDocumentOfRecipient(DocumentId documentId, RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} returns true when the document identified by the given document identifier belongs to the Registered Recipient identified by the given recipient identifier. Otherwise, it returns false.
+            \item Exceptions: None
+		\end{itemize}     
     \end{itemize}
 \end{itemize}
 
@@ -1544,7 +1573,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item PDSUnavailableException: Thrown if the personal document store is unavailable.
             \end{itemize}
 		\end{itemize}
-         
+        
+		 \item \texttt{Boolean isDocumentOfRecipient(DocumentId documentId, RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} returns true when the document identified by the given document identifier belongs to the Registered Recipient identified by the given recipient identifier. Otherwise, it returns false.
+            \item Exceptions: None
+		\end{itemize}        
     \end{itemize}
 \end{itemize}
 
@@ -1590,6 +1624,13 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item Effect: The \texttt{PDSReplicationManager} will store the given list of documents and their meta-data.
                 \item Exceptions: None
          \end{itemize}
+         
+		\item \texttt{Boolean isDocumentOfRecipient(DocumentId documentId, RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{PDSDB} returns true when the document identified by the given document identifier belongs to the Registered Recipient identified by the given recipient identifier. Otherwise, it returns false.
+            \item Exceptions: None
+		\end{itemize}         
+         
     \end{itemize}
 \end{itemize}
 
