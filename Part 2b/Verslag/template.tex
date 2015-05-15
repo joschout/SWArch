@@ -400,36 +400,43 @@ Show the complete scenario using one or more sequence diagrams.
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=0.8\textwidth]{DeliverViaEmail.png}
-    \caption{The system behavior for the first scenario.
+    \caption{DeliverViaEmail: (Continuation of  fig. \ref{fig:seq_InitiateDocumentdelivery}) The  \texttt{ChannelDispatcher} uses e-mail as a delivery method and will have a different flow when the e-mail should be delivered to a Registered or Unregistered Recipient.
         }\label{fig:seq_DeliverViaEmail}
 \end{figure}
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=0.8\textwidth]{StoringDocumentForRegisteredRecipients.png}
-    \caption{The system behavior for the first scenario.
+    \includegraphics[width=0.5\textwidth]{StoringDocumentForRegisteredRecipients.png}
+    \caption{StoringDocumentForRegisteredRecipients: (continuation of fig. \ref{fig:seq_DeliverViaEmail}) The \texttt{ChannelDispatcher} requests the \texttt{DocumentStorageManager} to store a document for a Registered Recipient.
+        }\label{fig:seq_StoringDocumentForRegisteredRecipients}
+\end{figure}
+
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.3\textwidth]{StoringDocumentForUnregisteredRecipientsWithEmail.png}
+    \caption{StoringDocumentForUnregisteredRecipientsWithEmail: (continuation of fig. \ref{fig:seq_DeliverViaEmail}) The \texttt{ChannelDispatcher} requests the \texttt{DocumentStorageManager} to store a document for an Unregistered Recipient.
         }\label{fig:seq_StoreDocRegisteredRecipient}
 \end{figure}
 
-
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=0.3\textwidth]{SendMailRegisteredRecipient.png}
-    \caption{The system behavior for the first scenario.
-        }\label{fig:seq_SendMailRegisteredRecipient}
+    \includegraphics[width=0.5\textwidth]{SendMailRegisteredRecipient.png}
+    \caption{SendMailRegisteredRecipient: (continuation of fig. \ref{fig:seq_DeliverViaEmail}) The \texttt{ChannelDispatcher} requests the \texttt{EmailFacade} to send an e-mail to a Registered Recipient.     
+ }\label{fig:seq_SendMailRegisteredRecipient}
 \end{figure}
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=0.3\textwidth]{SendMailUnregisteredRecipientReceiptTracking.png}
-    \caption{The system behavior for the first scenario.
-        }\label{fig:seq_SendMailUnregisteredRecipientReceiptTracking}
+    \includegraphics[width=0.5\textwidth]{SendMailUnregisteredRecipient.png}
+    \caption{SendMailUnregisteredRecipient: (continuation of fig. \ref{fig:seq_DeliverViaEmail}) The \texttt{ChannelDispatcher} requests the \texttt{EmailFacade} to send an e-mail to an Unregistered Recipient.
+    }\label{fig:seq_SendMailUnregisteredRecipient}
 \end{figure}
 
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=0.3\textwidth]{Seq_StoreDocPDS.png}
-    \caption{The system behavior for the first scenario.
+    \caption{Storing a document in the PDS (continuation of fig. \ref{fig:seq_StoreDocRegisteredRecipient}).
         }\label{fig:seq_StoreDocPDS}
 \end{figure}
 
@@ -1180,12 +1187,31 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
      	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
-    		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+    		\item Effect: The \texttt{JobDBShardingManager} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
     		\item Exceptions:
     		\begin{itemize}
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}
+    	
+   	   \item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobDBShardingManager} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}	
+
+   	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobDBShardingManager} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}	
+    	
     \end{itemize}
 \end{itemize}
 
@@ -1223,11 +1249,30 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: Describe the effect of the operation
             \item Exceptions: None
         \end{itemize}
+        
+        
         \item \texttt{BatchMetaData getBatchMetaData(JobId jobId)}
         \begin{itemize}
             \item Effect: The \texttt{JobFacade} returns the meta-data of the batch of the document processing job identified by the given job identifier.
             \item Exceptions: None
         \end{itemize}
+        
+         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+        \begin{itemize}
+            \item Effect: The \texttt{JobFacade} returns the document type of the document corresponding to the job identified by the given job identifier.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{String getNameOfSender(JobId jobId)}    
+        \begin{itemize}
+            \item Effect: The \texttt{JobFacade} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
+            \end{itemize}
+        \end{itemize}        
+        
+        
     \end{itemize}  
     
     \item JobMgmt
@@ -1283,7 +1328,10 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \item \texttt{RawData getRawData(JobId jobId)}
         \begin{itemize}
             \item Effect: The \texttt{JobManager} returns the raw data entry corresponding to the job identified by the given job identifier.
-            \item Exceptions: None
+            \item Exceptions:
+            \begin{itemize}
+            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
+            \end{itemize}
         \end{itemize}    
     
         \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
@@ -1296,6 +1344,25 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{JobManager} returns the meta-data of the batch of the document processing job identified by the given job identifier.
             \item Exceptions: None
         \end{itemize}
+        
+         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+        \begin{itemize}
+            \item Effect: The \texttt{JobManager} returns the document type of the document corresponding to the job identified by the given job identifier.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
+            \end{itemize}
+        \end{itemize}    
+        
+        \item \texttt{String getNameOfSender(JobId jobId)}    
+        \begin{itemize}
+            \item Effect: The \texttt{JobManager} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
+            \end{itemize}
+        \end{itemize}
+        
     \end{itemize}    
 
     \item JobMgmt
@@ -1928,7 +1995,13 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 		\begin{itemize}
 			\item Effect: The \texttt{OtherDB} checks if the customer organization with customer identifier \texttt{cuid} has receipt tracking turned on. It returns true if it has receipt tracking turned on, otherwise it returns false.
 			\item Exceptions: None
-		\end{itemize}				  		    
+		\end{itemize}
+		
+		\item \texttt{DocumentType getDocumentType(BatchId batchId)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns the document type of the batch identified by the given batch identifier.
+			\item Exceptions: None
+		\end{itemize}					  		    
     \end{itemize}
     
 	\item BatchDataMgmt
