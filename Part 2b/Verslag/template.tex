@@ -1035,15 +1035,18 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item Deliver
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    	\item \texttt{void sendMailRegisteredRecipient(Jobid jobId, EmailAddress emailAddress, DocumentId docId, String senderName, DocumentType docType)}    	
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect:  The \texttt{EmailFacade}  will send an e-mail to the Registered Recipient with a notification that a document corresponding to the job identified by \texttt{jobId} has been added to his or her personal document store. The e-mail will contain a short description of the received document (i.e., the sender of the document (\texttt{senderName}), the \texttt{documentType} of the document and the date when the document was sent). The e-mail will also contain a unique link pointing to the document in the personal document store. After sending the e-mail to the given \texttt{emailAddress}, the \texttt{EmailFacade} will mark the document as sent.
+            \item Exceptions: None
+		\end{itemize}
+    
+        \item \texttt{void sendMailUnregisteredRecipient(EmailAddress emailAddress,  Document document, DocumentId documentId, Boolean receiptTracking)}
+        \begin{itemize}
+            \item Effect: If \texttt{receiptTracking} is true, receipt tracking is turned on. The \texttt{EmailFacade} will send an e-mail to the Unregistered Recipient, which will contain a short description of the received document (i.e., the sender of the document (\texttt{senderName}), the \texttt{documentType} of the document and the date when the document was sent). The e-mail will also contain a unique link that can be used to download the document. After sending the e-mail to the given \texttt{emailAddress}, the \texttt{EmailFacade} will mark the document as sent.\\ If receipt tracking is turned of, the \texttt{EmailFacade} will send the document as an attachment with an e-mail.
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
 
@@ -1243,6 +1246,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}
+    	
+    	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} queries the \texttt{JobDBShardingManager} for the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobFacade} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}
+ 	
+    	
     \end{itemize}
 \end{itemize}
 
@@ -1300,6 +1314,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}
+    	
+    	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} looks up the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobManager} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JonManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}   
     \end{itemize}     
 \end{itemize}
 
@@ -1884,7 +1907,28 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 		\begin{itemize}
 			\item Effect: The \texttt{OtherDB} returns the number of documents that is maximally allowed for the customer organization identified by \texttt{cuid} for this recurring batch. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
 			\item Exceptions: None
-		\end{itemize}     
+		\end{itemize} 
+		
+           \item \texttt{Boolean checkIfRegistered(Email emailAddress) }        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns true if the given e-mail address belongs to a Registered Recipient. Otherwise, it returns false.
+			\item Exceptions: None
+		\end{itemize}
+		
+		   \item \texttt{RecipientId getRecipientId(Email emailAddress) }        
+		\begin{itemize}
+			\item Effect: If the system has a Registered Recipient with the given e-mail address, the \texttt{OtherDB} returns its recipient identifier.
+			\item Exceptions: 
+			\begin{itemize}
+				\item NoSuchRecipientException: Thrown if the \texttt{OtherDB} does not contain the information of a Registered Recipient with the given e-mail address.
+			\end{itemize}
+		\end{itemize}  		
+
+		\item \texttt{Boolean isReceiptTrackingOn(CustomerId cuid)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} checks if the customer organization with customer identifier \texttt{cuid} has receipt tracking turned on. It returns true if it has receipt tracking turned on, otherwise it returns false.
+			\item Exceptions: None
+		\end{itemize}				  		    
     \end{itemize}
     
 	\item BatchDataMgmt
@@ -2307,7 +2351,7 @@ them alphabetically for ease of navigation.
 	 
 	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
 	
-	\item \texttt{DeliveryInfo}:
+	\item \texttt{DeliveryMethod}:
 	
 	\item \texttt{Document}: A data file corresponding to a document.  The architecture specifies the format of this data type as a PDF-file. 
 	
@@ -2323,7 +2367,9 @@ them alphabetically for ease of navigation.
 	
 	\item \texttt{Echo}: The response to a ping message. This data element does not contain any meaningful data.
 	
-	\item \texttt{Email}:
+	\item \texttt{EmailAddress}:
+	
+	\item \texttt{EmailMessage}:
 	
 	\item \texttt{Error}: Description of data type.
 	
@@ -2340,6 +2386,8 @@ them alphabetically for ease of navigation.
 	\item \texttt{PDSOverview} The overview of a personal document store that can be shown to a Registered Recipient. Through this overview, the Registered Recipient can consult documents. The architecture does not specify the exact format of such an overview, but a likely possibility is an HTML page.
     
     \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    
+	\item \texttt{PostalAddress}:    
     
     \item \texttt{RawData}: A data structure listing a raw data entry used in a document processing job.
     
@@ -2360,6 +2408,7 @@ them alphabetically for ease of navigation.
     \item \texttt{Template}: A document used as a template for the generation of documents.
     
     \item \texttt{TemplateId}: A data structure uniquely identifying a template in the system. It lists three values. It contains \texttt{CustomerId} which identifies the Customer Organization who the template belongs to. It also contains a \texttt{DocumentType}, specifying for which kind of document it is a template for. The last piece of information it contains is a \texttt{TimeStamp} specifying when the system received the template.
+    
+    \item \texttt{ZoomitId}:
 \end{itemize}
-
 \end{document}
