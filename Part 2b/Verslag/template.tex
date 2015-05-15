@@ -157,8 +157,11 @@ Secondly \textit{P2} requires the system to be able to throttle excessive incomi
 
 Thirdly, \textit{P2} requires the performance of all other functionality of the system to remain unaffected in case of a large number of incoming document requests. Therefore, all potential bottleneck components that support the document lookup process are deployed on separate nodes, effectively increasing their performance (as discussed above) and thereby providing both an increased level of performance for the document lookup process and a sufficient level of performance for all other functionality. Also note that only requests coming from the \texttt{RecipientFacade} and the \texttt{PDSFacade}, which are inherently tied to the document lookup process, can be throttled by the \texttt{DocumentDB} and the \texttt{PDSDB} (as discussed above) and that all other requests thus remain unaffected by this throttling strategy at all times.
 \subsubsection*{Alternatives considered}
-\paragraph{Alternative(s) for choice 1}
+\paragraph{Alternative for sharding of the DocumentDB}
 
+\paragraph{Alternative for separate deployment of crucial components in the document lookup process}
+
+\paragraph{Alternative for the DocumentDB and the PDSDB having throttling responsibility}
 
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
 Discuss the decompositions of the components of the client-server view which
