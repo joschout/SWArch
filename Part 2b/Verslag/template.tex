@@ -157,8 +157,7 @@ In our current architecture, all potential bottleneck components that support th
 In our current design, both the \texttt{DocumentDB} and the \texttt{PDSDB} have the responsibility to throttle excessive read requests (originating from the \texttt{RecipientFacade}) when the rate of these incoming requests exceeds a certain value that is specific to the kind of request (determined by the requirements). Since all document lookup requests pass through the \texttt{RecipientFacade}, a valid alternative for this approach would be to delegate all throttling responsibility to this component. A clear advantage of the latter strategy is the centralization of all throttling functionality, effectively increasing the modifiability of the system. An important drawback, however, is the fact that the throttling component can now not take into account the \texttt{PDSDB} and \texttt{DocumentDB} requests originating from other components in the system. This lack of knowledge results in a fixed suboptimal upper bound for document lookup requests originating from the \texttt{RecipientFacade}. The reason for this is that the throttling component now needs take into account the maximum amount of residual requests (i.e. requests originating from all other components in the system) in order to not let the throttling affect any other functionality in the system. Since our current architecture does support an optimal load balancing policy for document lookup requests by throttling at the source components (i.e. the \texttt{PDSDB} and the \texttt{DocumentDB}), we chose to go with the latter strategy.
 
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
-Discuss the decompositions of the components of the client-server view which
-you have further decomposed.
+An overview of the main component-and-connector view can be found in Section \ref{sec:client-server}. All components that were decomposed any further are highlighted there and will be discussed below in greater detail. This component group consists of the DeliveryFunctionality (Section \ref{subsec:decomp-DeliveryFunctionality}), the DocumentDB (Section \ref{subsec:decomp-DocumentDB}), the DocumentGenerationManager (\ref{subsec:decomp-DocumentGenerationManager}), the DocumentStorageFunctionality (\ref{subsec:decomp-DocumentStorageFunctionality}), the JobManager (Section \ref{subsec:decomp-JobManager}), the LinkMappingFunctionality (Section \ref{subsec:decomp-LinkMappingFunctionality}), the PDSDB (Section \ref{subsec:decomp-PDSDB}) and the UserFunctionality (Section \ref{subsec:decomp-UserFunctionality}).
 
 \subsection{DeliveryFunctionality}\label{subsec:decomp-DeliveryFunctionality}
 \begin{figure}[!htp]
@@ -168,12 +167,10 @@ you have further decomposed.
 	\label{fig:decomp-DeliveryFunctionality}
 \end{figure}
 \FloatBarrier
-
-Describe the decomposition of \texttt{ComponentX} and how this relates to the
-requirements.
+\noindent
+The decomposition of the \texttt{DeliveryFunctionality} is presented in Figure \ref{fig:decomp-DeliveryFunctionality}. As shown, the \texttt{DeliveryFunctionality} is decomposed into five submodules: the \texttt{ChannelDispatcher}, the \texttt{EmailFacade}, the \texttt{Print\&PostalServiceFacade}, the \texttt{ZoomitFacade} and the \texttt{ZoomitDeliveryCache}.\\
 
 \subsection{DocumentDB}\label{subsec:decomp-DocumentDB}
-Note that there must also be a (sub)component monitoring all requests to the shards, in order to throttle excessive requests when necessary. Since this is a rather simple task and the (sub)component must be aware of the details concerning the sharding architecture to efficiently fulfil its purpose, this functionality is delegated to the \texttt{ShardingManager} itself. Finally, this \texttt{ShardingManager} is also responsible for implicitly pinging all \texttt{DocumentDBShards} upon reading and writing in them.
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DocumentDB.png}
@@ -181,6 +178,9 @@ Note that there must also be a (sub)component monitoring all requests to the sha
 	\label{fig:decomp-DocumentDB}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{DocumentDB} is presented in Figure \ref{fig:decomp-DocumentDB}. As shown, the \texttt{DocumentDB} is decomposed into only two submodules: the \texttt{DocumentDBShardingManager} and the \texttt{DocumentDBShard}.\\
+The \texttt{DocumentDB} is responsible for the actual storage of all documents. More specifically, the \texttt{DocumentStoragFunctionality} stores documents in it that both this component and the \texttt{RecipientFacade} are able to access. Because the \texttt{DocumentDB} stores a large amount of documents and correspondingly handles a large amount of document requests, its documents are partitioned across several \texttt{DocumentDBShards} that each reside on their own \texttt{DocumentDBShardNode} according to \textit{P2}. In order to further increase performance of the \texttt{DocumentDB} for \textit{P2}, the \texttt{DocumentDBShardingManager} is also deployed on an individual node. It is responsible for managing all \texttt{DocumentDBShards} (i.e. maintaining a consistent overview of all shards and their corresponding documents) and forwarding read and write requests to the appropriate ones.
 
 \subsection{DocumentGenerationManager}\label{subsec:decomp-DocumentGenerationManager}
 \begin{figure}[!htp]
@@ -190,9 +190,11 @@ Note that there must also be a (sub)component monitoring all requests to the sha
 	\label{fig:decomp-DocumentGenerationManager}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{DocumentGenerationManager} is presented in Figure \ref{fig:decomp-DocumentGenerationManager}. As shown, the \texttt{DocumentGenerationManager} is decomposed into five submodules: the \texttt{TemplateCache}, the \texttt{KeyCache}, the \texttt{Completer}, the \texttt{Scheduler} and the \texttt{GeneratorManager}.\\
+Since this decomposition was already discussed in the provided initial architecture, we will not repeat those results here. Note, however, that some interfaces have been changed, added or even removed for the \texttt{DocumentGenerationManager} to be able to properly communicate with the rest of the system (see Appendix \ref{app:catalog}).
 
 \subsection{DocumentStorageFunctionality}\label{subsec:decomp-DocumentStorageFunctionality}
-The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it. The necessity for this component follows from the fact that synchronisation is needed between the two storage components mentioned above. Note that the PDSDocMgmt interface in the \texttt{PDSDB} component now requires an extra method to save documents.
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{DocumentStorageFunctionality.png}
@@ -200,6 +202,11 @@ The storage of documents is handled by the \texttt{DocumentStorageManager}, whic
 	\label{fig:decomp-DocumentStorageFunctionality}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{DocumentStorageFunctionality} is presented in Figure \ref{fig:decomp-DocumentStorageFunctionality}. As shown, the \texttt{DocumentStorageFunctionality} is decomposed into only two submodules: the \texttt{DocumentStorageManager} and the \texttt{DocumentStorageCache}.\\
+The \texttt{DocumentStorageManager} is responsible for storing generated documents in the correct database(s) (i.e. the \texttt{PDSDB} and the \texttt{DocumentDB}). If the document belongs to a registered recipient, it sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}. However, if the document belongs to an unregistered recipient, it only sends a write request to the \texttt{DocumentDB}. Furthermore, the \texttt{DocumentStorageManager} is responsible for copying documents from the \texttt{DocumentDB} to the \texttt{PDSDB} when an unregistered Recipient registers to the eDocs system. Another responsibility of the \texttt{DocumentStorageManager} is storing at least 3 hours of documents when the PDSDB fails.
+
+The storage of documents is handled by the \texttt{DocumentStorageManager}, which receives generated documents from the intermediary \texttt{OtherFunctionality2} component and stores them in either the \texttt{DocumentDB} (for unregistered recipients) or in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for registered recipients) according to the method that is invoked on it.
 
 \subsection{JobManager}\label{subsec:decomp-JobManager}
 \begin{figure}[!htp]
@@ -209,11 +216,10 @@ The storage of documents is handled by the \texttt{DocumentStorageManager}, whic
 	\label{fig:decomp-JobManager}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{JobManager} is presented in Figure \ref{fig:decomp-JobManager}. As shown, the \texttt{JobManager} is decomposed into three submodules: the \texttt{JobFacade}, the \texttt{JobDBShardingManager} and the \texttt{JobDBShard}.\\
 
 \subsection{LinkMappingFunctionality}\label{subsec:decomp-LinkMappingFunctionality}
-Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
-LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
-Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{LinkMappingFunctionality.png}
@@ -221,6 +227,12 @@ Does NOT do mapping removal after x years --> there has to be a notification whe
 	\label{fig:decomp-LinkMappingFunctionality}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{LinkMappingFunctionality} is presented in Figure \ref{fig:decomp-LinkMappingFunctionality}. As shown, the \texttt{LinkMappingFunctionality} is decomposed into only two submodules: the \texttt{LinkMappingManager} and the \texttt{LinkMappingDB}.\\
+
+Motivatie voor LinkManager: Checks expiration date ALS DAT NODIG IS--> reason: links naar de pdsdb vervallen niet (zolang de gebruik geregistreerd is)
+LinkManager maps link to (document ID, place where the document is stored)-pairs --> REASON: the unique link has two possible sources: an e-mail to an unregistered recipient or an email to a registered recipient. For an unregistered recipient, the RecipientFacade must look with the documentid for the document in the documentDB. For a registered recipient, the RecipientFacade must look with the documentid for the document  in the PDSDB. (Mogelijk een boolean ofzo)
+Does NOT do mapping removal after x years --> there has to be a notification when the link has expired
 
 \subsection{PDSDB}\label{subsec:decomp-PDSDB}
 \begin{figure}[!htp]
@@ -230,6 +242,10 @@ Does NOT do mapping removal after x years --> there has to be a notification whe
 	\label{fig:decomp-PDSDB}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{PDSDB} is presented in Figure \ref{fig:decomp-PDSDB}. As shown, the \texttt{PDSDB} is decomposed into three submodules: the \texttt{PDSLongTermDocumentManager}, the \texttt{PDSReplicationManager} and the \texttt{PDSDBReplica}.\\
+Since this decomposition was already discussed in the provided initial architecture, we will not repeat those results here. Note, however, that some interfaces have been changed, added or even removed for the \texttt{PDSDB} to be able to properly communicate with the rest of the system (see Appendix \ref{app:catalog}).\\
+Also note that, in order to comply with the design decisions that were made in the light of \textit{Av2b}, the \texttt{PDSDB} should notify the \texttt{DocumentStorageManager} (see also the decomposition of \texttt{DocumentStorageFunctionality} in Section \ref{subsec:decomp-DocumentStorageFunctionality}) upon revival of the former after a period of downtime. This responsibility is delegated to the \texttt{PDSLongTermDocumentManager} by having it send a sign of life to the \texttt{DocumentStorageManager} upon revival of the \texttt{PDSDB}.
 
 \subsection{UserFunctionality}\label{subsec:decomp-UserFunctionality}
 \begin{figure}[!htp]
@@ -239,8 +255,11 @@ Does NOT do mapping removal after x years --> there has to be a notification whe
 	\label{fig:decomp-UserFunctionality}
 \end{figure}
 \FloatBarrier
+\noindent
+The decomposition of the \texttt{UserFunctionality} is presented in Figure \ref{fig:decomp-UserFunctionality}. As shown, the \texttt{UserFunctionality} is decomposed into six submodules: the \texttt{RecipientFacade}, the \texttt{CustomerOrganizationFacade}, the \texttt{EDocsAdminFacade}, the \texttt{AuthenticationHandler}, the \texttt{SessionDB} and the \texttt{RegistrationManager}.\\
 
 \section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
+\paragraph{Context diagram}
 Describe the context diagram for the deployment view.
 For example, which protocols are used for communication with external systems
 and why?
@@ -253,6 +272,7 @@ and why?
 \end{figure}
 \FloatBarrier
 
+\paragraph{Primary diagram}
 The primary deployment diagram itself and accompanying explanation.
 Pay attention to the parts of the deployment diagram which are crucial for
 achieving certain non-functional requirements.
@@ -686,7 +706,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentDB}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentDB} is responsible  for actually storing all the documents. It stores documents regardless of the fact of a document is also stored in the \texttt{PDSDB} It receives read and write requests from the \texttt{DocumentStoragManager}.
+    \item \textbf{Description:} The \texttt{DocumentDB} is responsible  for actually storing all the documents. It stores documents regardless of the fact that these documents are also stored in the PDSDB. It receives read and write requests from the \texttt{DocumentStoragManager}.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} \texttt{DocumentDBShardingManager} and \texttt{DocumentDBShard}
 \end{itemize}
