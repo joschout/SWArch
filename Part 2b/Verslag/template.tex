@@ -386,6 +386,22 @@ Show the complete scenario using one or more sequence diagrams.
 
 \FloatBarrier
 
+
+\subsection{Downloading a document via unique link}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{DownloadDocumentViaUniqueLink.png}
+    \caption{A recipient wants to download a document using a unique link.
+        }\label{fig:seq_DownloadDocumentViaUniqueLink}
+\end{figure}
+
+
+
+
+
 \subsection{Delivering a document via the personal document store}
 Shortly describe the scenario shown in this subsection.
 Show the complete scenario using one or more sequence diagrams.
@@ -697,29 +713,22 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentDBMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        
+		\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-             \item Effect: Describe the effect of the operation
-             \item Exceptions: None
-        \end{itemize} 
-    \end{itemize}
+            \item Effect: The \texttt{DocumentDB} will store the given document \texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions:  None 
+        \end{itemize}        
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+		\item \texttt{Tuple<Document, DocumentMetaData> getDocument(DocumentId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+            \item Effect: The \texttt{DocumentDB} will return the document identified by the given document identifier together with its meta-data.
+            \item Exceptions:  
+            \begin{itemize}
+            	\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDB}.
+            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -873,7 +882,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{DocumentStorageFunctionality}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{DocumentStorageManager} is responsible for storing the generated documents in the correct database. If the document belongs to a registered recipient, it sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}. Otherwise, it only sends a write request to the \texttt{DocumentDB}, which stores all the documents.\\
+    \item \textbf{Description:} The \texttt{DocumentFunctionality} is responsible for storing the generated documents in the correct database. If the document belongs to a registered recipient, it sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}. Otherwise, it only sends a write request to the \texttt{DocumentDB}, which stores all the documents.\\
     It is also responsible for copying documents from the \texttt{DocumentDB} to the \texttt{PDSDB} when an Unregistered Recipient registers to the eDocs system.\\ Another responsibility of the \texttt{DeliveryFunctionality} is storing at least 3 hours of documents when the \texttt{PDSDB} fails.
     \item \textbf{Super-component:} None
     \item \textbf{Sub-components:} \texttt{DocumentStorageCache} and \texttt{DocumentStorageManager}
@@ -881,31 +890,35 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentStorageMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Documentid storeDocumentForRegisteredRecipient(JobId jobId, RecipientId recipientId, Document document, String senderName, DocumentType docType, EmailAddress emailAddress)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{DocumentStorageFunctionality} will try to store the given \texttt{document} for the registered recipient identified by \texttt{recipientId} in both the \texttt{PDSDB} and \texttt{DocumentDB}. It generates a new document identifier for the document and returns it.
+            \item Exceptions: None
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
+		
+        \item \texttt{Documentid storeDocumentForUnregisteredRecipientWithEmail(JobId jobId, Document document, String senderName, DocumentType docType, EmailAddress emailAddress)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{DocumentStorageFunctionality} stores the given \texttt{document} for the unregistered recipient in the \texttt{DocumentDB}. It stores the given e-mail address in the meta-data of the document. This way, this document can later be added to the recipient's personal document store should he or she subscribe with the given e-mail address. The \texttt{DocumentStorageFunctionality} generates a new document identifier for the document and returns it. 
+            \item Exceptions: None
+		\end{itemize}
+
+        \item \texttt{Documentid storeDocumentForUnregisteredRecipientWithoutEmail(JobId jobId, Document document, String senderName, DocumentType docType)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentStorageFunctionality} stores the given \texttt{document} for the unregistered recipient in the \texttt{DocumentDB}. The \texttt{DocumentStorageFunctionality} generates a new document identifier for the document and returns it. 
+            \item Exceptions: None
+		\end{itemize}
+
+        \item \texttt{void markAsReceived(DocumentId documentId, TimeStamp whenReceived)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentStorageFunctionality} marks the document identified by the given document identifier as received, by storing the given time in the document meta-data of the document. The given time is the time when the recipient should have received the document. Note that this method only has effect the first time it is called for a valid document identifier and time stamp.
             \item Exceptions: None
         \end{itemize}
+
+
     \end{itemize}
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
 \end{itemize}
 
 
@@ -921,6 +934,26 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item DocumentStorageMgmt
     \begin{itemize}
+    
+        \item \texttt{Documentid storeDocumentForRegisteredRecipient(JobId jobId, RecipientId recipientId, Document document, String senderName, DocumentType docType, EmailAddress emailAddress)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentStorageManager} will try to store the given \texttt{documment} for the registered recipient identified by \texttt{recipientId} in both the \texttt{PDSDB} and \texttt{DocumentDB}.  It generates a new document identifier for the document and returns it.
+            \item Exceptions: None
+		\end{itemize}
+		    
+        \item \texttt{Documentid storeDocumentForUnregisteredRecipientWithEmail(JobId jobId, Document document, String senderName, DocumentType docType, EmailAddress emailAddress)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentStorageManager} stores the given \texttt{document} for the unregistered recipient in the \texttt{DocumentDB}. It stores the given e-mail address in the meta-data of the document. This way, this document can later be added to the recipient's personal document store should he or she subscribe with the given e-mail address. The \texttt{DocumentStorageManager} generates a new document identifier for the document and returns it. 
+            \item Exceptions: None
+		\end{itemize}
+
+        \item \texttt{Documentid storeDocumentForUnregisteredRecipientWithoutEmail(JobId jobId, Document document, String senderName, DocumentType docType)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentStorageManager} stores the given \texttt{document} for the unregistered recipient in the \texttt{DocumentDB}. The \texttt{DocumentStorageManager} generates a new document identifier for the document and returns it. 
+            \item Exceptions: None
+		\end{itemize}
+
+    
         \item \texttt{void markAsReceived(DocumentId documentId, TimeStamp whenReceived)}
         \begin{itemize}
             \item Effect: The \texttt{DocumentStorageManager} marks the document identified by the given document identifier as received, by storing the given time in the document meta-data of the document. The given time is the time when the recipient should have received the document. Note that this method only has effect the first time it is called for a valid document identifier and time stamp.
@@ -1008,28 +1041,18 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item InterfaceA
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void sendEmail(EmailAddress emailAddress, EmailMessage emailMessage)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{EmailChannel} sends the given e-mail message \texttt{emailMessage} to the given e-mail address \texttt{emailAddress}.
+            \item Exceptions: None
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+
+        \item \texttt{void sendEmailWithAttachement(EmailAddress emailAddress, EmailMessage emailMessage, Document document)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{EmailChannel} sends the given e-mail message \texttt{emailMessage} to the given e-mail address \texttt{emailAddress} with the given \texttt{document} as an attachment.
             \item Exceptions: None
-        \end{itemize}
+		\end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -1194,6 +1217,16 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}
     	
+     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}       	
+   	
+    	
    	   \item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
@@ -1211,6 +1244,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
     		\end{itemize}
     	\end{itemize}	
+    	
+    	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobDBShardingManager} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize} 	    	
     	
     \end{itemize}
 \end{itemize}
@@ -1292,6 +1334,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}
     	
+     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}   	
+    	
+    	
+    	
     	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobFacade} queries the \texttt{JobDBShardingManager} for the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobFacade} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
@@ -1300,6 +1353,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
     		\end{itemize}
     	\end{itemize}
+ 	
+    	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize} 	
  	
     	
     \end{itemize}
@@ -1382,6 +1444,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}
     	
+     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}       	
+    	
+    	
+    	
     	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobManager} looks up the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobManager} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
@@ -1389,7 +1462,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\begin{itemize}
     			\item NoSuchJobException: Thrown if the \texttt{JonManager} cannot find a job associated to the given job identifier.
     		\end{itemize}
-    	\end{itemize}   
+    	\end{itemize}
+    	
+    	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize} 	    	
+ 	   
     \end{itemize}     
 \end{itemize}
 
@@ -1424,30 +1507,43 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item LinkMappingDBMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
+        
+		\item \texttt{void storeMapping(Link link, DocumentId documentId, Boolean isRegistered, TimeStamp whenGenerated)}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingDB} stores the mapping between the given \texttt{link} and \texttt{documentId}. It also stores a \texttt{TimeStamp} with a value the time when the link was generated. The \texttt{TimeStamp} of the time when the mapping is generated is also stored with the mapping.
+            \item Exceptions: None
+		\end{itemize}        
+        
+		\item \texttt{Boolean isRegistered(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingDB} returns true if the given link points to a document of a Registered Recipient and false if the given link points to a document of an Unregistered Recipient.
+            \item Exceptions: 
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+            	\item NoSuchLinkException: Thrown if  the given link cannot be found.
             \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+		\end{itemize}   
+		
+		\item \texttt{Boolean getdocumentId(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingDB} returns the document to which the given link maps.
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
+            \end{itemize}
+		\end{itemize}  		     
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+		\item \texttt{TimeStamp getMappingTime(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingDB} returns the time when the mapping identified by the given link was generated.
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown the given link cannot be found.
+            \end{itemize}
+		\end{itemize}  
+        
+
     \end{itemize}
 \end{itemize}
 
@@ -1460,26 +1556,44 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item LinkMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Link createMapping(DocumentId docId, Boolean isRegistered)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{LinkMappingManager} generates a unique link for the document identified by the the given document identifier and stores the mapping between the document identifier and the link. This way, the recipient of the document can download it by following the link. The boolean \texttt{isRegistered} tells whether the recipient is registered or not. If the recipient is registered, the document can be found in the \texttt{PSDB}. Otherwise, it can be found in the \texttt{DocumentDB}.
             \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+		\end{itemize}
+		
+		\item \texttt{Boolean isRegistered(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingManager} returns true if the given link points to a document of a Registered Recipient and false if the given link points to a document of an Unregistered Recipient.
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
+            \end{itemize}
+		\end{itemize}
+
+		\item \texttt{DocumentId getDocumentIdUnregisteredRecipient(Link link) throws NoSuchLinkException, LinkExpiredException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingManager} returns the document identifier to which the given link points for an Unregistered Recipient. First, a check occurs to see whether the link is older than 30 days. If it is, an exception is thrown. Otherwise,the document identifier is returned.
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
+            	\item LinkExpiredException: Thrown if the link is older than 30 days.
+            \end{itemize}
+		\end{itemize}		
+
+		\item \texttt{DocumentId getDocumentIdRegisteredRecipient(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingManager} returns the document identifier to which the given link points for a Registered Recipient. 
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
+            \end{itemize}
+		\end{itemize}			
+		
+	\end{itemize}
+
 \end{itemize}
 
 \subsection{LinkMappingFunctionality}
@@ -1491,31 +1605,44 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item LinkMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{Link createMapping(DocumentId docId, Boolean isRegistered)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
+            \item Effect: The \texttt{LinkMappingFunctionality} generates a unique link for the document identified by the the given document identifier and stores the mapping between the document identifier and the link. This way, the recipient of the document can download it by following the link. The boolean \texttt{isRegistered} tells whether the recipient is registered or not. If the recipient is registered, the document can be found in the \texttt{PSDB}. Otherwise, it can be found in the \texttt{DocumentDB}.
+            \item Exceptions: None
+		\end{itemize}
+
+		\item \texttt{Boolean isRegistered(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingFunctionality} returns true if the given link points to a document of a Registered Recipient and false if the given link points to a document of an Unregistered Recipient.
+            \item Exceptions: 
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
             \end{itemize}
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+		
+		\item \texttt{DocumentId getDocumentIdUnregisteredRecipient(Link link) throws NoSuchLinkException, LinkExpiredException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingFunctionality} returns the document identifier to which the given link points for an Unregistered Recipient. First, a check occurs to see whether the link is older than 30 days. If it is, an exception is thrown. Otherwise,the document identifier is returned.
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
+            	\item LinkExpiredException: Thrown if the link is older than 30 days.
+            \end{itemize}
+		\end{itemize}		
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+		\item \texttt{DocumentId getDocumentIdRegisteredRecipient(Link link) throws NoSuchLinkException}
+		 \begin{itemize}
+            \item Effect: The \texttt{LinkMappingFunctionality} returns the document identifier to which the given link points for a Registered Recipient. 
+            \item Exceptions: 
+            \begin{itemize}
+            	\item NoSuchLinkException: Thrown if the given link cannot be found.
+            \end{itemize}
+		\end{itemize}				
+		
+		
+	\end{itemize}
 \end{itemize}
 
 \subsection{PDSDB}
@@ -1543,7 +1670,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 % MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
 		\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
         \begin{itemize}
-            \item Effect: The \texttt{PDSDB} will store the given document\texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Effect: The \texttt{PDSDB} will store the given document \texttt{doc} together with the provided meta-data \texttt{md}.
             \item Exceptions:  None 
         \end{itemize}
          
@@ -1976,13 +2103,13 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 			\item Exceptions: None
 		\end{itemize} 
 		
-           \item \texttt{Boolean checkIfRegistered(Email emailAddress) }        
+           \item \texttt{Boolean checkIfRegistered(EmailAddress emailAddress) }        
 		\begin{itemize}
 			\item Effect: The \texttt{OtherDB} returns true if the given e-mail address belongs to a Registered Recipient. Otherwise, it returns false.
 			\item Exceptions: None
 		\end{itemize}
 		
-		   \item \texttt{RecipientId getRecipientId(Email emailAddress) }        
+		   \item \texttt{RecipientId getRecipientId(EmailAddress emailAddress) }        
 		\begin{itemize}
 			\item Effect: If the system has a Registered Recipient with the given e-mail address, the \texttt{OtherDB} returns its recipient identifier.
 			\item Exceptions: 
@@ -2001,7 +2128,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 		\begin{itemize}
 			\item Effect: The \texttt{OtherDB} returns the document type of the batch identified by the given batch identifier.
 			\item Exceptions: None
-		\end{itemize}					  		    
+		\end{itemize}
+
+		
+		\item \texttt{String getNameOfSender(CustomerId cuId)}    
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the name of the sender of the document, i.e. the customer organization identified by the given customer organization identifier.
+            \item Exceptions: None	
+		\end{itemize}
+						  		    
     \end{itemize}
     
 	\item BatchDataMgmt
@@ -2042,41 +2177,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     
 \end{itemize}
 
-\subsection{RecipientClient}
-\begin{itemize}
-    \item \textbf{Description:} The \texttt{RecipientClient} is external to the eDocs system and represents a client device of an unregistered or registered recipient of eDocs that communicates with the eDocs System.
-    \item \textbf{Super-component:} None
-    \item \textbf{Sub-components:} None
-\end{itemize}
 
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
 
 \subsection{RawDataHandler}
 \begin{itemize}
@@ -2101,6 +2202,31 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \end{itemize}
     \end{itemize} 
 \end{itemize}
+
+\subsection{RecipientClient}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{RecipientClient} is external to the eDocs system and represents a client device of an unregistered or registered recipient of eDocs that communicates with the eDocs System.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item RecipientMgmt
+    \begin{itemize}
+        \item \texttt{SessionId getSessionId() throws NotAuthenticatedException}
+        \begin{itemize}
+            \item Effect: The \texttt{RecipientClient} returns the session identifier of the current session if the recipient is a Registered Recipient and currently logged in. Otherwise, an exception is thrown.
+            \item Exceptions:
+            \begin{itemize}
+                \item NotAuthenticatedException: Thrown if the recipient does not currently have a session with the eDocs system.
+            \end{itemize}
+		\end{itemize}
+
+    \end{itemize}
+\end{itemize}
+
+
 
 \subsection{RecipientFacade}
 \begin{itemize}
@@ -2142,7 +2268,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \end{itemize}       	
         \end{itemize}
       
-      \item \texttt{Tuple<Document, DocumentMetaData> lookupDocument(RecipientId recipientId, SessionId sessionId, DocumentId documentId) throws NotAuthenticatedException}  
+      \item \texttt{Tuple<Document, DocumentMetaData> lookupDocument(RecipientId recipientId, SessionId sessionId, DocumentId documentId) throws NotAuthenticatedException, DocumentUnavailableException}  
         \begin{itemize}
             \item Effect: The \texttt{RecipientFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{RecipientFacade} then gets the document identified by \texttt{documentId} and its meta-data using the \texttt{PDSFacade}, which checks whether the document belongs to the Registered Recipient, and returns them.
             \item Exceptions:
@@ -2151,6 +2277,18 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item DocumentUnavailableException: Thrown if the given document is not available for the given user. An example is when the document identified by the \texttt{documentId} exists, but the document does not belong to the Registered Recipient. Another example is when the document identifier does not exist.
             \end{itemize}       	
         \end{itemize}
+
+      \item \texttt{Tuple<Document, DocumentMetaData> getDocument(Link link) throws NotAuthenticatedException, DocumentUnavailableException, LinkExpiredException}  
+        \begin{itemize}
+            \item Effect: The \texttt{RecipientFacade} returns the document and meta-data to which the unique link points. It first checks whether the link points to a document of a registered or unregistered recipient. If the document belongs to  an Unregistered Recipient, a check occurs to see if the link is older than 30 days. If it is, an exception is thrown. If it is not, the document of the Unregistered Recipient gets marked as received and the \texttt{RecipientFacade} returns the document. \\ If the document belongs to an Registered Recipient, the \texttt{RecipientFacade} asks the Registered Recipient for its session identifier to check whether he or she is logged in and whether the document belongs to him or  her. If those conditions are met, the document of the Registered Recipient gets marked as received and the \texttt{RecipientFacade} returns the document.
+            \item Exceptions:
+             \begin{itemize}
+                \item NotAuthenticatedException: Thrown if the given session identifier is invalid. Also thrown if the link points to the document of a Registered Recipient and the recipient following the link currently has no session with the eDocs system.
+                \item DocumentUnavailableException: Thrown if the given document is not available for the given user. An example is when the document identified by the \texttt{documentId} exists, but the document does not belong to the Registered Recipient. Another example is when the document identifier does not exist.
+                \item LinkExpiredException: Thrown if the link is older than 30 calendar days and points to a document of an Unregistered Recipient.
+            \end{itemize}       	
+        \end{itemize}  
+  
                 
     \end{itemize}
 \end{itemize}
@@ -2453,6 +2591,8 @@ them alphabetically for ease of navigation.
     \item \texttt{JobId}: A piece of data uniquely identifying a document processing job in the system.
     
     \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilites are a long integer, a string, a URL etc.
+    
+    \item \texttt{Link}:
     
     \item \texttt{NotificationMessage}: A textual message which can be used to include extra information about the event of the notification.
     
