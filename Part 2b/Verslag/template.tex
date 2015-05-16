@@ -335,6 +335,24 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_scenario1}
 \end{figure}
 
+\subsection{Document generation}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{ProcessJobs1.png}
+    
+    \caption{The generation of documents (part 1). Figure \ref{fig:seq_ProcessJobs2} shows the continuation of this figure.
+        }\label{fig:seq_ProcessJobs1}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{ProcessJobs2.png}
+    \caption{The generation of documents (part 2). This figure is the continuation of figure \ref{fig:seq_ProcessJobs2}.
+        }\label{fig:seq_ProcessJobs2}
+\end{figure}
 
 \subsection{A registered recipient logs in}
 Figure \ref{fig:seq_UC1LogIn} depicts the sequence diagram of a Registered Recipient logging in, according to \emph{UC1: Log in}. The Registered Recipient provides his details to the \texttt{RecipientFacade}. The \texttt{Authentication} compares these credentials to those stored in the \texttt{OtherDB}. if the given credentials match the stored credentials, a new session is opened in the \texttt{SessionDB} and the corresponding session identifier is returned to the registered recipient. Otherwise, an InvalidCredentialsException is thrown.\\
@@ -496,6 +514,28 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_StoreDocPDS}
 \end{figure}
 
+\subsection{Consulting the personal document store}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{ConsultPDS.png}
+    \caption{A Registered Recipient consults his or her personal document store.
+        }\label{fig:seq_ConsultPDS}
+\end{figure}
+
+\subsection{Scenario 1}
+Shortly describe the scenario shown in this subsection.
+Show the complete scenario using one or more sequence diagrams.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{RegisterToPds.png}
+    \caption{An Unregistered Recipient registers to the personal document store.
+        }\label{fig:seq_RegisterToPDS}
+\end{figure}
+
 \FloatBarrier
 
 \appendix
@@ -594,7 +634,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 		\item \texttt{void addDocumentDeliveryCostbyPrintAndPostalService(CustomerId cuId, JobId jobId)}       
         \begin{itemize}
-            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by e-mail to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by postal mail to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
             \item Exceptions: None
         \end{itemize} 
         
@@ -602,7 +642,15 @@ List all elements and interfaces alphabetically for ease of navigation.
         \begin{itemize}
             \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by Zoomit to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
             \item Exceptions: None
-        \end{itemize}                
+        \end{itemize}   
+        
+		\item \texttt{void addDocumentDeliveryCostbyPDS(CustomerId cuId, JobId jobId)}       
+        \begin{itemize}
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by personal document store to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Exceptions: None
+        \end{itemize}          
+        
+                     
     \end{itemize}
 \end{itemize}
 
