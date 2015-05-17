@@ -353,13 +353,18 @@ Show the complete scenario using one or more sequence diagrams.
 \end{figure}
 
 \subsection{Document generation}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+\label{scenario:DocumentGeneration}
+The generation of documents has already been discussed in the provided initial architecture during the decomposition with as non-functional requirements \emph{Av1: Document generation failure} and \emph{P2: Document generation}. Figures \ref{fig:seq_ProcessJobs1} and \ref{fig:seq_ProcessJobs2} originate from the original architecture, but are adapted to fit the final architecture. Therefore, we will not give an in depth dicussion of these figures, but focus on the main differences.\\
+
+Figure \ref{fig:seq_ProcessJobs1} shows a \texttt{Generator} instance that requires new jobs to process contacting the \texttt{GenerationManager}. The \texttt{GenerationManager} then asks the \texttt{Scheduler} for job identifiers of jobs that need to be processed. The \texttt{Scheduler} returns a list of \texttt{JobIds} belonging to the same batch (but not necessarily all the jobs of that batch). Next, the \texttt{Generator} asks the \texttt{Completer} to return all the data necessary to generate the documents. This is data belonging to the jobs and data belonging to the batch of these jobs. The \texttt{Completer} first fetches the raw data for the jobs from the \texttt{OtherDB} using the \texttt{JobFacade}. The \texttt{JobFacade} can fetch these raw data entries because a job contains the identifier of the necessary raw data entry.\\
+After the raw data entries, the \texttt{Completer} fetches the meta-data of the batch, the cryptographic key of the customer organization initiating the processing job and the template for the document type to be generated. The batch meta-data, key and template are all stored in the \texttt{OtherDB}. The batch meta-data contains the customer organization identifier, the time when the batch was received by the eDocs system, whether the batch is recurring, the priority of batch \dots (see also the data type \texttt{BatchmetaData} in Appendix \ref{app:catalog}).\\
+
+Figure \ref{fig:seq_ProcessJobs2} shows the continuation of figure \ref{fig:seq_ProcessJobs2}. After fetching the template, the \texttt{Completer} returns the list of raw data entries and their job identifiers, together with the batch meta-data, the key and the template to the \texttt{GeneratorManager}. The \texttt{GeneratorManager} assigns these document processing jobs to a \texttt{Generator} instance asking for new processing jobs, giving it this necessary data.\\
+For each received job, the \texttt{Generator} instance tries to generate a document. If he succeeds, it tells the \texttt{BillingManager} to add the appropriate cost to the bill of the customer organization and forwards the job identifier and document to the \texttt{ChannelDispatcher}. The \texttt{ChannelDispatcher} will then initiate the delivery of the document, as explained in Section \ref{scenario:DeliverDocPDS}. If the \texttt{Generator} instance fails to generate the document because it does not have all of the data necessary to fill in the template, it will notify the appropriate Customer Organization Administrator by sending an  e-mail with a description of the error using the \texttt{NotificationHandler}. The \texttt{NotificationHandler} gets the e-mail address from the SLA in the \texttt{OtherDB}.
 
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=\textwidth]{ProcessJobs1.png}
-    
     \caption{The generation of documents (part 1). Figure \ref{fig:seq_ProcessJobs2} shows the continuation of this figure.
         }\label{fig:seq_ProcessJobs1}
 \end{figure}
@@ -372,6 +377,7 @@ Show the complete scenario using one or more sequence diagrams.
 \end{figure}
 
 \subsection{A registered recipient logs in}
+\label{scenario:RegRecipLogIn}
 Figure \ref{fig:seq_UC1LogIn} depicts the sequence diagram of a Registered Recipient logging in, according to \emph{UC1: Log in}. The Registered Recipient provides his details to the \texttt{RecipientFacade}. The \texttt{Authentication} compares these credentials to those stored in the \texttt{OtherDB}. if the given credentials match the stored credentials, a new session is opened in the \texttt{SessionDB} and the corresponding session identifier is returned to the registered recipient. Otherwise, an InvalidCredentialsException is thrown.\\
 Note that the use case \emph{UC1: Log in} also has the Customer Organization as a primary actor. The login procedure for customer organizations is almost identical to the procedure for registered recipient, which is why we do not provide a separate sequence diagram for this primary actor. Compared to figure \ref{fig:seq_UC1LogIn}, the Customer Organization sends it login request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Also, another method call to \texttt{OtherDB} is used to ask for the credentials of a customer organization.
 \begin{figure}[!htp]
@@ -382,6 +388,7 @@ Note that the use case \emph{UC1: Log in} also has the Customer Organization as 
 \end{figure}
 
 \subsection{A registered recipient logs out}
+\label{scenario:RegRecipLogOut}
 Figure \ref{fig:seq_UC2LogOut} shows the behaviour of a Registered Recipient logging out, according to \emph{UC2: Log out}. The Registered Recipient provides his recipient id and session id to the \texttt{RecipienntFacade}. The \texttt{AuthenticationHandler} first verifies the session (figure \ref{fig:seq_UC2LogOut}). If the session is valid, it logs out the Registered Recipient.\\ Note that the logout procedure for Customer Organizations is almost the same. The only difference is that the Customer Organization sends his logout request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Because of this reason, we do not give a separate sequence diagram for the Customer Organization logging out.
 
 \begin{figure}[!htp]
@@ -394,19 +401,19 @@ Figure \ref{fig:seq_UC2LogOut} shows the behaviour of a Registered Recipient log
 
 
 \subsection{Updating a document template}
+\label{scenario:UpdateDocTemplate}
 Figure \ref{fig:seq_UC20UpdateDocumentTemplate} shows the flow when a Customer Administrator updates the template used for generating documents of a given type. It corresponds to \emph{UC20: Update document template}. It consists of two main parts. First, the customer administrator asks what the possible document types are that the customer organization is allowed to generate. The system verifies whether the session of the customer administrator is valid (as detailed in figure \ref{fig:seq_VerifySession} and then returns a list of the allowed document types using the \texttt{OtherDB}.  Together with the allowed document types, it returns the  time when the currently stored templates corresponding to the document types were uploaded.\\
-Secondly, the customer administrator provides the document type it wants to update and the new template to the \texttt{CustomerOrganizationFacade}. After verifying the validity of the session again (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganization} asks the \texttt{OtherDB} to check whether the document type provided by the customer organization is valid and allowed. If it is not allowed or invalid, an InvalidDocumentTypeException gets thrown. Otherwise, the \texttt{CustomerOrganizationFacade} stores the template in the \texttt{OtherDB} together with the time when it has received the template, the document type and the customer organization id.
+Secondly, the customer administrator provides the document type it wants to update and the new template to the \texttt{CustomerOrganizationFacade}. After verifying the validity of the session again (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganization} asks the \texttt{OtherDB} to check whether the document type provided by the customer organization is valid and allowed. If it is not allowed or invalid, an InvalidDocumentTypeException gets thrown. Otherwise, the \texttt{CustomerOrganizationFacade} stores the template in the \texttt{OtherDB} together with the time when it has received the template, the document type and the customer organization identifier.
 
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=\textwidth]{Seq_UC20UpdateDocumentTemplate.png}
-
-    
     \caption{The system behavior for updating a document template.
         }\label{fig:seq_UC20UpdateDocumentTemplate}
 \end{figure}
 
 \subsection{Verifying a session}
+\label{scenario:VerifySession}
 Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid. The \texttt{AuthenticationHandler} uses the \texttt{SessionDB} to verify whether each incoming session identifier belongs to an existing session. If it belongs to an existing session, the corresponding session attributes are returned to the caller, otherwise an NoSuchSessionException is thrown.
 \begin{figure}[!htp]
     \centering
@@ -418,6 +425,7 @@ Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid
 \FloatBarrier
 
 \subsection{Initiating document processing}
+\label{scenario:InitiateDocProcessing}
 Figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows how a customer organization initiates a batch of document processing jobs. Recurring and non-recurring batches are indicated using the \texttt{isRecurring} boolean value. If the batch is non-recurring, the customer organization can indicate another priority than the default priority of that customer organization if the batch should be handled with another priority than the default priority.  For recurring batches, it does not matter if a priority is given, as the default priority will be used. The customer organization also delivers the raw data as a \texttt{rawDataPackage}. After verification of the session identifier (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards this together with all its arguments except for the \texttt{sessionid} to \texttt{RawDataHandler}, while also indicating if the batch is (non-)recurring.\\
 
 Figure \ref{fig:seq_VerifyRawData} depicts the first part of the method call in the \texttt{RawDataHandler}, which will verify whether the raw data is valid. First, \texttt{RawDataHandler} checks whether the customer organization is allowed to generated the given document type. If it is allowed, the received raw data packet will be validated, e.g  there will be checked whether the content of the received Excel file can be read or whether a received XML file is correctly formatted. If it is not valid, an exception is thrown. Otherwise, depending on if the batch is  recurring, the \texttt{RawDataHandler} will query the SLA in the \texttt{OtherDB} to check if the number of raw data entries in the raw data package is allowed. If the number of entries exceeds this maximum, an exception is thrown. Next, each individual entry will be checked on validity, so the \texttt{RawdataHandler} knows which \texttt{RawData} entries are valid and which are not.\\
@@ -449,8 +457,8 @@ Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storin
 \end{figure}
 
 \subsection{Consult document in personal document store}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+\label{scenario:ConsultDocInPDS}
+Figure \ref{fig:seq_UC14ConsultdocumentInPDS} shows how a Registered Recipient can consult a document in his or her personal document store. The Registered Recipient asks the \texttt{RecipientFacade} to look up the document identified by the given document identifier.  There are multiple ways for a Registered Recipient to acquire a document identifier, e.g. by following a unique link (Section \ref{scenario:DownloadDocUniqueLink}), by searching for document in the personal document store, by consulting the personal document store (Section \ref{scenario:ConsultPDS}). The system first verifies whether the session of the Registered Recipient is valid (as detailed in figure \ref{fig:seq_VerifySession} in Section \ref{scenario:VerifySession}). After verification of the session identifier, the \texttt{RecipientFacade} asks the \texttt{PDSFacade} to fetch the document. But before fetching the document, the \texttt{PDSFacade} verifies whether the document identified by the given document identifier actually belongs to the Registered Recipient identified by the given recipient identifier. This way, the recipient cannot request documents that do not belong to him or her by giving a chosen document identifier. If the document does not belong to the recipient, an exception is thrown. Otherwise, the \texttt{PDSFacade} fetches the document and its meta-data from the \texttt{PDSDB}. The \texttt{RecipientFacade} returns the document and its meta-data to the recipient after marking the document and its job as received. Note that when marking the document as received, the time of receipt gets stored in the document's meta-data, so the recipient can later on search for documents based on their receipt date.
 
 \begin{figure}[!htp]
     \centering
@@ -459,12 +467,14 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_UC14ConsultdocumentInPDS}
 \end{figure}
 
-\FloatBarrier
+
 
 
 \subsection{Downloading a document via unique link}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+\label{scenario:DownloadDocUniqueLink}
+Figure \ref{fig:seq_DownloadDocumentViaUniqueLink} shows how a recipient can download a document by following a unique link to this document sent by the System via e-mail. It shows both the cases when the recipient is registered and when he or she is not registered.\\ The recipient gives the link to the \texttt{RecipientFacade}, which asks the \texttt{LinkMappingManager} whether the link points to a document belonging to a registered or unregistered recipient. This is important, because the document will be downloaded from another database depending on this fact.\\
+If the document belongs to an Unregistered Recipient, the \texttt{RecipientFacade} asks the \texttt{LinkMappingManager} for the document identifier to which the link maps. The \texttt{LinkMappingManager} checks the \texttt{TimeStamp} stored with the mapping between the link and the document identifier and uses it check whether the link is 30 days old. If the link is older than 30 days, an exception is thrown. Otherwise, the \texttt{LinkMappingManager} fetches and returns the document identifier stored in the mapping.  The \texttt{RecipientFacade} the asks the \texttt{DocumentDB} to fetch the document and its meta-data identified by that document identifier. It will mark the job and the corresponding document as received, after which it returns the document and its meta-data. Note that when marking the document as received, the time of receipt gets stored in the document's meta-data, so the recipient can later  on (i.e. after registration) search for documents based on their receipt date.\\
+If the document belongs to a Registered Recipient, the \texttt{RecipientFacade} asks the \texttt{LinkMappingManager} for the document identifier to which the link maps. The \texttt{LinkMappingManager} does not check the \texttt{TimeStamp} of the mapping but just returns the document identifier. The \texttt{RecipientFacade} has to be sure that document belongs to the recipient following the link so it requests the session identifier and the recipient identifier of the recipient following the link. If the recipient does not currently have a session, an exception is thrown. If he or she does have a session, the recipient returns his or her recipient identifier and session identifier to the \texttt{RecipientFacade}. The \texttt{RecipientFacade} then looks up the document using the session, recipient and document identifiers as explained in Section \ref{scenario:ConsultDocInPDS}.
 
 \begin{figure}[!htp]
     \centering
@@ -478,6 +488,7 @@ Show the complete scenario using one or more sequence diagrams.
 
 
 \subsection{Delivering a document via the personal document store}
+\label{scenario:DeliverDocPDS}
 Shortly describe the scenario shown in this subsection.
 Show the complete scenario using one or more sequence diagrams.
 
@@ -532,6 +543,7 @@ Show the complete scenario using one or more sequence diagrams.
 \end{figure}
 
 \subsection{Consulting the personal document store}
+\label{scenario:ConsultPDS}
 Shortly describe the scenario shown in this subsection.
 Show the complete scenario using one or more sequence diagrams.
 
@@ -542,13 +554,14 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_ConsultPDS}
 \end{figure}
 
-\subsection{Scenario 1}
+\subsection{A recipient registers to the PDS}
+\label{scenario:RegRecipRegisters}
 Shortly describe the scenario shown in this subsection.
 Show the complete scenario using one or more sequence diagrams.
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{RegisterToPds.png}
+    \includegraphics[width=\textwidth]{RegisterToPdS.png}
     \caption{An Unregistered Recipient registers to the personal document store.
         }\label{fig:seq_RegisterToPDS}
 \end{figure}
@@ -835,6 +848,16 @@ List all elements and interfaces alphabetically for ease of navigation.
             	\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDB}.
             \end{itemize}
         \end{itemize}
+        
+		\item \texttt{List<DocumentId> geAlltDocumentIds(EmailAddress emailAddress)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentDB} will return the document identifiers of all documents that where previously sent to the given \texttt{emailAddress}.
+            \item Exceptions:  
+            \begin{itemize}
+            	\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDB}.
+            \end{itemize}
+        \end{itemize}        
+        
     \end{itemize}
 \end{itemize}
 
@@ -1064,6 +1087,13 @@ List all elements and interfaces alphabetically for ease of navigation.
             \item Effect: The \texttt{DocumentStorageManager} marks the document identified by the given document identifier as received, by storing the given time in the document meta-data of the document. The given time is the time when the recipient should have received the document. Note that this method only has effect the first time it is called for a valid document identifier and time stamp.
             \item Exceptions: None
         \end{itemize}
+        
+        \item \texttt{void moveDocumentsToPDS(EmailAddress emailAddress, RecipientId recipientId)}
+        \begin{itemize}
+            \item Effect: The \texttt{DocumentStorageManager} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
+            \item Exceptions: None
+        \end{itemize}        
+        
     \end{itemize}
 \end{itemize}
 
@@ -1318,19 +1348,29 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\item Effect: The \texttt{JobDBShardingManager} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
     		\item Exceptions:
     		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}
     	
+    	
+    	
      	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
-    		\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+    		\item Effect: The \texttt{JobDBShardingManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
     		\item Exceptions:
     		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
-    	\end{itemize}       	
-   	
+    	\end{itemize}       	   	
+  
+  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobDBShardingManager} marks the document processing job identified by the given job identifier as failed.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}        	
     	
    	   \item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1447,7 +1487,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}   	
-    	
+  
+  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} marks the document processing job identified by the given job identifier as failed.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}     	
     	
     	
     	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
@@ -1554,10 +1602,18 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
     		\item Exceptions:
     		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}       	
-    	
+
+  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} marks the document processing job identified by the given job identifier as failed.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given document identifier.
+    		\end{itemize}
+    	\end{itemize}        	
     	
     	
     	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
@@ -1749,6 +1805,215 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 		
 	\end{itemize}
 \end{itemize}
+
+\subsection{NotificationHandler}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{NotificationHandler} is responsible for sending notifications to the appropriate parties, e.g. the eDocs operators and the customer administrators.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+    \item NotifyOperator
+    \begin{itemize}
+        \item \texttt{void notifyOperatorOfPDSDBReplicaFailure(PDSDBReplicaId replicaId, TimeStamp dateTime)}
+        \begin{itemize}
+            \item Effect: The \texttt{NotificationHandler} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators. This method is called by a \texttt{PDSReplicationManager}.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{void notifyEdocsOperatorOfDocumentGenerationFailure(NotificationMessage msg,\\ TimeStamp whenFailed)}
+        \begin{itemize}
+            \item Effect: The \texttt{NotificationHandler} will send a textual message \texttt{msg} to the eDocs operators, which contains further information about the specific failure. This method is called by the \texttt{DocumentGenerationManager}. More specifically, it is called by the \texttt{GeneratorManager}.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{void notifyCustomerOrganizationOfInsufficientData(BatchMetaData, NotificationMessage msg, TimeStamp whenFailed)}
+        \begin{itemize}
+            \item Effect: The \texttt{NotificationHandler} will send an e-mail message to the customer organization identified by the customer organization identifier in the \texttt{batchMetaData}, specifying that a document generation job has failed because the system did not have all of the data required to fill in the document template. This method is called by a \texttt{Generator} instance.
+            \item Exceptions: None
+        \end{itemize}        
+        
+    \end{itemize}
+\end{itemize}
+
+\subsection{OtherDB}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{OtherDB} is responsible for storing all information that is not required to be stored separately by non-functional requirements. For example, it stores the raw data and data about customer organizations and registered recipients. It also stores the templates for documents and the keys of customer organizations to sign the documents during generation.
+    \item \textbf{Super-component:} None
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+        \item GetKey
+    \begin{itemize}
+        \item \texttt{Key getKey(CustomerId customerId)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+    
+    \item TemplateMgmt
+    \begin{itemize}
+        \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
+       % \item \texttt{Template getTemplate(TemplateId templateId)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
+            \end{itemize}
+        \end{itemize}
+        
+   		\item \texttt{Boolean storeDocumentTemplate(CustomerId cuId, DocumentType documentType, Template template, TimeStamp whenReceived) throws InvalidDocumentTypeException}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given template with the given time stamp for the customer organization identified by the given \texttt{CustomerId}.
+            \item Exceptions:
+            \begin{itemize}
+            	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+            \end{itemize}
+        \end{itemize}          
+    \end{itemize}
+    
+    \item UserDataMgmt
+    \begin{itemize}
+        \item \texttt{Credentials getRegisteredRecipientCredentials(RecipientId recipientId) \\throws NoSuchRecipientException}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchRecipientException: Thrown if no Registered Recipient with the given credentials exists.
+            \end{itemize}
+		\end{itemize}
+            
+        \item \texttt{Credentials getCustomerOrganizationCredentials(CustomerId customerId) \\ throws NoSuchCustomerOrganizationException}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
+            \end{itemize}
+        \end{itemize}
+        
+		\item \texttt{List<Tuple<DocumentType, TimeStamp>> getPossibleDocumentTypes(CustomerId customerId)}
+		\begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the a list of document types that the Customer Organization identified by \texttt{customerId} can generate. For each document type, it also returns the time when the last \texttt{Template} for that document type was uploaded.  
+            \item Exceptions: None
+        \end{itemize} 
+        
+		\item \texttt{Boolean isAllowedDocumentType(CustomerId cuid, DocumentType docType)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} checks in the SLA of the customer organization with customer identifier \texttt{cuid} if the document type \texttt{docType} is allowed. It returns true if it is allowed, otherwise it returns false.
+			\item Exceptions: None
+		\end{itemize}		        
+        
+        	\item \texttt{void indicateWhichRecurringBatch(CustomerId cuid, BatchMetaData batchMetaData) }        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} stores to which of the recurring batches of the customer organisation identified by \texttt{cuid} this batch corresponds. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
+			\item Exceptions: None
+		\end{itemize}	
+     
+           \item \texttt{int getNumberOfDocumentsMaximallyAllowed(CustomerId cuid, BatchMetaData batchMetaData) }        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns the number of documents that is maximally allowed for the customer organization identified by \texttt{cuid} for this recurring batch. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
+			\item Exceptions: None
+		\end{itemize} 
+		
+           \item \texttt{Boolean checkIfRegistered(EmailAddress emailAddress) }        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns true if the given e-mail address belongs to a Registered Recipient. Otherwise, it returns false.
+			\item Exceptions: None
+		\end{itemize}
+		
+		   \item \texttt{RecipientId getRecipientId(EmailAddress emailAddress) }        
+		\begin{itemize}
+			\item Effect: If the system has a Registered Recipient with the given e-mail address, the \texttt{OtherDB} returns its recipient identifier.
+			\item Exceptions: 
+			\begin{itemize}
+				\item NoSuchRecipientException: Thrown if the \texttt{OtherDB} does not contain the information of a Registered Recipient with the given e-mail address.
+			\end{itemize}
+		\end{itemize}  		
+
+		\item \texttt{Boolean isReceiptTrackingOn(CustomerId cuid)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} checks if the customer organization with customer identifier \texttt{cuid} has receipt tracking turned on. It returns true if it has receipt tracking turned on, otherwise it returns false.
+			\item Exceptions: None
+		\end{itemize}
+		
+		\item \texttt{DocumentType getDocumentType(BatchId batchId)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns the document type of the batch identified by the given batch identifier.
+			\item Exceptions: None
+		\end{itemize}
+
+		
+		\item \texttt{String getNameOfSender(CustomerId cuId)}    
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the name of the sender of the document, i.e. the customer organization identified by the given customer organization identifier.
+            \item Exceptions: None	
+		\end{itemize}
+
+		\item \texttt{RecipientId storeRegisteredRecipient(RecipientDetails recipientDetails, Credentials credentials)}    
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} creates a new 
+            Registered Recipient by storing his \texttt{recipientDetails} and \texttt{credentials}. It returns the \texttt{RecipientId} it created for the new Registered Recipient.
+            \item Exceptions: None	
+		\end{itemize}
+
+		\item \texttt{Emailaddress getEmailAddress(CustomerId customerId)}    
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the e-mail address corresponding to the given customer organization identifier.
+            \item Exceptions: None	
+		\end{itemize}
+						  		    
+    \end{itemize}
+    
+	\item BatchDataMgmt
+    \begin{itemize}
+        \item \texttt{BatchId storeBatchMetaData(BatchMetaData batchMetaData)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given \texttt{batchMetaData} and returns the batch identifier with which this meta-data can be queried.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{BatchMetaData getBatchMetaData(BatchId batchId)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the meta-data if the batch identified by the given \texttt{batchId}.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize}    
+    
+    	\item RawDataMgmt
+    \begin{itemize}
+        \item \texttt{List<RawDataId> storeRawData(List<RawData> rawDataEntries)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given raw data entries. It returns the identifiers of the stored raw data entries.
+            \item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{List<RawData> getRawData(List<RawDataId> rawDataIds)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the raw data entries corresponding to the given raw data identifiers.
+            \item Exceptions: None
+        \end{itemize}
+        
+            \item \texttt{RawData getRawData(RawDataId rawDataId)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} returns the raw data entry corresponding to the given raw data identifier.
+            \item Exceptions: None
+        \end{itemize}
+    \end{itemize} 
+    
+\end{itemize}
+
+
+
 
 \subsection{PDSDB}
 \begin{itemize}
@@ -2096,192 +2361,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \end{itemize}
 \end{itemize}
 
-\subsection{NotificationHandler}
-\begin{itemize}
-    \item \textbf{Description:} The \texttt{NotificationHandler} is responsible for sending notifications to the appropriate parties, e.g. the eDocs operators and the customer administrators.
-    \item \textbf{Super-component:} None
-    \item \textbf{Sub-components:} None
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-    \item NotifyOperator
-    \begin{itemize}
-        \item \texttt{void notifyOperatorOfPDSDBReplicaFailure(PDSDBReplicaId replicaId, TimeStamp dateTime)}
-        \begin{itemize}
-            \item Effect: The \texttt{NotificationHandler} will send the given \texttt{PDSDBReplicaId} of the failed \texttt{PDSDBReplica} with the given time of failure \texttt{dateTime} to the eDocs operators. This method is called by a \texttt{PDSReplicationManager}.
-            \item Exceptions: None
-        \end{itemize}
-        
-        \item \texttt{void notifyOperatorOfDocumentGenerationFailure(NotificationMessage msg,\\ TimeStamp whenFailed)}
-        \begin{itemize}
-            \item Effect: The \texttt{NotificationHandler} will send a textual message \texttt{msg} to the eDocs operators, which contains further information about the specific failure. This method is called by the \texttt{DocumentGenerationManager}. More specifically, it is called by the \texttt{GeneratorManager}.
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\subsection{OtherDB}
-\begin{itemize}
-    \item \textbf{Description:} The \texttt{OtherDB} is responsible for storing all information that is not required to be stored separately by non-functional requirements. For example, it stores the raw data and data about customer organizations and registered recipients. It also stores the templates for documents and the keys of customer organizations to sign the documents during generation.
-    \item \textbf{Super-component:} None
-    \item \textbf{Sub-components:} None
-\end{itemize}
-
-\subsubsection*{Provided interfaces}
-\begin{itemize}
-        \item GetKey
-    \begin{itemize}
-        \item \texttt{Key getKey(CustomerId customerId)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the key belonging to the Customer Organization identified by \texttt{customerId}.
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
-            \end{itemize}
-        \end{itemize}
-    \end{itemize}
-    
-    \item TemplateMgmt
-    \begin{itemize}
-        \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
-       % \item \texttt{Template getTemplate(TemplateId templateId)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchTemplateException: Thrown if there is no template for the given arguments.
-            \end{itemize}
-        \end{itemize}
-        
-   		\item \texttt{Boolean storeDocumentTemplate(CustomerId cuId, DocumentType documentType, Template template, TimeStamp whenReceived) throws InvalidDocumentTypeException}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} stores the given template with the given time stamp for the customer organization identified by the given \texttt{CustomerId}.
-            \item Exceptions:
-            \begin{itemize}
-            	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
-            \end{itemize}
-        \end{itemize}          
-    \end{itemize}
-    
-    \item UserDataMgmt
-    \begin{itemize}
-        \item \texttt{Credentials getRegisteredRecipientCredentials(RecipientId recipientId) \\throws NoSuchRecipientException}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Registered Recipient identified by \texttt{recipientId}.
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchRecipientException: Thrown if no Registered Recipient with the given credentials exists.
-            \end{itemize}
-		\end{itemize}
-            
-        \item \texttt{Credentials getCustomerOrganizationCredentials(CustomerId customerId) \\ throws NoSuchCustomerOrganizationException}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
-            \item Exceptions:
-            \begin{itemize}
-                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
-            \end{itemize}
-        \end{itemize}
-        
-		\item \texttt{List<Tuple<DocumentType, TimeStamp>> getPossibleDocumentTypes(CustomerId customerId)}
-		\begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the a list of document types that the Customer Organization identified by \texttt{customerId} can generate. For each document type, it also returns the time when the last \texttt{Template} for that document type was uploaded.  
-            \item Exceptions: None
-        \end{itemize} 
-        
-		\item \texttt{Boolean isAllowedDocumentType(CustomerId cuid, DocumentType docType)}        
-		\begin{itemize}
-			\item Effect: The \texttt{OtherDB} checks in the SLA of the customer organization with customer identifier \texttt{cuid} if the document type \texttt{docType} is allowed. It returns true if it is allowed, otherwise it returns false.
-			\item Exceptions: None
-		\end{itemize}		        
-        
-        	\item \texttt{void indicateWhichRecurringBatch(CustomerId cuid, BatchMetaData batchMetaData) }        
-		\begin{itemize}
-			\item Effect: The \texttt{OtherDB} stores to which of the recurring batches of the customer organisation identified by \texttt{cuid} this batch corresponds. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
-			\item Exceptions: None
-		\end{itemize}	
-     
-           \item \texttt{int getNumberOfDocumentsMaximallyAllowed(CustomerId cuid, BatchMetaData batchMetaData) }        
-		\begin{itemize}
-			\item Effect: The \texttt{OtherDB} returns the number of documents that is maximally allowed for the customer organization identified by \texttt{cuid} for this recurring batch. The \texttt{batchMetaData} contains a description of which recurring batch this batch is.
-			\item Exceptions: None
-		\end{itemize} 
-		
-           \item \texttt{Boolean checkIfRegistered(EmailAddress emailAddress) }        
-		\begin{itemize}
-			\item Effect: The \texttt{OtherDB} returns true if the given e-mail address belongs to a Registered Recipient. Otherwise, it returns false.
-			\item Exceptions: None
-		\end{itemize}
-		
-		   \item \texttt{RecipientId getRecipientId(EmailAddress emailAddress) }        
-		\begin{itemize}
-			\item Effect: If the system has a Registered Recipient with the given e-mail address, the \texttt{OtherDB} returns its recipient identifier.
-			\item Exceptions: 
-			\begin{itemize}
-				\item NoSuchRecipientException: Thrown if the \texttt{OtherDB} does not contain the information of a Registered Recipient with the given e-mail address.
-			\end{itemize}
-		\end{itemize}  		
-
-		\item \texttt{Boolean isReceiptTrackingOn(CustomerId cuid)}        
-		\begin{itemize}
-			\item Effect: The \texttt{OtherDB} checks if the customer organization with customer identifier \texttt{cuid} has receipt tracking turned on. It returns true if it has receipt tracking turned on, otherwise it returns false.
-			\item Exceptions: None
-		\end{itemize}
-		
-		\item \texttt{DocumentType getDocumentType(BatchId batchId)}        
-		\begin{itemize}
-			\item Effect: The \texttt{OtherDB} returns the document type of the batch identified by the given batch identifier.
-			\item Exceptions: None
-		\end{itemize}
-
-		
-		\item \texttt{String getNameOfSender(CustomerId cuId)}    
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the name of the sender of the document, i.e. the customer organization identified by the given customer organization identifier.
-            \item Exceptions: None	
-		\end{itemize}
-						  		    
-    \end{itemize}
-    
-	\item BatchDataMgmt
-    \begin{itemize}
-        \item \texttt{BatchId storeBatchMetaData(BatchMetaData batchMetaData)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} stores the given \texttt{batchMetaData} and returns the batch identifier with which this meta-data can be queried.
-            \item Exceptions: None
-        \end{itemize}
-        
-        \item \texttt{BatchMetaData getBatchMetaData(BatchId batchId)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the meta-data if the batch identified by the given \texttt{batchId}.
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}    
-    
-    	\item RawDataMgmt
-    \begin{itemize}
-        \item \texttt{List<RawDataId> storeRawData(List<RawData> rawDataEntries)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} stores the given raw data entries. It returns the identifiers of the stored raw data entries.
-            \item Exceptions: None
-        \end{itemize}
-        
-        \item \texttt{List<RawData> getRawData(List<RawDataId> rawDataIds)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the raw data entries corresponding to the given raw data identifiers.
-            \item Exceptions: None
-        \end{itemize}
-        
-            \item \texttt{RawData getRawData(RawDataId rawDataId)}
-        \begin{itemize}
-            \item Effect: The \texttt{OtherDB} returns the raw data entry corresponding to the given raw data identifier.
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize} 
-    
-\end{itemize}
-
 
 
 \subsection{RawDataHandler}
@@ -2319,12 +2398,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item RecipientMgmt
     \begin{itemize}
-        \item \texttt{SessionId getSessionId() throws NotAuthenticatedException}
+        \item \texttt{Tuple<RecipientId, SessionId> getSessionDetails() throws NotAuthenticatedException}
         \begin{itemize}
-            \item Effect: The \texttt{RecipientClient} returns the session identifier of the current session if the recipient is a Registered Recipient and currently logged in. Otherwise, an exception is thrown.
+            \item Effect: The \texttt{RecipientClient} returns the recipient identifier and the session identifier of the current session if the recipient is a Registered Recipient and currently logged in. Otherwise, an exception is thrown.
             \item Exceptions:
             \begin{itemize}
-                \item NotAuthenticatedException: Thrown if the recipient does not currently have a session with the eDocs system.
+                \item NoSessionException: Thrown if the recipient does not currently have a session with the eDocs system.
             \end{itemize}
 		\end{itemize}
 
@@ -2358,6 +2437,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item Effect: The \texttt{RecipientFacade} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
                 \item Exceptions: None
             \end{itemize}
+            
+         \item \texttt{SessionId registerRecipient(RecipientDetails recipientDetails, Credential credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
+            \begin{itemize}
+                \item Effect: The \texttt{RecipientFacade} registers the recipient using his or her details and logs him or her in.
+                \item Exceptions: 
+                \begin{itemize}
+                	\item InvalidRecipientDetailsException: Thrown if the provided details are not valied, e.g. there are missing details. The exception lists the missing details to the Unregistered Recipient.
+                	\item EmailAddressInUseException: Thrown if the given e-mail address in \textbf{recipientDetails} is already registered.
+                \end{itemize}
+            \end{itemize}           
+            
         \end{itemize}
     
 
@@ -2407,14 +2497,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item RegistrationMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void  createRegisteredRecipient(RecipientDetails recipientDetails, Credentials credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{RegistrationManager} creates a new Registered Recipient in the eDocs system. It first verifies whether \texttt{recipientDetails} contains all necessary details of the recipient. If it does, it then verifies if the eDocs system already has a recipient registered with the e-mail address in the given \texttt{recipientDetails}. If there is no such Registered Recipient, the \texttt{RegistrationManager} stores the Registered Recipient in the \texttt{OtherDB}. It uses the \texttt{DocumentStorageManager} to store the documents that were previously sent to the given e-mail address in the personal document store of the new Registered Recipient.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                	\item InvalidRecipientDetailsException: Thrown if the provided details are not valied, e.g. there are missing details. The exception lists the missing details to the Unregistered Recipient.
+                	\item EmailAddressInUseException: Thrown if the given e-mail address in \textbf{recipientDetails} is already registered.
             \end{itemize}
         \end{itemize}
     \end{itemize}
@@ -2657,8 +2748,9 @@ them alphabetically for ease of navigation.
 \begin{itemize}
 	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
 	
-	\item \texttt{BatchMetaData}: A data structure listing the metadata belonging to a batch of jobs. This includes the \texttt{CustomerID} of a Customer Organization, the \texttt{DocumentType} of the documents to be generated, the \texttt{TimeStamp} of when the batch was received, \dots
+	\item \texttt{BatchMetaData}: A data structure listing the meta-data belonging to a batch of jobs. This includes the \texttt{CustomerID} of a Customer Organization, the \texttt{DocumentType} of the documents to be generated, the \texttt{TimeStamp} of when the batch was received, the \textbf{DocumentPriority} of the documents, a \texttt{Boolean} specifying whether batch is recurring or not,\dots
 	
+
 	\item \texttt{CompletePartialBatchData}: A complex data structure listing all data a \texttt{Generator} needs to complete document generation jobs that are part of the same batch. It contains an array of \texttt{Tuple<JobId, RawData>}. The \texttt{JobIds} identify jobs that are all part of the same batch. The \texttt{RawData} belongs to these document processing jobs. Also listed in the \texttt{BatchMetaData} are the values of the \texttt{BatchMetaData}, \texttt{Key} and \texttt{Template} data types belonging to the batch.	
 	
 	 \texttt{CompletePartialBatchData} also contains a \texttt{BatchMetaData} entry, a \texttt{Key} and a \texttt{Template}. \emph{Important to note:} a value of CompletePartialBatchData contains all information necessary to generate \textbf{some} jobs of belonging to same batch. It does not have to contain the information of all jobs belonging to same batch.
@@ -2714,6 +2806,8 @@ them alphabetically for ease of navigation.
     \item \texttt{RawDataId}: A piece of data uniquely identifying a raw data entry in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     
     \item \texttt{RecipientId}: A piece of data uniquely identifying a Registered Recipient in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    
+    \item \texttt{RecipientDetails}:
     
     \item \texttt{SessionId}: A piece of data uniquely identifying a session of a registered recipient of customer organization in the eDocs system. This contains at least the user identifier (i.e. the \texttt{CustomerId} for a customer organization or the \texttt{RecipientId} for a registered recipient) and the time the session was initiated.
     
