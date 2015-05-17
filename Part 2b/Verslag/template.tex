@@ -381,7 +381,7 @@ Figure \ref{fig:seq_ProcessJobs1} shows a \texttt{Generator} instance that requi
 After the raw data entries, the \texttt{Completer} fetches the meta-data of the batch, the cryptographic key of the customer organization initiating the processing job and the template for the document type to be generated. The batch meta-data, key and template are all stored in the \texttt{OtherDB}. The batch meta-data contains the customer organization identifier, the time when the batch was received by the eDocs system, whether the batch is recurring, the priority of batch \dots (see also the data type \texttt{BatchmetaData} in Appendix \ref{app:catalog}).\\
 
 Figure \ref{fig:seq_ProcessJobs2} shows the continuation of figure \ref{fig:seq_ProcessJobs2}. After fetching the template, the \texttt{Completer} returns the list of raw data entries and their job identifiers, together with the batch meta-data, the key and the template to the \texttt{GeneratorManager}. The \texttt{GeneratorManager} assigns these document processing jobs to a \texttt{Generator} instance asking for new processing jobs, giving it this necessary data.\\
-For each received job, the \texttt{Generator} instance tries to generate a document. If he succeeds, it tells the \texttt{BillingManager} to add the appropriate cost to the bill of the customer organization and forwards the job identifier and document to the \texttt{ChannelDispatcher}. The \texttt{ChannelDispatcher} will then initiate the delivery of the document, as explained in Section \ref{scenario:DeliverDocPDS}. If the \texttt{Generator} instance fails to generate the document because it does not have all of the data necessary to fill in the template, it will notify the appropriate Customer Organization Administrator by sending an  e-mail with a description of the error using the \texttt{NotificationHandler}. The \texttt{NotificationHandler} gets the e-mail address from the SLA in the \texttt{OtherDB}.
+For each received job, the \texttt{Generator} instance tries to generate a document. If it succeeds, it tells the \texttt{BillingManager} to add the appropriate cost to the bill of the customer organization and forwards the job identifier and document to the \texttt{ChannelDispatcher}. The \texttt{ChannelDispatcher} will then initiate the delivery of the document, as explained in Section \ref{scenario:DeliverDoc}. If the \texttt{Generator} instance fails to generate the document because it does not have all of the data necessary to fill in the template, it will notify the appropriate Customer Organization Administrator by sending an  e-mail with a description of the error using the \texttt{NotificationHandler}. The \texttt{NotificationHandler} gets the e-mail address from the SLA in the \texttt{OtherDB}.
 
 \begin{figure}[!htp]
     \centering
@@ -508,10 +508,9 @@ If the document belongs to a Registered Recipient, the \texttt{RecipientFacade} 
 
 
 
-\subsection{Delivering a document via the personal document store}
-\label{scenario:DeliverDocPDS}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+\subsection{Delivering a document}
+\label{scenario:DeliverDoc}
+The initiation of the document delivery process is initiated by a \texttt{Generator} instance after the generation of a document, as explained in Section \ref{scenario:DocumentGeneration}. This is shown in figure \ref{fig:seq_InitiateDocumentdelivery}, where the \texttt{Generator} instance forwards the document and job identifier for the document that have to be delivered to \texttt{ChannelDispatcher}. The \texttt{ChannelDispatcher} uses the job identifier to ask the raw data entry corresponding to the document from the \texttt{JobFacade}. The \texttt{ChannelDispatcher} extracts the delivery method from the raw data entry and choose what to do next with the document depending on that extracted delivery method value. \\
 
 \begin{figure}[!htp]
     \centering
@@ -519,6 +518,20 @@ Show the complete scenario using one or more sequence diagrams.
     \caption{A \texttt{Generator} instance asks the \texttt{ChannelDispatcher} to store and deliver a document.
         }\label{fig:seq_InitiateDocumentdelivery}
 \end{figure}
+
+\subsubsection{Delivering a document via the personal document store or via e-mail}
+\label{scenario:DeliverDocPDS}
+Figure \ref{fig:seq_DeliverViaEmail} shows the behaviour of the \texttt{ChannelDispatcher} when the delivery method indicated in the raw data is e-mail. The \texttt{ChannelDispatcher} will first extract the e-mail address from the raw data. It then looks up the document type and the name of customer organization for who the mail is sent, since this is information that will be put into the e-mail message. This information is retrieved from the \texttt{OtherDB} using the \texttt{JobFacade} and the job identifier. Next, the \texttt{ChannelDispatcher} checks whether the e-mail address belongs to a recipient who is registered to eDocs. \\
+
+If the e-mail has to be sent to a Registered Recipient, the \texttt{ChannelDispatcher} first fetches the recipient's identifier. It will then contact the \texttt{DocumentStorageManager}, telling it that a document for a Registered Recipient needs to be stored, as shown in figure \ref{fig:seq_StoringDocumentForRegisteredRecipients}. The \texttt{DocumentStorageManager} generates a new document identifier for the document to be stored. It also generates the document meta-data for both the \texttt{DocumentDB} and the \texttt{PDSDB}. These meta-data both contain the document type and the name of the sender, but only the meta-data in the \texttt{PDSDB} contains the recipient identifier of recipient of the document, and only the meta-data in the \texttt{DocumentDB} contains the e-mail address of the recipient.\\ The \texttt{DocumentStorageManager} then stores the the document in both the 
+\texttt{DocumentDB} and the \texttt{PDSDB} with the corresponding document identifier and correct meta-data. A sequence diagram for storing a document in the \texttt{PDSDB} was already made for the initial architecture and is shown in figure \ref{fig:seq_StoreDocPDS}. Finally, the \texttt{DocumentStorageManager} stores the newly generated document identifier in the job of the document, so later on, the job identifier can be mapped onto the document identifier.\\
+After storing the document for the 
+Registered Recipient, figure \ref{fig:seq_DeliverViaEmail} shows the \texttt{ChannelDispatcher} contacting the \texttt{EmailFacade} to send an e-mail to the Registered Recipient. As shown in figure \ref{fig:seq_SendMailRegisteredRecipient}, the \texttt{EmailFacade} first creates a unique link pointing to the document. The \texttt{LinkMappingFunctionality} takes care of creating and storing the mapping between the link and the document identifier. It also stores a boolean, indicating that the mapping point to a document of a registered recipient. The \texttt{EmailFacade} then generates an e-mail message containing a short description of the received document (i.e. the name of the sender of the document, the type of the document and the date at which the document was sent) and the link to the document. It finally sends the document to the e-mail address of the Registered Recipient using the interface to the \texttt{EmailChannel} and marks the document as sent. Figure \ref{fig:seq_DeliverViaEmail} shows the \texttt{ChannelDispatcher} telling the \texttt{BillingManager} to add the cost of delivering the document via personal document store to the bill of the customer organization after sending the e-mail.\\
+Note that the \texttt{BillingManager} gets contacted for every document delivery, without first checking whether the document is recurring or not. The \texttt{BillingManager} will then check whether the document belongs to a recurring batch or not and will only bill the customer organization if the document belongs to a non-recurring batch. This behaviour is shown in figure \ref{fig:seq_CostDocumentDeliveryPDS} for the case of delivering the document via personal document store. 
+
+If the e-mail has to be sent to an Unregistered recipient, the \texttt{ChannelDispatcher} also contacts the \texttt{DocumentStorageManager}, telling it that a document for an Unregistered Recipient needs to be stored, as shown in figure \ref{fig:seq_StoreDocumentForUnregisteredRecipient}. The actions of the \texttt{DocumentStorageManager} are almost the same as those in figure \ref{fig:seq_StoringDocumentForRegisteredRecipients}, except that it only stores the document in the \texttt{DocumentDB} and not in the \texttt{PDSDB}. The \texttt{DocumentStorageManager} then returns the newly generated document identifier to th \texttt{ChannelDispatcher}.\\
+After storing the document for the 
+Unregistered Recipient, figure \ref{fig:seq_DeliverViaEmail} shows the \texttt{ChannelDispatcher} using the \texttt{JobFacade} to find out if the customer organization has receipt tracking enabled or not. It then contacts the \texttt{EmailFacade} to send an e-mail to the Unregistered Recipient. As shown in figure \ref{fig:seq_SendMailUnregisteredRecipient}, the \texttt{EmailFacade} changes its behaviour depending on the given boolean, which tells it whether the customer organization has enabled receipt tracking. If receipt tracking is turned on, the \texttt{EmailChannel} has the same behabiour as in figure \ref{fig:seq_SendMailRegisteredRecipient}. The only difference is that the \texttt{LinkManager}stores a boolean indicating that the recipient is not registered. If receipt tracking is turned off, the \texttt{EmailChannel} send the full document as an attachment to the e-mail to the Unregistered Recipient using the interface to the \texttt{EmailChannel}. Figure \ref{fig:seq_DeliverViaEmail} shows the \texttt{ChannelDispatcher} telling the \texttt{BillingManager} to add the cost of delivering the document via e-mail to the bill of the customer organization after sending the e-mail.
 
 \begin{figure}[!htp]
     \centering
@@ -539,7 +552,7 @@ Show the complete scenario using one or more sequence diagrams.
     \centering
     \includegraphics[width=0.3\textwidth]{StoringDocumentForUnregisteredRecipientsWithEmail.png}
     \caption{StoringDocumentForUnregisteredRecipientsWithEmail: (continuation of fig. \ref{fig:seq_DeliverViaEmail}) The \texttt{ChannelDispatcher} requests the \texttt{DocumentStorageManager} to store a document for an Unregistered Recipient.
-        }\label{fig:seq_StoreDocRegisteredRecipient}
+        }\label{fig:seq_StoreDocumentForUnregisteredRecipient}
 \end{figure}
 
 \begin{figure}[!htp]
@@ -558,15 +571,40 @@ Show the complete scenario using one or more sequence diagrams.
 
 \begin{figure}[!htp]
     \centering
+    \includegraphics[width=\textwidth]{CostDocumentDeliveryPDS.png}
+    \caption{CostDocumentDeliveryPDS:  The \texttt{BillingManager} adds the cost of delivering a document via the personal document store to the bill of the customer organization if the document is part of a non-recurring batch.
+    }\label{fig:seq_CostDocumentDeliveryPDS}
+\end{figure}
+
+
+
+\begin{figure}[!htp]
+    \centering
     \includegraphics[width=0.3\textwidth]{Seq_StoreDocPDS.png}
     \caption{Storing a document in the PDS (continuation of fig. \ref{fig:seq_StoreDocRegisteredRecipient}).
         }\label{fig:seq_StoreDocPDS}
 \end{figure}
 
+\subsubsection{Delivering a document via postal mail}
+\label{scenario:DeliverDocPostalMail}
+Figure \ref{fig:seq_DeliverViaPostalMail} shows the behaviour of the \texttt{ChannelDispatcher} when the delivery method indicated in the raw data is postal mail. The \texttt{ChannelDispatcher} will first extract the postal address from the raw data. It then looks up the document type and the name of customer organization for who the mail is sent, since this is information that will be stored as document meta-data when storing the document. This information is retrieved from the \texttt{OtherDB} using the \texttt{JobFacade} and the job identifier. In the same way, \texttt{ChannelDispatcher} also looks up the print parameters for the customer organization, which are stored in the SLA in the \texttt{OtherDB}. \\
+Next, the \texttt{ChannelDispatcher} contacts the \texttt{DocumentStorageManager}, telling it that a document for an Unregistered Recipient needs to be stored, as shown in figure \ref{fig:seq_StoreDocumentForUnregisteredRecipient}. This is also discussed in Section \ref{scenario:DeliverDocPDS}.\\
+After storing the document for the 
+Unregistered Recipient, figure \ref{fig:seq_DeliverViaEmail} shows
+the \texttt{ChannelDispatcher} contacting the \texttt{Print\&PostalServiceFacade}, forwarding it the postal address, the postal parameters and the document. The  \texttt{Print\&PostalServiceFacade} sends this data to the external / \texttt{Print\&PostalServiceClient}, which will print the document using the given print parameters and send it to the given postal address. Next, \texttt{Print\&PostalServiceFacade} marks the document as sent using the \texttt{JobFacade}. Fimally, the \texttt{ChannelDispatcher} tells the \texttt{BillingManager} to add the cost of delivering the document via postal mail to the bill of the customer organization.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{DeliverViaPostalMail.png}
+    \caption{DeliverViaPostalMail: (Continuation of  fig. \ref{fig:seq_InitiateDocumentdelivery}) The  \texttt{ChannelDispatcher} uses postal mail as a delivery method.
+        }\label{fig:seq_DeliverViaPostalMail}
+\end{figure}
+
+
+
 \subsection{Consulting the personal document store}
 \label{scenario:ConsultPDS}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+Figure \ref{fig:seq_ConsultPDS} shows a Registered Recipient using a \texttt{RecipientClient} to get an overview of all received documents in his or her personal document store. First, the \texttt{RecipientFacade} verifies whether the session of the Registered recipient is valid (as detailed in figure \ref{fig:seq_VerifySession}). It then uses the \texttt{PDSFacade} to get the document identifiers and document meta-data of the received documents of the Registered Recipient. The \texttt{RecipientFacade} wraps this info into an overview and returns this overview to the \texttt{RecipientClient}. If the \texttt{PDSDB} has failed, an exception is thrown instead. The \texttt{RecipientClient} can uses the document identifiers wrapped in the overview to download a specific document, as explained in Section \ref{scenario:ConsultDocInPDS}.
 
 \begin{figure}[!htp]
     \centering
@@ -671,33 +709,33 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item CostRegistrationMgmt
     \begin{itemize}
-        \item \texttt{void addDocumentGenerationCost(CustomerId cuId, JobId jobId, DocumentPriority priority)}
+        \item \texttt{void addDocumentGenerationCost(JobId jobId)}
         \begin{itemize}
-            \item Effect: The \texttt{BillingManager} adds the cost for generation documents corresponding to the job identified by \texttt{jobId} to the bill of the customer organization identified by \texttt{cuId}. The document had a priority \texttt{priority}. This method is called by the \texttt{GenerationManager}.
+            \item Effect: The \texttt{BillingManager} adds the cost for generating a document corresponding to the job identified by \texttt{jobId} to the bill of the customer organization if this job is part of a non-recurring batch. This method is called by the \texttt{GenerationManager}.
             \item Exceptions: None
         \end{itemize}
         
-		\item \texttt{void addDocumentDeliveryCostbyEmail(CustomerId cuId, JobId jobId)}       
+		\item \texttt{void addDocumentDeliveryCostbyEmail(JobId jobId)}       
         \begin{itemize}
-            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by e-mail to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by e-mail to the bill of the customer organization if the job is part of a non-recurring batch. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
             \item Exceptions: None
         \end{itemize} 
 
-		\item \texttt{void addDocumentDeliveryCostbyPrintAndPostalService(CustomerId cuId, JobId jobId)}       
+		\item \texttt{void addDocumentDeliveryCostbyPostalMail(JobId jobId)}       
         \begin{itemize}
-            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by postal mail to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by postal mail to the bill of the customer organization if the job is part of a non-recurring batch. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
             \item Exceptions: None
         \end{itemize} 
         
-		\item \texttt{void addDocumentDeliveryCostbyZoomit(CustomerId cuId, JobId jobId)}       
+		\item \texttt{void addDocumentDeliveryCostbyZoomit(JobId jobId)}       
         \begin{itemize}
-            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by Zoomit to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by Zoomit to the bill of the customer organization if the job is part of a non-recurring batch. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
             \item Exceptions: None
         \end{itemize}   
         
-		\item \texttt{void addDocumentDeliveryCostbyPDS(CustomerId cuId, JobId jobId)}       
+		\item \texttt{void addDocumentDeliveryCostbyPDS(JobId jobId)}       
         \begin{itemize}
-            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by personal document store to the bill of the customer organization identified by \texttt{cuId}. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
+            \item Effect: The \texttt{BillingManager} adds the cost for delivering the document by personal document store to the bill of the customer organization if the job is part of a non-recurring batch. The document corresponds to the job identified by \texttt{JobId}. This method is called by the \texttt{ChannelDispatcher}.
             \item Exceptions: None
         \end{itemize}          
         
@@ -1236,14 +1274,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \end{itemize}
     \end{itemize}
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
 \end{itemize}
 
 \subsection{Generator}
@@ -1527,6 +1557,16 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
     		\end{itemize}
     	\end{itemize}
+ 
+   	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}	 
+ 
  	
     	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1536,7 +1576,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
     		\end{itemize}
     	\end{itemize} 	
- 	
+
+    	\item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobFacade} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}  	
     	
     \end{itemize}
 \end{itemize}
@@ -1645,6 +1693,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JonManager} cannot find a job associated to the given job identifier.
     		\end{itemize}
     	\end{itemize}
+  
+   	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}	  
     	
     	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1654,6 +1711,17 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
     		\end{itemize}
     	\end{itemize} 	    	
+
+    	\item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobManager} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}  
+ 
+ 
  	   
     \end{itemize}     
 \end{itemize}
@@ -1973,6 +2041,11 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 			\item Exceptions: None
 		\end{itemize}
 
+		\item \texttt{Boolean isRecurringBatch(BatchId batchId)}        
+		\begin{itemize}
+			\item Effect: The \texttt{OtherDB} returns true if the bacth identified by the given batch is a recurring batch. Otherwise, it returns false.
+			\item Exceptions: None
+		\end{itemize}
 		
 		\item \texttt{String getNameOfSender(CustomerId cuId)}    
         \begin{itemize}
@@ -2318,30 +2391,13 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DeliverMail
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void sendDocument(PostalAddress postalAddress, PrintParameters printParameters, Document document)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{PrintChannel} wll print the given document using the given print parameters and send it to the given postal address.
+            \item Exceptions: None
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -2354,31 +2410,13 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item Deliver
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void sendDocument(PostalAddress postalAddress, PrintParameters printParameters, Document document)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{Print\&PostalServiceFacade} sends the given document, the given postal address and the given print parameters to the \texttt{PrintChannel}. It then marks the document as sent using the \texttt{JobManager}.
+            \item Exceptions: None
 		\end{itemize}
-		
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -2818,7 +2856,9 @@ them alphabetically for ease of navigation.
     
     \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
     
-	\item \texttt{PostalAddress}:    
+	\item \texttt{PostalAddress}:   
+	
+	\item \texttt{PrintParameters}:    
     
     \item \texttt{RawData}: A data structure listing a raw data entry used in a document processing job.
     
