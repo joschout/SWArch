@@ -440,9 +440,8 @@ Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storin
 \end{figure}
 
 \subsection{Consult document in personal document store}
-\label{ConsultDocInPDS}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+\label{scenario:ConsultDocInPDS}
+Figure \ref{fig:seq_UC14ConsultdocumentInPDS} shows how a Registered Recipient can consult a document in his or her personal document store. The Registered Recipient asks the \texttt{RecipientFacade} to look up the document identified by the given document identifier.  There are multiple ways for a Registered Recipient to acquire a document identifier, e.g. by following a unique link (Section \ref{scenario:DownloadDocUniqueLink}), by searching for document in the personal document store, by consulting the personal document store (Section \ref{scenario:ConsultPDS}). The system first verifies whether the session of the Registered Recipient is valid (as detailed in figure \ref{fig:seq_VerifySession} in Section \ref{scenario:VerifySession}). After verification of the session identifier, the \texttt{RecipientFacade} asks the \texttt{PDSFacade} to fetch the document. But before fetching the document, the \texttt{PDSFacade} verifies whether the document identified by the given document identifier actually belongs to the Registered Recipient identified by the given recipient identifier. This way, the recipient cannot request documents that do not belong to him or her by giving a chosen document identifier. If the document does not belong to the recipient, an exception is thrown. Otherwise, the \texttt{PDSFacade} fetches the document and its meta-data from the \texttt{PDSDB}. The \texttt{RecipientFacade} returns the document and its meta-data to the recipient after marking the document and its job as received. Note that when marking the document as received, the time of receipt gets stored in the document's meta-data, so the recipient can later on search for documents based on their receipt date.
 
 \begin{figure}[!htp]
     \centering
@@ -451,13 +450,14 @@ Show the complete scenario using one or more sequence diagrams.
         }\label{fig:seq_UC14ConsultdocumentInPDS}
 \end{figure}
 
-\FloatBarrier
+
 
 
 \subsection{Downloading a document via unique link}
 \label{scenario:DownloadDocUniqueLink}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+Figure \ref{fig:seq_DownloadDocumentViaUniqueLink} shows how a recipient can download a document by following a unique link to this document sent by the System via e-mail. It shows both the cases when the recipient is registered and when he or she is not registered.\\ The recipient gives the link to the \texttt{RecipientFacade}, which asks the \texttt{LinkMappingManager} whether the link points to a document belonging to a registered or unregistered recipient. This is important, because the document will be downloaded from another database depending on this fact.\\
+If the document belongs to an Unregistered Recipient, the \texttt{RecipientFacade} asks the \texttt{LinkMappingManager} for the document identifier to which the link maps. The \texttt{LinkMappingManager} checks the \texttt{TimeStamp} stored with the mapping between the link and the document identifier and uses it check whether the link is 30 days old. If the link is older than 30 days, an exception is thrown. Otherwise, the \texttt{LinkMappingManager} fetches and returns the document identifier stored in the mapping.  The \texttt{RecipientFacade} the asks the \texttt{DocumentDB} to fetch the document and its meta-data identified by that document identifier. It will mark the job and the corresponding document as received, after which it returns the document and its meta-data. Note that when marking the document as received, the time of receipt gets stored in the document's meta-data, so the recipient can later  on (i.e. after registration) search for documents based on their receipt date.\\
+If the document belongs to a Registered Recipient, the \texttt{RecipientFacade} asks the \texttt{LinkMappingManager} for the document identifier to which the link maps. The \texttt{LinkMappingManager} does not check the \texttt{TimeStamp} of the mapping but just returns the document identifier. The \texttt{RecipientFacade} has to be sure that document belongs to the recipient following the link so it requests the session identifier and the recipient identifier of the recipient following the link. If the recipient does not currently have a session, an exception is thrown. If he or she does have a session, the recipient returns his or her recipient identifier and session identifier to the \texttt{RecipientFacade}. The \texttt{RecipientFacade} then looks up the document using the session, recipient and document identifiers as explained in Section \ref{scenario:ConsultDocInPDS}.
 
 \begin{figure}[!htp]
     \centering
@@ -2381,12 +2381,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item RecipientMgmt
     \begin{itemize}
-        \item \texttt{SessionId getSessionId() throws NotAuthenticatedException}
+        \item \texttt{Tuple<RecipientId, SessionId> getSessionDetails() throws NotAuthenticatedException}
         \begin{itemize}
-            \item Effect: The \texttt{RecipientClient} returns the session identifier of the current session if the recipient is a Registered Recipient and currently logged in. Otherwise, an exception is thrown.
+            \item Effect: The \texttt{RecipientClient} returns the recipient identifier and the session identifier of the current session if the recipient is a Registered Recipient and currently logged in. Otherwise, an exception is thrown.
             \item Exceptions:
             \begin{itemize}
-                \item NotAuthenticatedException: Thrown if the recipient does not currently have a session with the eDocs system.
+                \item NoSessionException: Thrown if the recipient does not currently have a session with the eDocs system.
             \end{itemize}
 		\end{itemize}
 
