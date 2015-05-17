@@ -2784,7 +2784,7 @@ List and describe all data types defined in your interface specifications. List
 them alphabetically for ease of navigation.
 
 \begin{itemize}
-	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	\item \texttt{BatchId}: A piece of data uniquely identifying a batch of document processing jobs in the system. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
 	
 	\item \texttt{BatchMetaData}: A data structure listing the meta-data belonging to a batch of jobs. This includes the \texttt{CustomerID} of a Customer Organization, the \texttt{DocumentType} of the documents to be generated, the \texttt{TimeStamp} of when the batch was received, the \textbf{DocumentPriority} of the documents, a \texttt{Boolean} specifying whether batch is recurring or not,\dots
 	
@@ -2795,59 +2795,58 @@ them alphabetically for ease of navigation.
 
 	\item \texttt{Credentials}: The authentication credentials of a Registered Recipient or Customer Organization. The credentials always contain an identifier of the recipient or customer organization and a proof of his or her identity. The architecture does not specify the specific credentials used, but a possibility is using a username and password.
 	 
-	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+	\item \texttt{CustomerId}: A piece of data uniquely identifying a Customer Organization in the system. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL \dots
 	
-	\item \texttt{DeliveryMethod}:
+	\item \texttt{DeliveryMethod}: A data structure representing the method with which a document should be delivered. At the moment, it can represent three possible values: e-mail, postal mail and Zoomit. The exact format is not specified by the architecture. During the delivery process, the \texttt{ChannelDispatcher} parses one value of this type out of the \texttt{RawData} of a document, on which it will decide which delivery method to use for sending the document.
 	
 	\item \texttt{Document}: A data file corresponding to a document.  The architecture specifies the format of this data type as a PDF-file. 
 	
 	\item \texttt{DocumentId}: A piece of data uniquely identifying a document in the system.
 
-	\item \texttt{DocumentMetaData}: 
-	%PDSDBMetaData wordt niet meer gebruikt
-	%The meta-data stored with a document in the \texttt{DocumentDB}. This meta-data differs from the \texttt{PDSDBMetaData}, in that it does not contain a \texttt{RecipientId}, but it does contain an \texttt{Email} address.
+	\item \texttt{DocumentMetaData}: A data structure representing the meta-data stored with a document. It contains the name of the sender of the document,  the \texttt{DocumentType}. Depending on where the meta-data is stored, it can contain different values. The meta-data stored with a document in the \texttt{DocumentDB} can contain the \texttt{EmailAddress} of the recipient, if the delivery method of the document was via e-mail. This way, the system can find all documents that where sent to a specific e-mail address when a recipient registers using that e-mail address. If the meta-data is stored in the \texttt{PDSDB}, the meta-data contains the \texttt{RecipientId} of the Registered Recipient to who the document belongs.\\ Another value that is sometimes stored in the meta-data, is a \texttt{TimeStamp} of when the document is received. This \texttt{TimeStamp} is added to the meta-data when the document is received by the recipient. It is a final value,  meaning it can only be written once. This way, it will not be overwritten when the recipient downloads a document multiple times. It exact moment when this \texttt{TimeStamp} is added to the meta-data is dependent om the method of document receipt.
 	
 	\item \texttt{DocumentPriority}: A data type representing the priority of document generation jobs. They have values representing the Critical, Diamond, Gold and Silver priorities. The exact format of this data type is not specified by the architecture.
 	
-	\item \texttt{DocumentType}: A piece of data describing the type of a document. This architecture does not specify the exact format of this data type, but possibilities are a long integer, a string, a URL etc.
+	\item \texttt{DocumentType}: A piece of data describing the type of a document. This architecture does not specify the exact format of this data type, but possibilities are a long integer, a string, a URL \dots
 	
 	\item \texttt{Echo}: The response to a ping message. This data element does not contain any meaningful data.
 	
-	\item \texttt{EmailAddress}:
+	\item \texttt{EmailAddress}: A data structure representing an e-mail address. The exact format is not specified by the architecture, but it could be a String.
 	
-	\item \texttt{EmailMessage}:
+	\item \texttt{EmailMessage}: A data structure representing an e-mail message. The exact format of the message is not defined by our architecture. It can contain a unique \texttt{Link} with which a document can be downloaded, if applicable. Other possible information it can contain is for example a short description of the received document (i.e., the sender of the document, the type of the document and the date at which the document was sent).
 	
 	\item \texttt{Error}: Description of data type.
 	
-    \item \texttt{GeneratordId}: A piece of data uniquely identifying a \texttt{Generator} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    \item \texttt{GeneratordId}: A piece of data uniquely identifying a \texttt{Generator} in the system. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
     
     \item \texttt{JobBatch}: Description of data type.
     
     \item \texttt{JobId}: A piece of data uniquely identifying a document processing job in the system.
     
-    \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilites are a long integer, a string, a URL etc.
+    \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilities are a long integer, a string, a URL etc.
     
-    \item \texttt{Link}:
+    \item \texttt{Link}: A data structure representing a unique link. The system uses these links to point to documents. This way, a recipient can download a document by following a link. the exact format is not specified, but a possibility is just a String, since the link is a URL.
     
     \item \texttt{NotificationMessage}: A textual message which can be used to include extra information about the event of the notification.
     
 	\item \texttt{PDSOverview} The overview of a personal document store that can be shown to a Registered Recipient. Through this overview, the Registered Recipient can consult documents. The architecture does not specify the exact format of such an overview, but a likely possibility is an HTML page.
     
-    \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    \item \texttt{PDSDBReplicaId}:  A piece of data uniquely identifying a \texttt{PDSDBReplica} in the system. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
     
-	\item \texttt{PostalAddress}:   
+	\item \texttt{PostalAddress}: A data structure containing a postal address. The exact format of this data structure is unspecified.
 	
-	\item \texttt{PrintParameters}:    
+	\item \texttt{PrintParameters}: A data structure containing the print parameters that the system gives to a Print \& Postal Service. Examples of what these parameters can contain are the paper type to be used, whether the documents should be printed single-sided or double-sided, whether the documents should be printed in colour or in black and white \dots The exact format of this data structure is not specified by the architecture
+	
     
     \item \texttt{RawData}: A data structure listing a raw data entry used in a document processing job.
     
-    \item \texttt{RawDataPacket}: A data structure containing all the raw data entries in a batch, given by the customer organization to the \texttt{CustomerOrganizationFacade}. The architecture does not specify this data structure, but possibilities are an XML file or Excell file.
+    \item \texttt{RawDataPacket}: A data structure containing all the raw data entries in a batch, given by the customer organization to the \texttt{CustomerOrganizationFacade}. The architecture does not specify this data structure, but possibilities are an XML file or Excel file.
     
-    \item \texttt{RawDataId}: A piece of data uniquely identifying a raw data entry in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    \item \texttt{RawDataId}: A piece of data uniquely identifying a raw data entry in the system. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
     
-    \item \texttt{RecipientId}: A piece of data uniquely identifying a Registered Recipient in the system. This architecture does not specify the exact format of this identifier, but possibilites are a long integer, a string, a URL etc.
+    \item \texttt{RecipientId}: A piece of data uniquely identifying a Registered Recipient in the system. This architecture does not specify the exact format of this identifier, but possibilities are a long integer, a string, a URL etc.
     
-    \item \texttt{RecipientDetails}:
+    \item \texttt{RecipientDetails}: A data structure containing the details of a recipient. A recipient has to provide these details at registration. The details contain the first name, the last name, the e-mail address and the postal address of the recipient.
     
     \item \texttt{SessionId}: A piece of data uniquely identifying a session of a registered recipient of customer organization in the eDocs system. This contains at least the user identifier (i.e. the \texttt{CustomerId} for a customer organization or the \texttt{RecipientId} for a registered recipient) and the time the session was initiated.
     
@@ -2861,6 +2860,6 @@ them alphabetically for ease of navigation.
     
     \item \texttt{TemplateId}: A data structure uniquely identifying a template in the system. It lists three values. It contains \texttt{CustomerId} which identifies the Customer Organization who the template belongs to. It also contains a \texttt{DocumentType}, specifying for which kind of document it is a template for. The last piece of information it contains is a \texttt{TimeStamp} specifying when the system received the template.
     
-    \item \texttt{ZoomitId}:
+    \item \texttt{ZoomitId}: A data structure uniquely identifying a Zoomit account in the external Zoomit system. It consists of a number, but the actual information it must be able to contain is not specified by the architecture. 
 \end{itemize}
 \end{document}
