@@ -1033,31 +1033,26 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    \item DocumentStorageCacheMgmt
+    
+        \item \texttt{void storeDocument(DocumentId docId, RecipientId recipId)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item Effect: The \texttt{DocumentStorageCache} stores the given \texttt{DocumentId} and \texttt{RecipientId} in its cache.
+        	\item Exceptions: None
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
+       
+        \item \texttt{Tuple<DocumentId docId, RecipientId recipId> fetchNextDocument()}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item Effect: The \texttt{DocumentStorageCache} retrieves the \texttt{DocumentId} and \texttt{RecipientId} corresponding to the next document in its cache.
+        	\item Exceptions: None
         \end{itemize}
-    \end{itemize}
+        
+        \item \texttt{List<Tuple<DocumentId docId, RecipientId recipId>> fetchAllDocuments()}
+        \begin{itemize}
+        	\item Effect: The \texttt{DocumentStorageCache} retrieves the \texttt{DocumentIds} and \texttt{RecipientIds} corresponding to all documents in its cache.
+        	\item Exceptions: None
+        \end{itemize} 
+        
 \end{itemize}
 
 
@@ -1096,7 +1091,6 @@ List all elements and interfaces alphabetically for ease of navigation.
             \item Effect: The \texttt{DocumentStorageFunctionality} marks the document identified by the given document identifier as received, by storing the given time in the document meta-data of the document. The given time is the time when the recipient should have received the document. Note that this method only has effect the first time it is called for a valid document identifier and time stamp.
             \item Exceptions: None
         \end{itemize}
-
 
     \end{itemize}
 
@@ -1159,26 +1153,39 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    
+    \item ConfirmZoomit
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    	\item \texttt{void markAsDelivered(DocumentId document, TimeStamp whenDelivered)}
+    	\begin{itemize}
+    		\item Effect: The \texttt{ZoomitFacade} gets notified that the document identified by the given document identifier is has been delivered by its addressee. The given \texttt{TimeStamp} indicates when the document had been delivered.
+    	\end{itemize}
+    \end{itemize}
+        
+        \item NotifyDeliveryFailure
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
+        	\item \texttt{void notifyOfEmailDeliveryFailure(EmailAddress emailAddress, EmailMessage emailMessage}
+        	\begin{itemize}
+        		\item Effect: The \texttt{EmailFacade} notifies looks up the customer organization 
+        	\end{itemize} 
+        \end{itemize}
+        
+            \item FinalizeDocument\\
+            Note that the methods in this interface are made idempotent. The methods of this interface are called by \texttt{Generator} instances. 
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+            	\item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc)}
+            	\begin{itemize}
+            		\item Effect: The \texttt{ChannelDispatcher} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
+            		\item Exceptions: None
+            	\end{itemize}
+            	
+            	\item \texttt{void generationError(JobId jobid, Error error)}
+            	\begin{itemize}
+            		\item Effect: Describe the effect of the operation
+            		\item Exceptions: None
+            	\end{itemize}
             \end{itemize}
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+    
 \end{itemize}
 
 \subsection{EDocsAdminClient}
