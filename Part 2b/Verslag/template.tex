@@ -46,9 +46,9 @@ Finally, we would like to stress that the \texttt{DocumentStorageManager} and th
 For more details, we refer to Section \ref{subsubsec:Av2b}, Section \ref{subsec:decomp-DocumentStorageFunctionality} and Section \ref{sec:deployment}.
 
 \paragraph{Av3: Zoomit failure}
-\textit{Av3} requires the system to be able to (1) autonomously detect when an invoice is not accepted by Zoomit, (2) temporarily store at least 2 days of these invoices locally until they are accepted by Zoomit, (3) keep on retrying to deliver a failed invoice to Zoomit in a proper fashion and (4) notify an eDocs operator after 5 failed attempts of at least 10 different invoices. To achieve this, the \texttt{ZoomitFacade} is able to receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. the invoice was accepted by Zoomit). Furthermore, the \texttt{ZoomitDeliveryCache} caches all \texttt{Documents} (including \texttt{DocumentIds}) and corresponding \texttt{ZoomitIds} for which the \texttt{ZoomitFacade} did not (yet) receive a delivery confirmation up to a maximum of 2 days of documents.\\
-The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list of \texttt{Document}-\texttt{ZoomitId} pairs (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding \texttt{Document}-\texttt{ZoomitId} pair is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off (because the external \texttt{ZoomitChannelNode} on which the \texttt{ZoomitChannel} resides, is now presumed to be operational again).\\
-Finally, the \texttt{Document}-\texttt{ZoomitId} pairs in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached pairs whose counters have reached the value of 5 and sends a notification to an eDocs operator through the \texttt{NotificationHandler} when the amount of such pairs reaches the value of 10.
+\textit{Av3} requires the system to be able to (1) autonomously detect when an invoice is not accepted by Zoomit, (2) temporarily store at least 2 days of these invoices locally until they are accepted by Zoomit, (3) keep on retrying to deliver a failed invoice to Zoomit in a proper fashion and (4) notify an eDocs operator after 5 failed attempts of at least 10 different invoices. To achieve this, the \texttt{ZoomitFacade} is able to receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. the invoice was accepted by Zoomit). Furthermore, the \texttt{ZoomitDeliveryCache} caches all \texttt{Documents} and corresponding \texttt{ZoomitIds}, \texttt{DocumentIds}, sender names and receipt tracking information for which the \texttt{ZoomitFacade} did not (yet) receive a delivery confirmation up to a maximum of 2 days of documents.\\
+The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding entry is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off (because the external \texttt{ZoomitChannelNode} on which the \texttt{ZoomitChannel} resides, is now presumed to be operational again).\\
+Finally, the entries in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached entries whose counters have reached the value of 5 and sends a notification to an eDocs operator through the \texttt{NotificationHandler} when the amount of such entries reaches the value of 10.
 For more details, we refer to Section \ref{subsubsec:Av1a-Av2a}, Section \ref{subsec:decomp-DeliveryFunctionality} and Section \ref{sec:deployment}.
 
 \paragraph{P2: Document lookups}
@@ -87,6 +87,7 @@ Upon documenting the final steps in our architectural process, we encountered so
 \paragraph{Joint deployment of DocumentGenerationManager}
 Upon documenting the final steps in our architectural process, it became clear to us that the deployment configuration of the \texttt{DocumentGenerationManager} does not fully comply with the requirements from the domain analysis. More precisely, according to \textit{Av1}, failure of the infrastructure for generating documents ``should not affect the availability of any type of persistent data'' and ``should not affect the availability of other functionality of the system''. Since some components, residing on the same node as the \texttt{DocumentGenerationManager} (i.e. the \texttt{ResidualNode}), do store persistent data (e.g. the \texttt{DocumentStorageCache}) and other system functionality is obviously not unaffected by the failure of the \texttt{DocumentGenerationManager}, this component should be deployed on its own individual node.
 
+\FloatBarrier
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
 \paragraph{Context diagram}
 The context diagram of the component-and-connector view is given in Figure \ref{fig:cc-context}. As shown, six distinct types of external components communicate with the system:
@@ -100,22 +101,20 @@ Notice that each external interface on the client side is provided by a separate
 
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{ContextDiagram.png}
+	\includegraphics[height=0.9\textheight]{ContextDiagram.png}
 	\caption{Context diagram for the client-server view.}
 	\label{fig:cc-context}
 \end{figure}
-\FloatBarrier
 
 \paragraph{Primary diagram}
 The main component-and-connector view is shown in Figure \ref{fig:cs-primary}. All components that were decomposed further are highlighted. The DeliveryFunctionality is further decomposed in Section \ref{subsec:decomp-DeliveryFunctionality}, the DocumentDB in Section \ref{subsec:decomp-DocumentDB}, the DocumentGenerationManager in Section \ref{subsec:decomp-DocumentGenerationManager}, the DocumentStorageFunctionality in Section \ref{subsec:decomp-DocumentStorageFunctionality}, the JobManager in Section \ref{subsec:decomp-JobManager}, the LinkMappingFunctionality in Section \ref{subsec:decomp-LinkMappingFunctionality}, the PDSDB in Section \ref{subsec:decomp-PDSDB} and the UserFunctionality in Section \ref{subsec:decomp-UserFunctionality}. The descriptions of all components in Figure \ref{fig:cs-primary}, their sub-components and their interfaces are given in Appendix \ref*{app:catalog}.
 
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{ClientServerView.png}
+	\includegraphics[height=0.9\textheight]{ClientServerView.png}
 	\caption{Primary diagram of the client-server view.}
 	\label{fig:cs-primary}
 \end{figure}
-\FloatBarrier
 
 \subsection{Main architectural decisions}
 Figure \ref{fig:cs-primary} provides the overall description of the architecture and illustrates the most important architectural decisions for achieving the required qualities. Here we document how our architecture fulfils the most important qualities (based on the priorities given by the stakeholders). Although the qualities that were already discussed in the provided initial architecture will not be analysed any further here, their residual drivers will. The resulting qualities thus consist of Av1a \& Av2a: Notifying the appropriate operator within 1 minute, Av1b: Storing the status of an individual job and Av2b: Temporary storage and user notification during PDSDB failure. In addition, we also highlight P2: Document lookups, because of the importance of this quality to a significant part of the recipient base.
@@ -158,17 +157,17 @@ In our current architecture, all potential bottleneck components that support th
 \paragraph{Alternative for the DocumentDB and the PDSDB having throttling responsibility}
 In our current design, both the \texttt{DocumentDB} and the \texttt{PDSDB} have the responsibility to throttle excessive read requests (originating from the \texttt{RecipientFacade}) when the rate of these incoming requests exceeds a certain value that is specific to the kind of request (determined by the requirements). Since all document lookup requests pass through the \texttt{RecipientFacade}, a valid alternative for this approach would be to delegate all throttling responsibility to this component. A clear advantage of the latter strategy is the centralization of all throttling functionality, effectively increasing the modifiability of the system. An important drawback, however, is the fact that the throttling component can now not take into account the \texttt{PDSDB} and \texttt{DocumentDB} requests originating from other components in the system. This lack of knowledge results in a fixed suboptimal upper bound for document lookup requests originating from the \texttt{RecipientFacade}. The reason for this is that the throttling component now needs take into account the maximum amount of residual requests (i.e. requests originating from all other components in the system) in order to not let the throttling affect any other functionality in the system. Since our current architecture does support an optimal load balancing policy for document lookup requests by throttling at the source components (i.e. the \texttt{PDSDB} and the \texttt{DocumentDB}), we chose to go with the latter strategy.
 
+\FloatBarrier
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
 An overview of the main component-and-connector view can be found in Section \ref{sec:client-server}. All components that were decomposed any further are highlighted there and will be discussed below in greater detail. This component group consists of the DeliveryFunctionality (Section \ref{subsec:decomp-DeliveryFunctionality}), the DocumentDB (Section \ref{subsec:decomp-DocumentDB}), the DocumentGenerationManager (\ref{subsec:decomp-DocumentGenerationManager}), the DocumentStorageFunctionality (\ref{subsec:decomp-DocumentStorageFunctionality}), the JobManager (Section \ref{subsec:decomp-JobManager}), the LinkMappingFunctionality (Section \ref{subsec:decomp-LinkMappingFunctionality}), the PDSDB (Section \ref{subsec:decomp-PDSDB}) and the UserFunctionality (Section \ref{subsec:decomp-UserFunctionality}).
 
 \subsection{DeliveryFunctionality}\label{subsec:decomp-DeliveryFunctionality}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{DeliveryFunctionality.png}
+	\includegraphics[height=0.9\textheight]{DeliveryFunctionality.png}
 	\caption{Decomposition of \texttt{DeliveryFunctionality}}
 	\label{fig:decomp-DeliveryFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DeliveryFunctionality} is presented in Figure \ref{fig:decomp-DeliveryFunctionality}. As shown, the \texttt{DeliveryFunctionality} is decomposed into five submodules: the \texttt{ChannelDispatcher}, the \texttt{EmailFacade}, the \texttt{Print\&PostalServiceFacade}, the \texttt{ZoomitFacade} and the \texttt{ZoomitDeliveryCache}.\\\\
 The \texttt{DeliveryFunctionality} is responsible for delivering all correctly generated documents to their corresponding recipients. More precisely, upon receiving a document from the \texttt{Generator}, the \texttt{ChannelDispatcher} decides on the channel via which the document should be sent, based on an analysis of the corresponding raw data, receipt tracking information and recipient status (i.e. registered or unregistered) that it has fetched from the \texttt{JobManager} (for the raw data) and the \texttt{OtherDB} (for the other data). Once that it has determined the correct channel for the document, the \texttt{ChannelDispatcher} contacts the \texttt{BillingManager} to register the delivery cost for the respective document. Subsequently, the \texttt{ChannelDispatcher} sends a documents storage request to the \texttt{DocumentStorageFunctionality}, indicating whether it should store the document in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for a registered recipient) or in the \texttt{DocumentDB} alone (for an unregistered recipient). Finally, the \texttt{ChannelDispatcher} forwards the document to the appropriate channel facade along with the necessary information to complete the delivery process.\\\\
@@ -185,16 +184,15 @@ After having created the email, the \texttt{EmailFacade} sends the email to the 
 The \texttt{Print\&PostalServiceFacade} is responsible for creating printing jobs (consisting of documents that are to be delivered to unregistered recipients) and sending them to the external \texttt{Print\&PostalServiceChannel} for subsequent printing and delivery. This delivery process is set in motion upon receipt of a document and corresponding delivery information from the \texttt{ChannelDispatcher}. Note that the \texttt{Print\&PostalServiceFacade} also marks all document processing jobs, for which printing jobs have been issued to the \texttt{Print\&PostalServiceChannel}, as sent by contacting the \texttt{JobManager}.\\\\
 In order to comply with \textit{M2}, the \texttt{Print\&PostalServiceFacade} encapsulates all changes that might need to be made in order to seamlessly incorporate a new print \& postal service in the system, e.g. additional methods, external interfaces, \dots Furthermore, according to \textit{M3}, the \texttt{Print\&PostalServiceFacade} encapsulates all changes that might need to be made in order to seamlessly incorporate the dynamic selection of the cheapest print \& postal service (on a global scale) in the system. More precisely, this component will only require (1) an additional external interface to each of the employed print \& postal services, (2) an internal interface to the \texttt{OtherDB} to consult all SLAs in order to retrieve the approximate location and size of all batches for the day and (3) its internal structure to be adapted to the new functionality.\\\\
 The \texttt{ZoomitFacade} is responsible for sending documents to the external \texttt{ZoomitChannel} along with the corresponding sender name (i.e. the name of the customer organization that ordered the underlying document processing job) and the \texttt{ZoomitId} of the unregistered recipient to whom the document is to be delivered. This delivery process is set in motion upon receipt of a document and corresponding delivery information from the \texttt{ChannelDispatcher}. After having sent the document data to the external \texttt{ZoomitChannel}, the \texttt{ZoomitFacade} awaits confirmation from this component, upon which it marks the corresponding job as sent by contacting the \texttt{JobManager}. Furthermore, if receipt tracking is enabled, the \texttt{ZoomitFacade} indicates to the \texttt{ZoomitChannel} that it must notify the former component upon actual delivery of the document to the recipient. When the \texttt{ZoomitFacade} receives such a delivery notification, it marks the corresponding job as received by calling the \texttt{JobManager}.\\\\
-In order to comply with \textit{Av3}, the \texttt{ZoomitDeliveryCache} is responsible for caching all \texttt{Documents} (including \texttt{DocumentIds}) and corresponding \texttt{ZoomitIds} for which the \texttt{ZoomitFacade} did not (yet) receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. Zoomit did not receive the document) up to a maximum of 2 days of documents. The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list of \texttt{Document}- \texttt{ZoomitId} pairs (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding \texttt{Document}-\texttt{ZoomitId} pair is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off. To further comply with \textit{Av3}, the \texttt{Document}-\texttt{ZoomitId} pairs in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached pairs whose counters have reached the value of 5 and sends a notification to an eDocs operator through the NotificationHandler when the amount of such pairs reaches the value of 10.
+In order to comply with \textit{Av3}, the \texttt{ZoomitDeliveryCache} is responsible for caching all \texttt{Documents} and corresponding \texttt{ZoomitIds}, \texttt{DocumentIds}, sender names and receipt tracking information for which the \texttt{ZoomitFacade} did not (yet) receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. Zoomit did not receive the document) up to a maximum of 2 days of documents. The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding entry is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off. To further comply with \textit{Av3}, the entries in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached entries whose counters have reached the value of 5 and sends a notification to an eDocs operator through the NotificationHandler when the amount of such entries reaches the value of 10.
 
 \subsection{DocumentDB}\label{subsec:decomp-DocumentDB}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{DocumentDB.png}
+	\includegraphics[width=1.0\textwidth]{DocumentDB.png}
 	\caption{Decomposition of \texttt{DocumentDB}}
 	\label{fig:decomp-DocumentDB}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DocumentDB} is presented in Figure \ref{fig:decomp-DocumentDB}. As shown, the \texttt{DocumentDB} is decomposed into only two submodules: the \texttt{DocumentDBShardingManager} and the \texttt{DocumentDBShard}.\\\\
 The \texttt{DocumentDB} is responsible for the actual storage of all documents, along with their meta data. More specifically, the \texttt{DocumentStoragFunctionality} stores documents in it that both this component and the \texttt{RecipientFacade} are able to access. Because the \texttt{DocumentDB} stores a large amount of documents and correspondingly handles a large amount of document requests, its documents are partitioned across several \texttt{DocumentDBShards} that each reside on their own \texttt{DocumentDBShardNode} according to \textit{P2}. In order to further increase performance of the \texttt{DocumentDB} for \textit{P2}, the \texttt{DocumentDBShardingManager} is also deployed on an individual node. It is responsible for managing all \texttt{DocumentDBShards} (i.e. maintaining a consistent overview of all shards and their corresponding documents) and forwarding read and write requests to the appropriate ones.\\\\
@@ -203,11 +201,10 @@ Finally, \textit{P2} requires the \texttt{DocumentDB} to be able to throttle exc
 \subsection{DocumentGenerationManager}\label{subsec:decomp-DocumentGenerationManager}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{DocumentGenerationManager.png}
+	\includegraphics[height=0.9\textheight]{DocumentGenerationManager.png}
 	\caption{Decomposition of \texttt{DocumentGenerationManager}}
 	\label{fig:decomp-DocumentGenerationManager}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DocumentGenerationManager} is presented in Figure \ref{fig:decomp-DocumentGenerationManager}. As shown, the \texttt{DocumentGenerationManager} is decomposed into five submodules: the \texttt{TemplateCache}, the \texttt{KeyCache}, the \texttt{Completer}, the \texttt{Scheduler} and the \texttt{GeneratorManager}.\\\\
 Since this decomposition was already discussed in the provided initial architecture, we will not repeat those results here. Note, however, that some interfaces have been changed, added or even removed for the \texttt{DocumentGenerationManager} to be able to properly communicate with the rest of the system (see Appendix \ref{app:catalog}).
@@ -216,11 +213,10 @@ Also note that, according to \textit{M1}, all potential changes involving a new 
 \subsection{DocumentStorageFunctionality}\label{subsec:decomp-DocumentStorageFunctionality}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{DocumentStorageFunctionality.png}
+	\includegraphics[width=1.0\textwidth]{DocumentStorageFunctionality.png}
 	\caption{Decomposition of \texttt{DocumentStorageFunctionality}}
 	\label{fig:decomp-DocumentStorageFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DocumentStorageFunctionality} is presented in Figure \ref{fig:decomp-DocumentStorageFunctionality}. As shown, the \texttt{DocumentStorageFunctionality} is decomposed into only two submodules: the \texttt{DocumentStorageManager} and the \texttt{DocumentStorageCache}.\\\\
 The \texttt{DocumentStorageManager} is responsible for storing generated documents in the correct database(s) (i.e. the \texttt{PDSDB} and the \texttt{DocumentDB}) upon the appropriate method call from the \texttt{ChannelDispatcher} (see also the decomposition of the \texttt{DeliveryFunctionality} in Section \ref{subsec:decomp-DeliveryFunctionality}). If the call indicates that the document belongs to a registered recipient, the \texttt{DocumentStorageManager} sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}, accompanied by a call to the \texttt{JobManager} to mark the corresponding job as sent. However, if the call indicates that the document belongs to an unregistered recipient, the \texttt{DocumentStorageManager} only sends a write request to the \texttt{DocumentDB}. Note that in each case, the \texttt{DocumentStorageManager} creates the appropriate \texttt{DocumentMetaData} (see Appendix \ref{app:datatypes}) to store along with the document. Also note that all calls to add a receipt timestamp to the meta data of a document pass through the \texttt{DocumentStorageManager} in order to reach both the \texttt{DocumentDB} and the \texttt{PDSDB} in a controlled manner.\\\\
@@ -230,11 +226,10 @@ A major responsibility of the \texttt{DocumentStorageFunctionality} is the tempo
 \subsection{JobManager}\label{subsec:decomp-JobManager}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{JobManager.png}
+	\includegraphics[height=0.8\textheight]{JobManager.png}
 	\caption{Decomposition of \texttt{JobManager}}
 	\label{fig:decomp-JobManager}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{JobManager} is presented in Figure \ref{fig:decomp-JobManager}. As shown, the \texttt{JobManager} is decomposed into three submodules: the \texttt{JobFacade}, the \texttt{JobDBShardingManager} and the \texttt{JobDBShard}.\\\\
 In order to comply with \textit{Av1b}, the \texttt{JobManager} is responsible for storing all document processing jobs. These jobs are (according to \textit{P3}) partitioned across several \texttt{JobDBShards} that each reside on their own node. In order to further comply with \textit{P3} and thus increase performance of the \texttt{JobManager} and the corresponding speed at which job statuses can be requested, the \texttt{JobDBShardingManager}, which is in charge of managing all \texttt{JobDBShards} and forwarding read and write requests to the appropriate ones, is also deployed on an individual node (see also the deployment view in Section \ref{sec:deployment}).\\\\
@@ -245,11 +240,10 @@ Furthermore, the \texttt{JobFacade} is also responsible for creating jobs, a pro
 \subsection{LinkMappingFunctionality}\label{subsec:decomp-LinkMappingFunctionality}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{LinkMappingFunctionality.png}
+	\includegraphics[width=0.6\textwidth]{LinkMappingFunctionality.png}
 	\caption{Decomposition of \texttt{LinkMappingFunctionality}}
 	\label{fig:decomp-LinkMappingFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{LinkMappingFunctionality} is presented in Figure \ref{fig:decomp-LinkMappingFunctionality}. As shown, the \texttt{LinkMappingFunctionality} is decomposed into only two submodules: the \texttt{LinkMappingManager} and the \texttt{LinkMappingDB}.\\\\
 The \texttt{LinkMappingManager} is responsible for creating link mappings upon receiving this request from the \texttt{EmailFacade} in the \texttt{DeliveryFunctionality} (see the decomposition of the \texttt{DeliveryFunctionality} in Section \ref{subsec:decomp-DeliveryFunctionality}) and subsequently storing them in the \texttt{LinkMappingDB}. More precisely, a link mapping consists of a \texttt{Link} and a corresponding \texttt{DocumentId}-\texttt{Boolean} pair along with a timestamp, identifying the mapped document, its location (i.e. the \texttt{PDSDB} or the \texttt{DocumentDB}) and the time at which the mapping was created, respectively.\\\\
@@ -264,11 +258,10 @@ If the requested document is located in the \texttt{PDSDB} (i.e. the recipient i
 \subsection{PDSDB}\label{subsec:decomp-PDSDB}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{PDSDB.png}
+	\includegraphics[height=0.8\textheight]{PDSDB.png}
 	\caption{Decomposition of \texttt{PDSDB}}
 	\label{fig:decomp-PDSDB}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{PDSDB} is presented in Figure \ref{fig:decomp-PDSDB}. As shown, the \texttt{PDSDB} is decomposed into three submodules: the \texttt{PDSLongTermDocumentManager}, the \texttt{PDSReplicationManager} and the \texttt{PDSDBReplica}.\\\\
 Since this decomposition was already discussed in the provided initial architecture, we will not repeat those results here. Note, however, that some interfaces have been changed, added or even removed for the \texttt{PDSDB} to be able to properly communicate with the rest of the system (see Appendix \ref{app:catalog}).\\\\
@@ -278,11 +271,10 @@ Finally, \textit{P2} requires the \texttt{PDSDB} to be able to throttle excessiv
 \subsection{UserFunctionality}\label{subsec:decomp-UserFunctionality}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{UserFunctionality.png}
+	\includegraphics[height=0.9\textheight]{UserFunctionality.png}
 	\caption{Decomposition of \texttt{UserFunctionality}}
 	\label{fig:decomp-UserFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{UserFunctionality} is presented in Figure \ref{fig:decomp-UserFunctionality}. As shown, the \texttt{UserFunctionality} is decomposed into six submodules: the \texttt{RecipientFacade}, the \texttt{CustomerOrganizationFacade}, the \texttt{EDocsAdminFacade}, the \texttt{AuthenticationHandler}, the \texttt{SessionDB} and the \texttt{RegistrationManager}.\\\\
 The \texttt{UserFunctionality} is responsible for the interaction between (un)registered recipients, customer organizations and eDocs operators on the one side and the eDocs system on the other side. More precisely, the interactive functionality between the eDocs system and each of these three user groups is split up into three corresponding facade components: the \texttt{RecipientFacade}, the \texttt{CustomerOrganizationFacade} and the \texttt{EDocsAdminFacade}.\\\\
@@ -301,25 +293,24 @@ Furthermore, the \texttt{RecipientFacade} is able to present a registered recipi
 The \texttt{AuthenticationHandler} is responsible for authenticating registered recipients and customer organizations upon receiving the proper request from the \texttt{RecipientFacade} and the \texttt{CustomerOrganizationFacade} respectively. For the \texttt{AuthenticationHandler} do its job, it needs to communicate with the \texttt{OtherDB} (for fetching user credentials) and the \texttt{SessionDB} (for session management). The latter component is solely responsible for storing user sessions and handling all requests from the \texttt{AuthenticationHandler} concerning these sessions. Furthermore, in order to comply with \textit{P2} and \textit{P3} by preventing the authentication subprocess from introducing a bottleneck in either the document lookup process (\textit{P2}) or the status overview process (\textit{P3}), both the \texttt{AuthenticationHandler} and the \texttt{SessionDB} are deployed on the same individual node.\\\\
 Finally, the \texttt{RegistrationManager} is responsible for registering a recipient (upon which it sends a request to the \texttt{DocumentStorageFunctionality} to create a new personal document store), unregistering a recipient (upon which it sends a request to the \texttt{DocumentStorageFunctionality} to invalidate the recipient's personal document store after having checked if all included documents were received), registering a customer organization and unregistering a customer organization. In each case, the \texttt{RegistrationManager} calls the \texttt{OtherDB} to store (upon registration) or invalidate (upon unregistration) the respective user credentials. Note that the \texttt{RegistrationManager} does not allow a recipient to unregister if he or she has not yet received (i.e. read) all documents in his or her personal document store (as dictated by the requirements).
 
+\FloatBarrier
 \section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{ContextDeployment.png}
+	\includegraphics[height=0.9\textheight]{ContextDeployment.png}
 	\caption{Context diagram for the deployment view.}
 	\label{fig:depl_context}
 \end{figure}
-\FloatBarrier
 \noindent
 The context diagram of the deployment view is given in Figure \ref{fig:depl_context}. As shown, four nodes are connected to the outside world: the \texttt{EDocsAdminNode}, the \texttt{CustomerOrganizationNode}, the \texttt{RecipientNode} and the \texttt{ResidualNode}. Notice that there will be multiple \texttt{CustomerOrganizationTerminals}, \texttt{RecipientTerminals} and possibly \texttt{EDocsAdminTerminals} communicating with the eDocs system simultaneously.\\
 Due to its very nature, the \texttt{EmailChannel} communicates with the eDocs system by means of an SMTP protocol. Both the \texttt{ZoomitChannel} and the \texttt{Print\&PostalServiceChannel}, however, are connected to the eDocs system via a TCP protocol, because this connection only needs to support simple data transfer. For the same reason, both the \texttt{EDocsAdminTerminal} and the \texttt{CustomerOrganizationTerminal} support a TCP connection to the internal \texttt{EDocsAdminNode} and \texttt{CustomerOrganizationNode} respectively. Furthermore, the \texttt{EDocsAdminTerminal}, the \texttt{CustomerOrganizationTerminal} and the \texttt{RecipientTerminal} all make use of an HTTP protocol to be able to communicate with their corresponding internal node in a user friendly manner.
 
 \begin{figure}[!htp]
     \centering
-	\includegraphics[width=0.8\textwidth]{TotalDeployment.png}
+	\includegraphics[height=0.9\textheight]{TotalDeployment.png}
     \caption{Primary diagram for the deployment view.}
     \label{fig:depl_primary}
 \end{figure}
-\FloatBarrier
 \noindent
 The entire deployment diagram of the eDocs system is presented in Figure \ref{fig:depl_primary}. As shown, the deployment diagram employs both top-level components as sub-components of further decompositions. If a top-level component is deployed on a node, this means that all its sub-components are deployed there as well. Notice that for readability reasons, we only show multiplicities differing from 1. Also notice that we did not specify protocols for internal connections.\\
 
@@ -350,6 +341,7 @@ In the current architecture, both the \texttt{EDocsAdminFacade} and the \texttt{
 \paragraph{Alternative for separate deployment of potential bottleneck components in crucial processes}
 In our current architecture, all potential bottleneck components that support crucial processes (i.e. the document lookup process and the status overview process) are deployed on separate nodes. An obvious alternative would be to deploy these components on the same node (assuming this would not contradict with any design decisions that were made for other requirements). Although this approach would greatly increase communication performance between all components involved, it would also decrease overall performance of the document lookup process and, more importantly, of the other functionality in the system. For these reasons, we decided to deploy these components on separate nodes as discussed above.
 
+\FloatBarrier
 \section{Scenarios}\label{sec:scenarios}
 In this scenario, we illustrate the internal behaviour for our system  for the most important data flows, i.e. the authentication of the Registered Recipients and the whole document processing flow.\\
 We describe the authentication of Registered Recipients in Sections \ref{scenario:RegRecipLogIn} and \ref{scenario:RegRecipLogIn}.\\
@@ -907,10 +899,10 @@ List all elements and interfaces alphabetically for ease of navigation.
             \end{itemize}
         \end{itemize}
         
-		\item \texttt{List<DocumentId> geAlltDocumentIds(EmailAddress emailAddress)}
+		\item \texttt{List<DocumentId> geAllDocumentIds(EmailAddress emailAddress)}
         \begin{itemize}
             \item Effect: The \texttt{DocumentDB} will return the document identifiers of all documents that where previously sent to the given \texttt{emailAddress}.
-            \item Exceptions:  
+            \item Exceptions: None
             \begin{itemize}
             	\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDB}.
             \end{itemize}
@@ -928,30 +920,33 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentDBShardingMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    	
+        \item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{DocumentDBShard} will store the given document \texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions: None
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
+		
+        \item \texttt{Tuple<Document, DocumentMetaData> getDocument(DocumentId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item Effect: The \texttt{DocumentDBShard} will return the document identified by the given document identifier together with its meta-data.
+        	\item Exceptions:  
+        	\begin{itemize}
+        		\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDBShard}.
+        	\end{itemize}
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+        
+        \item \texttt{List<DocumentId> geAllDocumentIds(EmailAddress emailAddress)}
+  		\begin{itemize}
+        	\item Effect: The \texttt{DocumentDBShard} will return the document identifiers of all documents it contains that where previously sent to the given \texttt{emailAddress}.
+        	\item Exceptions: None
+        	\begin{itemize}
+        		\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDBShard}.
+        	\end{itemize}
+        \end{itemize}   
+        
     \end{itemize}
 \end{itemize}
 
@@ -964,30 +959,33 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentDBMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    	
+    	\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
+    	\begin{itemize}
+    		\item Effect: The \texttt{DocumentDBShardingManager} will store the given document \texttt{doc} together with the provided meta-data \texttt{md} in the appropriate \texttt{DocumentDBShard}.
+    		\item Exceptions: None
+    	\end{itemize}
+    	
+    	\item \texttt{Tuple<Document, DocumentMetaData> getDocument(DocumentId id)}
+    	\begin{itemize}
+    		\item Effect: The \texttt{DocumentDBShardingManager} will return the document identified by the given document identifier together with its meta-data.
+    		\item Exceptions:  
+    		\begin{itemize}
+    			\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in any of the \texttt{DocumentDBShards}.
+    		\end{itemize}
+    	\end{itemize}
+    	
+        \item \texttt{List<DocumentId> geAllDocumentIds(EmailAddress emailAddress)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item Effect: The \texttt{DocumentDBShardingManager} will return the document identifiers of all documents that where previously sent to the given \texttt{emailAddress}.
+        	\item Exceptions: None
+        	\begin{itemize}
+        		\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in any of the \texttt{DocumentDBShards}.
+        	\end{itemize}
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+    	
     \end{itemize}
 \end{itemize}
 
@@ -1413,31 +1411,85 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+	\item JobDBShardingMgmt
+     	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to a document identified by the given document identifier.
+     		\end{itemize}
+     	\end{itemize}
+     	
+     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to a document identified by the given document identifier.
+     		\end{itemize}
+     	\end{itemize}       	   	
+     	
+     	\item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} marks the document processing job identified by the given job identifier as failed.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job identified by the given document identifier.
+     		\end{itemize}
+     	\end{itemize}        	
+     	
+     	\item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}	
+     	
+     	\item \texttt{RawDataId getRawDataId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the raw data entry identifier of the raw data entry corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}	
+     	
+     	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize} 	 
+     	
+     	\item \texttt{DocumentId getDocumentId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the document identifier of the document corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}
+     	
+     	\item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}
+     	
+         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+         \begin{itemize}
+         	\item Effect: The \texttt{JobDBShard} returns the document type of the document corresponding to the job identified by the given job identifier.
+         	\item Exceptions: None
+         \end{itemize}
+         
 \end{itemize}
 
 \subsection{JobDBShardingManager}
@@ -1451,11 +1503,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item JobDBMgmt
     \begin{itemize}
-	    \item \texttt{RawData getRawData(JobId jobId)}
-        \begin{itemize}
-            \item Effect: The \texttt{JobDBShardingManager} returns the raw data entry corresponding to the job identified by the given job identifier.
-            \item Exceptions: None
-        \end{itemize}    
 
      	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1466,8 +1513,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}
     	
-    	
-    	
      	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
@@ -1477,7 +1522,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}       	   	
   
-  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+		\item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} marks the document processing job identified by the given job identifier as failed.
     		\item Exceptions:
@@ -1485,15 +1530,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}        	
-    	
-   	   \item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobDBShardingManager} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}	
 
    	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1504,6 +1540,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}	
     	
+   	   \item \texttt{RawDataId getRawDataId(JobId jobId) throws NoSuchJobExceptionException}
+   	   \begin{itemize}
+   	   	\item Effect: The \texttt{JobDBShardingManager} returns the raw data entry identifier of the raw data entry corresponding to the job identified by the given job identifier.
+   	   	\item Exceptions:
+   	   	\begin{itemize}
+   	   		\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+   	   	\end{itemize}
+   	   \end{itemize}	
+    	
     	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
@@ -1511,7 +1556,31 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\begin{itemize}
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
     		\end{itemize}
-    	\end{itemize} 	    	
+    	\end{itemize} 	 
+    	
+   	   \item \texttt{DocumentId getDocumentId(JobId jobId) throws NoSuchJobExceptionException}
+   	   \begin{itemize}
+   	   	\item Effect: The \texttt{JobDBShardingManager} returns the document identifier of the document corresponding to the job identified by the given job identifier.
+   	   	\item Exceptions:
+   	   	\begin{itemize}
+   	   		\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+   	   	\end{itemize}
+   	   \end{itemize}
+    	
+    	\item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobDBShardingManager} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}
+    	
+         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+         \begin{itemize}
+         	\item Effect: The \texttt{JobDBShardingManager} returns the document type of the document corresponding to the job identified by the given job identifier.
+         	\item Exceptions: None
+         \end{itemize}
     	
     \end{itemize}
 \end{itemize}
@@ -1526,17 +1595,14 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item SetStatus
+    \item JobMgmt
     \begin{itemize}
         \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
             \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
             \item Exceptions: None
         \end{itemize}
-    \end{itemize}
-    
-	\item GetBatchData
-    \begin{itemize}
+
         \item \texttt{RawData getRawData(JobId jobId)}
         \begin{itemize}
             \item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
@@ -1545,9 +1611,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         
         
         
-        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
+        \item \texttt{List<Tuple<JobId, RawData>> getRawData(List<JobId> jobIds)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{JobFacade} returns the raw data entries corresponding to the jobs identified by the given job identifiers.
             \item Exceptions: None
         \end{itemize}
         
@@ -1581,11 +1647,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             	\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
             \end{itemize}
         \end{itemize}        
-        
-    \end{itemize}  
     
-    \item JobMgmt
-    \begin{itemize}
     	\item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
     	\begin{itemize}
             \item Effect: The \texttt{JobFacade} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
@@ -1610,7 +1672,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}   	
   
-  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+		\item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobFacade} marks the document processing job identified by the given job identifier as failed.
     		\item Exceptions:
@@ -1669,140 +1731,128 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item SetStatus
+    \item JobMgmt
     \begin{itemize}
         \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-    
-	\item GetBatchData
-    \begin{itemize}
-        \item \texttt{RawData getRawData(JobId jobId)}
-        \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the raw data entry corresponding to the job identified by the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
-        \end{itemize}    
-    
-        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-        \item \texttt{BatchMetaData getBatchMetaData(BatchId batchId)}
-        \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the meta-data of the batch of the document processing job identified by the given job identifier.
-            \item Exceptions: None
+        	\item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
+        	\item Exceptions: None
         \end{itemize}
         
-         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+        \item \texttt{RawData getRawData(JobId jobId)}
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the document type of the document corresponding to the job identified by the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
-        \end{itemize}    
+        	\item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
+        	\item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{List<Tuple<JobId, RawData>> getRawData(List<JobId> jobIds)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the raw data entries corresponding to the jobs identified by the given job identifiers.
+        	\item Exceptions: None
+        \end{itemize}
+        
+        
+        \item \texttt{BatchMetaData getBatchMetaData(JobId jobId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the meta-data of the batch of the document processing job identified by the given job identifier.
+        	\item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{DocumentType getDocumentType(JobId jobId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the document type of the document corresponding to the job identified by the given job identifier.
+        	\item Exceptions: None
+        \end{itemize}
         
         \item \texttt{String getNameOfSender(JobId jobId)}    
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
-        \end{itemize}
-
+        	\item Effect: The \texttt{JobFacade} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
+        	\end{itemize}
+        \end{itemize}        
+        
         \item \texttt{PrintParameters getPrintParameters(JobId jobId) throws NoSuchJobException}    
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
+        	\end{itemize}
+        \end{itemize}        
+        
+        \item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
+        	\item Exceptions: None
         \end{itemize}
-       
-    \end{itemize}    
-
-    \item JobMgmt
-    \begin{itemize}
-    	\item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
-    	\begin{itemize}
-            \item Effect: The \texttt{JobManager} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
-            \item Exceptions: None
+        
+        \item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+        	\end{itemize}
         \end{itemize}
-    	
-    	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
-    		\end{itemize}
-    	\end{itemize}
-    	
-     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
-    		\end{itemize}
-    	\end{itemize}       	
-
-  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} marks the document processing job identified by the given job identifier as failed.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given document identifier.
-    		\end{itemize}
-    	\end{itemize}        	
-    	
-    	
-    	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} looks up the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobManager} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JonManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}
-  
-   	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}	  
-    	
-    	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize} 	    	
-
-    	\item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}  
- 
- 
- 	   
+        
+        \item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+        	\end{itemize}
+        \end{itemize}   	
+        
+        \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} marks the document processing job identified by the given job identifier as failed.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given document identifier.
+        	\end{itemize}
+        \end{itemize}     	
+        
+        
+        \item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} queries the \texttt{JobDBShardingManager} for the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobFacade} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize}
+        
+        \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize}	 
+        
+        
+        \item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize} 	
+        
+        \item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize}  	
+        
     \end{itemize}     
 \end{itemize}
 
