@@ -808,10 +808,7 @@ In this section, we list all the components and the interfaces they provide. Per
             	\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
             \end{itemize}
         \end{itemize}        
-    \end{itemize}
-    
-    \item InitiateDocumentProcessing
-    \begin{itemize}
+
     	\item \texttt{List<RawData> initiateDocumentProcessing(CustomerId cuid, SessionId sessionId, \\DocumentType docType, RawDataPacket rawDataPacket, \\ DocumentPriority priority, Boolean isRecurring) throws NotAuthenticatedException,\\ InvalidDocumentTypeException, InvalidRawDataPackageException, ToManyRawDataEntriesException }
     	 \begin{itemize}
             \item Effect: The \texttt{CustomerOrganizationFacade} gets an indication from a customer organization with customer identifier \texttt{cuid} to start a batch of document processing jobs. The documents to be generated should be of document type \texttt{docType}. The boolean \texttt{isRecurring} indicates whether the batch is recurring or non-recurring. The information necessary to generate the documents is given in  a \texttt{RawDataPacket} containing all the info about the raw data entries of the batch. After verification of the session identifier, the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards it together with most of its arguments to the \texttt{RawDataHandler}.
@@ -822,7 +819,18 @@ In this section, we list all the components and the interfaces they provide. Per
             	\item InvalidRawDataPackageException: Thrown if the raw data package contains an error (e.g. an invalid Excel file or incorrectly formatted XML).
             	\item ToManyRawDataEntriesException: Thrown if the batch is a recurring batch and contains more raw data entries than maximally allowed for this batch.
             \end{itemize}
-        \end{itemize}  	
+        \end{itemize}  
+        
+        \item \texttt{JobStatusOverview getJobStatusOverview(SessionId sessionId, CustomerId cuid)\\ throws NotAuthenticatedException}
+        \begin{itemize}
+            \item Effect: The \texttt{CustomerOrganizationFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{CustomerOrganizationFacade} then requests to get an overview of all the document that the customer organization identified by the given customer organization identifier has ever initiated. It does this by querying the \textbf{JobManager} to get all status messages for each job belonging to the customer organization. It wraps these statuses in a \texttt{JobStatusOverview} object, which it returns.
+            \item Exceptions:
+             \begin{itemize}
+                \item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+            \end{itemize}       	
+        \end{itemize}        
+        
+        	
     \end{itemize}
 \end{itemize}
 
@@ -1577,7 +1585,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \begin{itemize}
         \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
+            \item Effect: The \texttt{JobFacade} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
             \item Exceptions: None
         \end{itemize}
 
@@ -1586,6 +1594,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
             \item Exceptions: None
         \end{itemize}
+        
+		\item \texttt{List<Tuple<DocumentId, JobStatus>> getAllJobStatuses(CustomerId customerId)}
+		\begin{itemize}
+			\item Effect: The \texttt{JobFacade} returns for all the documents ever initiated by the customer organization identified by the given customer organization identifier the document identifier and the job status.
+			\item Exceptions: None
+		\end{itemize}		        
+        
+        
+        
         
         
         
@@ -1719,32 +1736,45 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         
         \item \texttt{RawData getRawData(JobId jobId)}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
+        	\item Effect: The \texttt{JobManager} returns the raw data entry corresponding to the job identified by the given job identifier.
         	\item Exceptions: None
         \end{itemize}
         
+		\item \texttt{List<Tuple<DocumentId, JobStatus>> getAllJobStatuses(CustomerId customerId)}
+		\begin{itemize}
+			\item Effect: The \texttt{JobManager} returns for all the documents ever initiated by the customer organization identified by the given customer organization identifier the document identifier and the job status.
+			\item Exceptions: None
+		\end{itemize}	        
+        
+        
         \item \texttt{List<Tuple<JobId, RawData>> getRawData(List<JobId> jobIds)}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} returns the raw data entries corresponding to the jobs identified by the given job identifiers.
+        	\item Effect: The \texttt{JobManager} returns the raw data entries corresponding to the jobs identified by the given job identifiers.
         	\item Exceptions: None
         \end{itemize}
+        
+		\item \texttt{List<Tuple<DocumentId, JobStatus>> getAllJobStatuses(CustomerId customerId)}
+		\begin{itemize}
+			\item Effect: The \texttt{JobManager} returns for all the documents ever initiated by the customer organization identified by the given customer organization identifier the document identifier and the job status.
+			\item Exceptions: None
+		\end{itemize}        
         
         
         \item \texttt{BatchMetaData getBatchMetaData(JobId jobId)}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} returns the meta-data of the batch of the document processing job identified by the given job identifier.
+        	\item Effect: The \texttt{JobManager} returns the meta-data of the batch of the document processing job identified by the given job identifier.
         	\item Exceptions: None
         \end{itemize}
         
         \item \texttt{DocumentType getDocumentType(JobId jobId)}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} returns the document type of the document corresponding to the job identified by the given job identifier.
+        	\item Effect: The \texttt{JobManager} returns the document type of the document corresponding to the job identified by the given job identifier.
         	\item Exceptions: None
         \end{itemize}
         
         \item \texttt{String getNameOfSender(JobId jobId)}    
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
+        	\item Effect: The \texttt{JobManager} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
         	\item Exceptions:
         	\begin{itemize}
         		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
@@ -1753,7 +1783,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         
         \item \texttt{PrintParameters getPrintParameters(JobId jobId) throws NoSuchJobException}    
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
+        	\item Effect: The \texttt{JobManager} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
         	\item Exceptions:
         	\begin{itemize}
         		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
@@ -1762,44 +1792,44 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         
         \item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
+        	\item Effect: The \texttt{JobManager} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
         	\item Exceptions: None
         \end{itemize}
         
         \item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+        	\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
         	\end{itemize}
         \end{itemize}
         
         \item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+        	\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
         	\end{itemize}
         \end{itemize}   	
         
         \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} marks the document processing job identified by the given job identifier as failed.
+        	\item Effect: The \texttt{JobManager} marks the document processing job identified by the given job identifier as failed.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given document identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given document identifier.
         	\end{itemize}
         \end{itemize}     	
         
         
         \item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} queries the \texttt{JobDBShardingManager} for the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobFacade} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
+        	\item Effect: The \texttt{JobManager} queries the \texttt{JobDBShardingManager} for the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has receipt tracking enabled. The \texttt{JobManager} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
         	\end{itemize}
         \end{itemize}
         
@@ -1808,7 +1838,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         	\item Effect: The \texttt{JobFacade} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
         	\end{itemize}
         \end{itemize}	 
         
@@ -1818,16 +1848,16 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         	\item Effect: The \texttt{JobFacade} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
         	\end{itemize}
         \end{itemize} 	
         
         \item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
         \begin{itemize}
-        	\item Effect: The \texttt{JobFacade} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
+        	\item Effect: The \texttt{JobManager} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
         	\item Exceptions:
         	\begin{itemize}
-        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        		\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
         	\end{itemize}
         \end{itemize}  	
         
@@ -2710,7 +2740,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         	\end{itemize}
 		\end{itemize}            
             
-        \item \texttt{PDSOverview getPDSOverview(SessionId, RecipientId recipientId)\\ throws NotAuthenticatedException, PDSUnavailableException}
+        \item \texttt{PDSOverview getPDSOverview(SessionId sessionId, RecipientId recipientId)\\ throws NotAuthenticatedException, PDSUnavailableException}
         \begin{itemize}
             \item Effect: The \texttt{RecipientFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{RecipientFacade} then requests all the document meta-data of the documents of the recipient identified by \texttt{recipientId} from the \texttt{PDSFacade}. It generates a document overview , which is returned  to the caller.
             \item Exceptions:
@@ -3197,6 +3227,10 @@ them alphabetically for ease of navigation.
     \item \texttt{JobId}: A piece of data uniquely identifying a document processing job in the system.
     
     \item \texttt{Key}: A data structure containing the key of the Customer Organization which is used to sign its documents during the generation process. This architecture does not specify the exact format of this data type, but possibilities are a long integer, a string, a URL etc.
+    
+	\item \texttt{JobStatus}: A piece of data representing a job status in the system. Depending on the value, it represents a different document status. Possible document statuses are\emph{initiated}, \emph{generated}, \emph{sent}, \emph{failed}, \emph{delivered}, \dots
+	
+    \item \texttt{JobStatusOverview}: A data structure representing an overview of the status of all the document processing jobs that a customer organization has ever initiated. For each job belonging to the customer organization, the data structure contains the corresponding document identifier and the status messages of the job, e.g. initiated, generated, failed, sent, received, ...
     
     \item \texttt{Link}: A data structure representing a unique link. The system uses these links to point to documents. This way, a recipient can download a document by following a link. the exact format is not specified, but a possibility is just a String, since the link is a URL.
     
