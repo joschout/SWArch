@@ -1258,22 +1258,12 @@ List all elements and interfaces alphabetically for ease of navigation.
          
         \item \texttt{void unregister(SessionId edocsSessionid, RecipientId recipientId) throws NotAuthenticatedException}   
         \begin{itemize}
-        	\item Effect: The \texttt{RegistrationManager} asks the \texttt{RecipientClient} for confirmation of the unregistration after verifying the session identifier. If the Registered Recipient confirms and all the documents of the recipient have been read, his or her account gets deleted and his or her documents are removed from the \texttt{PDSDB}. Finally, the \texttt{RegistrationManager} logs the recipient out.
+        	\item Effect: The \texttt{RegistrationManager} asks the \texttt{EDocsAdminClient} for confirmation of the unregistration after verifying the session identifier. If the eDocs Administrator confirms, the account of the customer organization gets marked as inactive. Finally, the \texttt{RegistrationManager} logs the customer organization out.
         	\item Exceptions:
         	\begin{itemize}
         		\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
         	\end{itemize}
-		\end{itemize}           
-        
-        
-        
-        
-        
-        
-        
-        
-         
-            
+		\end{itemize}                      
 \end{itemize}
 
 \subsection{EmailChannel}
@@ -1293,7 +1283,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{EmailChannel} sends the given e-mail message \texttt{emailMessage} to the given e-mail address \texttt{emailAddress}.
             \item Exceptions: None
 		\end{itemize}
-
 
         \item \texttt{void sendEmailWithAttachement(EmailAddress emailAddress, EmailMessage emailMessage, Document document)}
         \begin{itemize}
@@ -2090,12 +2079,20 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
                 \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
             \end{itemize}
         \end{itemize}
+        
+        \item \texttt{void storeKey(CustomerId customerId, Key key)}
+        \begin{itemize}
+            \item Effect: The \texttt{OtherDB} stores the given key as the new key for the customer organization identified by the given customer organization identifier.
+            \item Exceptions:
+            \begin{itemize}
+                \item NoSuchKeyException: Thrown if there is no key for the given \texttt{customerId}.
+            \end{itemize}
+        \end{itemize}
     \end{itemize}
     
     \item TemplateMgmt
     \begin{itemize}
         \item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, \\ TimeStamp whenReceived)}
-       % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
             \item Effect: The \texttt{OtherDB} returns the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. 
             \item Exceptions:
@@ -2130,9 +2127,28 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
             \item Effect: The \texttt{OtherDB} returns the credentials belonging to the Customer Organization identified by \texttt{customerId}.
             \item Exceptions:
             \begin{itemize}
-                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the given credentials exists.
+                \item NoSuchCustomerOrganizationException: Thrown if no Customer Organization with the customer organization identifier exists.
             \end{itemize}
         \end{itemize}
+        
+        \item \texttt{CustomerId storeCustomerOrganizationDetails(CustomerOrganizationDetails custOrgDetails)}
+        \begin{itemize}
+        \item Effect: The \texttt{OtherDB} stores the given customer organization details when registering a new customer organization. It returns the customer identifier of the newly created customer organziation account.  
+            \item Exceptions: None
+        \end{itemize}         
+        
+         \item \texttt{void markCustomerOrganizationAsInactive(CustomerId customerId)}
+        \begin{itemize}
+        \item Effect: The \texttt{OtherDB} marks the account of the customer organization identified by the given customer organization identifer as inactive. 
+            \item Exceptions: None
+        \end{itemize}        
+        
+        
+        \item \texttt{void storePossibleDocumentTypes(CustomerId customerId, List<DocumentType> documentTypes)}
+        \begin{itemize}
+        \item Effect: The \texttt{OtherDB} stores the given list of document types as the list of document types that the Customer Organization identified by \texttt{customerId} can generate.   
+            \item Exceptions: None
+        \end{itemize} 
         
 		\item \texttt{List<Tuple<DocumentType, TimeStamp>> getPossibleDocumentTypes(CustomerId customerId)}
 		\begin{itemize}
@@ -2208,9 +2224,9 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         \begin{itemize}
             \item Effect: The \texttt{OtherDB} removes the Registered Recipient's information from its memory.
             \item Exceptions: None	
-		\end{itemize}		
+		\end{itemize}	
 		
-
+		
 		\item \texttt{Emailaddress getEmailAddress(CustomerId customerId)}    
         \begin{itemize}
             \item Effect: The \texttt{OtherDB} returns the e-mail address corresponding to the given customer organization identifier.
