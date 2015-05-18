@@ -46,9 +46,9 @@ Finally, we would like to stress that the \texttt{DocumentStorageManager} and th
 For more details, we refer to Section \ref{subsubsec:Av2b}, Section \ref{subsec:decomp-DocumentStorageFunctionality} and Section \ref{sec:deployment}.
 
 \paragraph{Av3: Zoomit failure}
-\textit{Av3} requires the system to be able to (1) autonomously detect when an invoice is not accepted by Zoomit, (2) temporarily store at least 2 days of these invoices locally until they are accepted by Zoomit, (3) keep on retrying to deliver a failed invoice to Zoomit in a proper fashion and (4) notify an eDocs operator after 5 failed attempts of at least 10 different invoices. To achieve this, the \texttt{ZoomitFacade} is able to receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. the invoice was accepted by Zoomit). Furthermore, the \texttt{ZoomitDeliveryCache} caches all \texttt{Documents} (including \texttt{DocumentIds}) and corresponding \texttt{ZoomitIds} for which the \texttt{ZoomitFacade} did not (yet) receive a delivery confirmation up to a maximum of 2 days of documents.\\
-The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list of \texttt{Document}-\texttt{ZoomitId} pairs (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding \texttt{Document}-\texttt{ZoomitId} pair is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off (because the external \texttt{ZoomitChannelNode} on which the \texttt{ZoomitChannel} resides, is now presumed to be operational again).\\
-Finally, the \texttt{Document}-\texttt{ZoomitId} pairs in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached pairs whose counters have reached the value of 5 and sends a notification to an eDocs operator through the \texttt{NotificationHandler} when the amount of such pairs reaches the value of 10.
+\textit{Av3} requires the system to be able to (1) autonomously detect when an invoice is not accepted by Zoomit, (2) temporarily store at least 2 days of these invoices locally until they are accepted by Zoomit, (3) keep on retrying to deliver a failed invoice to Zoomit in a proper fashion and (4) notify an eDocs operator after 5 failed attempts of at least 10 different invoices. To achieve this, the \texttt{ZoomitFacade} is able to receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. the invoice was accepted by Zoomit). Furthermore, the \texttt{ZoomitDeliveryCache} caches all \texttt{Documents} and corresponding \texttt{ZoomitIds}, \texttt{DocumentIds}, sender names and receipt tracking information for which the \texttt{ZoomitFacade} did not (yet) receive a delivery confirmation up to a maximum of 2 days of documents.\\
+The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding entry is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off (because the external \texttt{ZoomitChannelNode} on which the \texttt{ZoomitChannel} resides, is now presumed to be operational again).\\
+Finally, the entries in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached entries whose counters have reached the value of 5 and sends a notification to an eDocs operator through the \texttt{NotificationHandler} when the amount of such entries reaches the value of 10.
 For more details, we refer to Section \ref{subsubsec:Av1a-Av2a}, Section \ref{subsec:decomp-DeliveryFunctionality} and Section \ref{sec:deployment}.
 
 \paragraph{P2: Document lookups}
@@ -184,7 +184,7 @@ After having created the email, the \texttt{EmailFacade} sends the email to the 
 The \texttt{Print\&PostalServiceFacade} is responsible for creating printing jobs (consisting of documents that are to be delivered to unregistered recipients) and sending them to the external \texttt{Print\&PostalServiceChannel} for subsequent printing and delivery. This delivery process is set in motion upon receipt of a document and corresponding delivery information from the \texttt{ChannelDispatcher}. Note that the \texttt{Print\&PostalServiceFacade} also marks all document processing jobs, for which printing jobs have been issued to the \texttt{Print\&PostalServiceChannel}, as sent by contacting the \texttt{JobManager}.\\\\
 In order to comply with \textit{M2}, the \texttt{Print\&PostalServiceFacade} encapsulates all changes that might need to be made in order to seamlessly incorporate a new print \& postal service in the system, e.g. additional methods, external interfaces, \dots Furthermore, according to \textit{M3}, the \texttt{Print\&PostalServiceFacade} encapsulates all changes that might need to be made in order to seamlessly incorporate the dynamic selection of the cheapest print \& postal service (on a global scale) in the system. More precisely, this component will only require (1) an additional external interface to each of the employed print \& postal services, (2) an internal interface to the \texttt{OtherDB} to consult all SLAs in order to retrieve the approximate location and size of all batches for the day and (3) its internal structure to be adapted to the new functionality.\\\\
 The \texttt{ZoomitFacade} is responsible for sending documents to the external \texttt{ZoomitChannel} along with the corresponding sender name (i.e. the name of the customer organization that ordered the underlying document processing job) and the \texttt{ZoomitId} of the unregistered recipient to whom the document is to be delivered. This delivery process is set in motion upon receipt of a document and corresponding delivery information from the \texttt{ChannelDispatcher}. After having sent the document data to the external \texttt{ZoomitChannel}, the \texttt{ZoomitFacade} awaits confirmation from this component, upon which it marks the corresponding job as sent by contacting the \texttt{JobManager}. Furthermore, if receipt tracking is enabled, the \texttt{ZoomitFacade} indicates to the \texttt{ZoomitChannel} that it must notify the former component upon actual delivery of the document to the recipient. When the \texttt{ZoomitFacade} receives such a delivery notification, it marks the corresponding job as received by calling the \texttt{JobManager}.\\\\
-In order to comply with \textit{Av3}, the \texttt{ZoomitDeliveryCache} is responsible for caching all \texttt{Documents} (including \texttt{DocumentIds}) and corresponding \texttt{ZoomitIds} for which the \texttt{ZoomitFacade} did not (yet) receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. Zoomit did not receive the document) up to a maximum of 2 days of documents. The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list of \texttt{Document}- \texttt{ZoomitId} pairs (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding \texttt{Document}-\texttt{ZoomitId} pair is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off. To further comply with \textit{Av3}, the \texttt{Document}-\texttt{ZoomitId} pairs in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached pairs whose counters have reached the value of 5 and sends a notification to an eDocs operator through the NotificationHandler when the amount of such pairs reaches the value of 10.
+In order to comply with \textit{Av3}, the \texttt{ZoomitDeliveryCache} is responsible for caching all \texttt{Documents} and corresponding \texttt{ZoomitIds}, \texttt{DocumentIds}, sender names and receipt tracking information for which the \texttt{ZoomitFacade} did not (yet) receive an initial delivery confirmation from the \texttt{ZoomitChannel} (i.e. Zoomit did not receive the document) up to a maximum of 2 days of documents. The \texttt{ZoomitFacade} then periodically retries to deliver the next document in the cached list (note that the \texttt{ZoomitDeliveryCache} thus stores its entries in a circular manner) to the \texttt{ZoomitChannel} in a proper fashion by using exponential back-off. Once the \texttt{ZoomitFacade} has received an initial delivery confirmation regarding one of those cached documents, the corresponding entry is deleted from the \texttt{ZoomitDeliveryCache} and the \texttt{ZoomitFacade} tries to deliver every other document in the list to the \texttt{ZoomitChannel} right after, disregarding the previously employed method of exponential back-off. To further comply with \textit{Av3}, the entries in the \texttt{ZoomitDeliveryCache} need to be stored along with a counter that the \texttt{ZoomitFacade} increments after each failed attempt to send the respective document. Additionally, the \texttt{ZoomitFacade} keeps track of all cached entries whose counters have reached the value of 5 and sends a notification to an eDocs operator through the NotificationHandler when the amount of such entries reaches the value of 10.
 
 \subsection{DocumentDB}\label{subsec:decomp-DocumentDB}
 \begin{figure}[!htp]
@@ -899,10 +899,10 @@ List all elements and interfaces alphabetically for ease of navigation.
             \end{itemize}
         \end{itemize}
         
-		\item \texttt{List<DocumentId> geAlltDocumentIds(EmailAddress emailAddress)}
+		\item \texttt{List<DocumentId> geAllDocumentIds(EmailAddress emailAddress)}
         \begin{itemize}
             \item Effect: The \texttt{DocumentDB} will return the document identifiers of all documents that where previously sent to the given \texttt{emailAddress}.
-            \item Exceptions:  
+            \item Exceptions: None
             \begin{itemize}
             	\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDB}.
             \end{itemize}
@@ -920,30 +920,33 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentDBShardingMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    	
+        \item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{DocumentDBShard} will store the given document \texttt{doc} together with the provided meta-data \texttt{md}.
+            \item Exceptions: None
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
+		
+        \item \texttt{Tuple<Document, DocumentMetaData> getDocument(DocumentId id)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item Effect: The \texttt{DocumentDBShard} will return the document identified by the given document identifier together with its meta-data.
+        	\item Exceptions:  
+        	\begin{itemize}
+        		\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDBShard}.
+        	\end{itemize}
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+        
+        \item \texttt{List<DocumentId> geAllDocumentIds(EmailAddress emailAddress)}
+  		\begin{itemize}
+        	\item Effect: The \texttt{DocumentDBShard} will return the document identifiers of all documents it contains that where previously sent to the given \texttt{emailAddress}.
+        	\item Exceptions: None
+        	\begin{itemize}
+        		\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in the \texttt{DocumentDBShard}.
+        	\end{itemize}
+        \end{itemize}   
+        
     \end{itemize}
 \end{itemize}
 
@@ -956,30 +959,33 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DocumentDBMgmt
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+    	
+    	\item \texttt{void storeDocument(DocumentId id, Document doc, DocumentMetaData md)}
+    	\begin{itemize}
+    		\item Effect: The \texttt{DocumentDBShardingManager} will store the given document \texttt{doc} together with the provided meta-data \texttt{md} in the appropriate \texttt{DocumentDBShard}.
+    		\item Exceptions: None
+    	\end{itemize}
+    	
+    	\item \texttt{Tuple<Document, DocumentMetaData> getDocument(DocumentId id)}
+    	\begin{itemize}
+    		\item Effect: The \texttt{DocumentDBShardingManager} will return the document identified by the given document identifier together with its meta-data.
+    		\item Exceptions:  
+    		\begin{itemize}
+    			\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in any of the \texttt{DocumentDBShards}.
+    		\end{itemize}
+    	\end{itemize}
+    	
+        \item \texttt{List<DocumentId> geAllDocumentIds(EmailAddress emailAddress)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item Effect: The \texttt{DocumentDBShardingManager} will return the document identifiers of all documents that where previously sent to the given \texttt{emailAddress}.
+        	\item Exceptions: None
+        	\begin{itemize}
+        		\item NoSuchDocumentException: Thrown if there is no document identified by the given document identifier in any of the \texttt{DocumentDBShards}.
+        	\end{itemize}
         \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+    	
     \end{itemize}
 \end{itemize}
 
@@ -1346,31 +1352,85 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
-    \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
+	\item JobDBShardingMgmt
+     	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to a document identified by the given document identifier.
+     		\end{itemize}
+     	\end{itemize}
+     	
+     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to a document identified by the given document identifier.
+     		\end{itemize}
+     	\end{itemize}       	   	
+     	
+     	\item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} marks the document processing job identified by the given job identifier as failed.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job identified by the given document identifier.
+     		\end{itemize}
+     	\end{itemize}        	
+     	
+     	\item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}	
+     	
+     	\item \texttt{RawDataId getRawDataId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the raw data entry identifier of the raw data entry corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}	
+     	
+     	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize} 	 
+     	
+     	\item \texttt{DocumentId getDocumentId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the document identifier of the document corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}
+     	
+     	\item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
+     	\begin{itemize}
+     		\item Effect: The \texttt{JobDBShard} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
+     		\item Exceptions:
+     		\begin{itemize}
+     			\item NoSuchJobException: Thrown if the \texttt{JobDBShard} cannot find a job associated to the given job identifier.
+     		\end{itemize}
+     	\end{itemize}
+     	
+         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+         \begin{itemize}
+         	\item Effect: The \texttt{JobDBShard} returns the document type of the document corresponding to the job identified by the given job identifier.
+         	\item Exceptions: None
+         \end{itemize}
+         
 \end{itemize}
 
 \subsection{JobDBShardingManager}
@@ -1384,11 +1444,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 \begin{itemize}
     \item JobDBMgmt
     \begin{itemize}
-	    \item \texttt{RawData getRawData(JobId jobId)}
-        \begin{itemize}
-            \item Effect: The \texttt{JobDBShardingManager} returns the raw data entry corresponding to the job identified by the given job identifier.
-            \item Exceptions: None
-        \end{itemize}    
 
      	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1399,8 +1454,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}
     	
-    	
-    	
      	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
@@ -1410,7 +1463,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}       	   	
   
-  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+		\item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} marks the document processing job identified by the given job identifier as failed.
     		\item Exceptions:
@@ -1418,15 +1471,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job identified by the given document identifier.
     		\end{itemize}
     	\end{itemize}        	
-    	
-   	   \item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobDBShardingManager} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}	
 
    	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
@@ -1437,6 +1481,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}	
     	
+   	   \item \texttt{RawDataId getRawDataId(JobId jobId) throws NoSuchJobExceptionException}
+   	   \begin{itemize}
+   	   	\item Effect: The \texttt{JobDBShardingManager} returns the raw data entry identifier of the raw data entry corresponding to the job identified by the given job identifier.
+   	   	\item Exceptions:
+   	   	\begin{itemize}
+   	   		\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+   	   	\end{itemize}
+   	   \end{itemize}	
+    	
     	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobDBShardingManager} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
@@ -1444,7 +1497,31 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\begin{itemize}
     			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
     		\end{itemize}
-    	\end{itemize} 	    	
+    	\end{itemize} 	 
+    	
+   	   \item \texttt{DocumentId getDocumentId(JobId jobId) throws NoSuchJobExceptionException}
+   	   \begin{itemize}
+   	   	\item Effect: The \texttt{JobDBShardingManager} returns the document identifier of the document corresponding to the job identified by the given job identifier.
+   	   	\item Exceptions:
+   	   	\begin{itemize}
+   	   		\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+   	   	\end{itemize}
+   	   \end{itemize}
+    	
+    	\item \texttt{BatchId getBatchId(JobId jobId) throws NoSuchJobExceptionException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{JobDBShardingManager} returns the batch identifier of the batch corresponding to the job identified by the given job identifier.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NoSuchJobException: Thrown if the \texttt{JobDBShardingManager} cannot find a job associated to the given job identifier.
+    		\end{itemize}
+    	\end{itemize}
+    	
+         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+         \begin{itemize}
+         	\item Effect: The \texttt{JobDBShardingManager} returns the document type of the document corresponding to the job identified by the given job identifier.
+         	\item Exceptions: None
+         \end{itemize}
     	
     \end{itemize}
 \end{itemize}
@@ -1459,17 +1536,14 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item SetStatus
+    \item JobMgmt
     \begin{itemize}
         \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
             \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
             \item Exceptions: None
         \end{itemize}
-    \end{itemize}
-    
-	\item GetBatchData
-    \begin{itemize}
+
         \item \texttt{RawData getRawData(JobId jobId)}
         \begin{itemize}
             \item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
@@ -1478,9 +1552,9 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         
         
         
-        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
+        \item \texttt{List<Tuple<JobId, RawData>> getRawData(List<JobId> jobIds)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{JobFacade} returns the raw data entries corresponding to the jobs identified by the given job identifiers.
             \item Exceptions: None
         \end{itemize}
         
@@ -1514,11 +1588,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             	\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
             \end{itemize}
         \end{itemize}        
-        
-    \end{itemize}  
     
-    \item JobMgmt
-    \begin{itemize}
     	\item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
     	\begin{itemize}
             \item Effect: The \texttt{JobFacade} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
@@ -1543,7 +1613,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     		\end{itemize}
     	\end{itemize}   	
   
-  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+		\item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
     	\begin{itemize}
     		\item Effect: The \texttt{JobFacade} marks the document processing job identified by the given job identifier as failed.
     		\item Exceptions:
@@ -1602,140 +1672,128 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item SetStatus
+    \item JobMgmt
     \begin{itemize}
         \item \texttt{void setJobStatusAsTemporarilyFailed(List<JobId> statusesOfJobs)}
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-    
-	\item GetBatchData
-    \begin{itemize}
-        \item \texttt{RawData getRawData(JobId jobId)}
-        \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the raw data entry corresponding to the job identified by the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
-        \end{itemize}    
-    
-        \item \texttt{Tuple<JobId, RawData> getRawData(List<JobId> jobIds)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-        \item \texttt{BatchMetaData getBatchMetaData(BatchId batchId)}
-        \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the meta-data of the batch of the document processing job identified by the given job identifier.
-            \item Exceptions: None
+        	\item Effect: The \texttt{JobManager} marks the job as ``temporarily failed'' for each of the jobs identified by the given \texttt{JobIds}. Used by the \texttt{DocumentGenerationManager} for jobs that where assigned to a failed \texttt{Generator} instance.
+        	\item Exceptions: None
         \end{itemize}
         
-         \item \texttt{DocumentType getDocumentType(JobId jobId)}
+        \item \texttt{RawData getRawData(JobId jobId)}
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the document type of the document corresponding to the job identified by the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
-        \end{itemize}    
+        	\item Effect: The \texttt{JobFacade} returns the raw data entry corresponding to the job identified by the given job identifier.
+        	\item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{List<Tuple<JobId, RawData>> getRawData(List<JobId> jobIds)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the raw data entries corresponding to the jobs identified by the given job identifiers.
+        	\item Exceptions: None
+        \end{itemize}
+        
+        
+        \item \texttt{BatchMetaData getBatchMetaData(JobId jobId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the meta-data of the batch of the document processing job identified by the given job identifier.
+        	\item Exceptions: None
+        \end{itemize}
+        
+        \item \texttt{DocumentType getDocumentType(JobId jobId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the document type of the document corresponding to the job identified by the given job identifier.
+        	\item Exceptions: None
+        \end{itemize}
         
         \item \texttt{String getNameOfSender(JobId jobId)}    
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
-        \end{itemize}
-
+        	\item Effect: The \texttt{JobFacade} returns the name of the sender of the document corresponding to the job identified by the given job identifier.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
+        	\end{itemize}
+        \end{itemize}        
+        
         \item \texttt{PrintParameters getPrintParameters(JobId jobId) throws NoSuchJobException}    
         \begin{itemize}
-            \item Effect: The \texttt{JobManager} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
-            \item Exceptions:
-            \begin{itemize}
-            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
-            \end{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
+        	\end{itemize}
+        \end{itemize}        
+        
+        \item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
+        	\item Exceptions: None
         \end{itemize}
-       
-    \end{itemize}    
-
-    \item JobMgmt
-    \begin{itemize}
-    	\item \texttt{void createJobsAndInitiateProcessing(Customerid cuid, TimeStamp deadline, List<rawdataId> rawDataIds, batchId batchId)}
-    	\begin{itemize}
-            \item Effect: The \texttt{JobManager} creates a job for each of the raw data identifiers it gets as an argument. The job contains the time of deadline for the document processing job and the batch identifier. It stores the jobs and inserts the jobs in the \texttt{Scheduler}, together with their deadline and batch identifier.
-            \item Exceptions: None
+        
+        \item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+        	\end{itemize}
         \end{itemize}
-    	
-    	\item \texttt{void markAsReceived(DocumentId documentId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as received by the recipient.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
-    		\end{itemize}
-    	\end{itemize}
-    	
-     	\item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to a document identified by the given document identifier.
-    		\end{itemize}
-    	\end{itemize}       	
-
-  \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} marks the document processing job identified by the given job identifier as failed.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given document identifier.
-    		\end{itemize}
-    	\end{itemize}        	
-    	
-    	
-    	\item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} looks up the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobManager} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JonManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}
-  
-   	   \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}	  
-    	
-    	\item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize} 	    	
-
-    	\item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
-    	\begin{itemize}
-    		\item Effect: The \texttt{JobManager} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
-    		\item Exceptions:
-    		\begin{itemize}
-    			\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job associated to the given job identifier.
-    		\end{itemize}
-    	\end{itemize}  
- 
- 
- 	   
+        
+        \item \texttt{void markAsSent(DocumentId documentId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} marks the job corresponding to the document identified by the given document identifier as sent by the eDocs system.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to a document identified by the given document identifier.
+        	\end{itemize}
+        \end{itemize}   	
+        
+        \item \texttt{void markAsFailed(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} marks the document processing job identified by the given job identifier as failed.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given document identifier.
+        	\end{itemize}
+        \end{itemize}     	
+        
+        
+        \item \texttt{Boolean isReceiptTrackingOn(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} queries the \texttt{JobDBShardingManager} for the customer organization identifier belonging to the job identified by \texttt{jobId} and uses it to ask the \texttt{OtherDB} whether that customer organization has reciept tracking enabled. The \texttt{JobFacade} returns true when the customer organization has receipt tracking enabled and returns false otherwise.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize}
+        
+        \item \texttt{CustomerID getCustomerId(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} returns the customer organization identifier of the customer organization corresponding to the job identified by the given job identifier.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize}	 
+        
+        
+        \item \texttt{Boolean associateDocumentToJob(JobId jobId, DocumentId documentId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} will store the given document identifier in the job identified by the given job identifier. This is to associate a document processing job with the document it has generated. It returns true when it succeeds.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize} 	
+        
+        \item \texttt{Boolean isPartOfRecurringBatch(JobId jobId) throws NoSuchJobExceptionException}
+        \begin{itemize}
+        	\item Effect: The \texttt{JobFacade} checks whether the job identified by the given job identifier belongs to a recurring batch ant returns true if it does. Otherwise, it returns false.
+        	\item Exceptions:
+        	\begin{itemize}
+        		\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job associated to the given job identifier.
+        	\end{itemize}
+        \end{itemize}  	
+        
     \end{itemize}     
 \end{itemize}
 
