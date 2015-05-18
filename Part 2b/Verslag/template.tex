@@ -412,7 +412,7 @@ Secondly, the customer administrator provides the document type it wants to upda
 
 \subsection{Verifying a session}
 \label{scenario:VerifySession}
-Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid. The \texttt{AuthenticationHandler} uses the \texttt{SessionDB} to verify whether each incoming session identifier belongs to an existing session. If it belongs to an existing session, the corresponding session attributes are returned to the caller, otherwise an NoSuchSessionException is thrown.
+Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid. The \texttt{AuthenticationHandler} uses the \texttt{SessionDB} to verify whether each incoming session identifier belongs to an existing session. If it belongs to an existing session, the corresponding session attributes are returned to the caller, otherwise a NoSuchSessionException is thrown.
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=\textwidth]{Seq_VerifySession.png}
@@ -558,7 +558,7 @@ Unregistered Recipient, figure \ref{fig:seq_DeliverViaEmail} shows the \texttt{C
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=0.3\textwidth]{Seq_StoreDocPDS.png}
-    \caption{Storing a document in the PDS (continuation of fig. \ref{fig:seq_StoreDocRegisteredRecipient}).
+    \caption{Storing a document in the PDS (continuation of fig. \ref{fig:seq_StoringDocumentForRegisteredRecipients}).
         }\label{fig:seq_StoreDocPDS}
 \end{figure}
 
@@ -743,12 +743,6 @@ In this section, we list all the components and the interfaces they provide. Per
             \item Effect: The \texttt{ChannelDispatcher} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
             \item Exceptions: None
 		\end{itemize}
-		
-        \item \texttt{void generationError(JobId jobid, Error error)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -823,7 +817,7 @@ In this section, we list all the components and the interfaces they provide. Per
         
         \item \texttt{JobStatusOverview getJobStatusOverview(SessionId sessionId, CustomerId cuid)\\ throws NotAuthenticatedException}
         \begin{itemize}
-            \item Effect: The \texttt{CustomerOrganizationFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{CustomerOrganizationFacade} then requests to get an overview of all the document that the customer organization identified by the given customer organization identifier has ever initiated. It does this by querying the \textbf{JobManager} to get all status messages for each job belonging to the customer organization. It wraps these statuses in a \texttt{JobStatusOverview} object, which it returns.
+            \item Effect: The \texttt{CustomerOrganizationFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{CustomerOrganizationFacade} then requests to get an overview of all the document that the customer organization identified by the given customer organization identifier has ever initiated. It does this by querying the \texttt{JobManager} to get all status messages for each job belonging to the customer organization. It wraps these statuses in a \texttt{JobStatusOverview} object, which it returns.
             \item Exceptions:
              \begin{itemize}
                 \item NotAuthenticatedException: Thrown if the given session identifier is invalid.
@@ -1015,7 +1009,7 @@ In this section, we list all the components and the interfaces they provide. Per
 \subsubsection*{Provided interfaces}
 \begin{itemize}
     \item DocumentStorageCacheMgmt
-    
+    \begin{itemize}
         \item \texttt{void storeDocument(DocumentId docId, RecipientId recipId)}
         \begin{itemize}
         	\item Effect: The \texttt{DocumentStorageCache} stores the given \texttt{DocumentId} and \texttt{RecipientId} in its cache.
@@ -1033,7 +1027,7 @@ In this section, we list all the components and the interfaces they provide. Per
         	\item Effect: The \texttt{DocumentStorageCache} retrieves the \texttt{DocumentIds} and \texttt{RecipientIds} corresponding to all documents in its cache.
         	\item Exceptions: None
         \end{itemize} 
-        
+   \end{itemize}   
 \end{itemize}
 
 
@@ -1075,13 +1069,13 @@ In this section, we list all the components and the interfaces they provide. Per
         
         \item \texttt{void moveDocumentsToPDS(EmailAddress emailAddress, RecipientId recipientId)}
         \begin{itemize}
-        	\item Effect: The \texttt{DocumentStorageManager} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
+        	\item Effect: The \texttt{DocumentStorageFunctionality} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
         	\item Exceptions: None
         \end{itemize}  
         
         \item \texttt{void moveDocumentsToPDS(EmailAddress emailAddress, RecipientId recipientId)}
         \begin{itemize}
-        	\item Effect: The \texttt{DocumentStorageManager} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
+        	\item Effect: The \texttt{DocumentStorageFunctionality} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
         	\item Exceptions: None
         \end{itemize}   
 
@@ -1146,7 +1140,7 @@ In this section, we list all the components and the interfaces they provide. Per
 \begin{itemize}
     \item \textbf{Description:} The \texttt{DeliveryFunctionality} is responsible  for delivering the documents generated by eDocs to the recipients. 
     \item \textbf{Super-component:} \texttt{ChannelDispatcher}, \texttt{EmailFacade}, \texttt{Print\&PostalServiceFacade}, \texttt{ZoomitFacade} and \texttt{ZoomitDeliveryCache}
-    \item \textbf{Sub-components:} the direct sub-components, if any.
+    \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
@@ -1176,12 +1170,6 @@ In this section, we list all the components and the interfaces they provide. Per
             		\item Effect: The \texttt{DeliveryFunctionality} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
             		\item Exceptions: None
             	\end{itemize}
-            	
-            	\item \texttt{void generationError(JobId jobid, Error error)}
-            	\begin{itemize}
-            		\item Effect: Describe the effect of the operation
-            		\item Exceptions: None
-            	\end{itemize}
             \end{itemize}
     
 \end{itemize}
@@ -1206,7 +1194,7 @@ In this section, we list all the components and the interfaces they provide. Per
             \end{itemize}
 		\end{itemize}
 		
-		\item \texttt{void notifyEdocsOperator(NotificationMessage msg,\\ TimeStamp whenFailed)}
+		\item \texttt{void notifyEdocsOperator(NotificationMessage msg, TimeStamp whenFailed)}
         \begin{itemize}
             \item Effect: The \texttt{EDocsAdminClient} will deliver a textual message \texttt{msg} to the eDocs operators, which contains further information about the specific failure.
             \item Exceptions: None
@@ -1218,16 +1206,16 @@ In this section, we list all the components and the interfaces they provide. Per
 \subsection{EDocsAdminFacade}
 \begin{itemize}
     \item \textbf{Description:} The \texttt{EDocsAdminClient} is responsible for the interaction of eDocs Administrators with the system. 
-    \item \textbf{Super-component:} \texttt{userFunctionality}
+    \item \textbf{Super-component:} \texttt{UserFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
     \item EdocsAdminIncoming
+		\begin{itemize}
 
-
-        \item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
+        \item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
         \begin{itemize}
             \item Effect: The \texttt{EDocsAdminFacade} forwards the given \texttt{credentials} to the \texttt{AuthenticationHandler}, which verifies them and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{RecipientFacade}.
             \item Exceptions:
@@ -1242,7 +1230,7 @@ In this section, we list all the components and the interfaces they provide. Per
                 \item Exceptions: None
             \end{itemize}
             
-        \item \texttt{void registerCustomerOrganization(SessionId edocsSessionid, CustomerOrganizationDetails custOrgDetails, Credential credentials) throws InvalidCustomerOrganizationDetailsException, EmailAddressInUseException, NotAuthenticatedException}
+        \item \texttt{void registerCustomerOrganization(SessionId edocsSessionid, CustomerOrganizationDetails custOrgDetails, Credential credentials) throws InvalidCustomerOrganizationDetailsException, EmailAddressInUseException,\\ NotAuthenticatedException}
             \begin{itemize}
                 \item Effect: The \texttt{EDocsAdminFacade} registers the Customer Organization using the given details. 
                 \item Exceptions: 
@@ -1253,14 +1241,15 @@ In this section, we list all the components and the interfaces they provide. Per
                 \end{itemize}
             \end{itemize}           
          
-        \item \texttt{void unregister(SessionId edocsSessionid, RecipientId recipientId) throws NotAuthenticatedException}   
+        \item \texttt{void unregister(SessionId edocsSessionid, RecipientId recipientId) throws\\ NotAuthenticatedException}   
         \begin{itemize}
-        	\item Effect: The \texttt{RegistrationManager} asks the \texttt{EDocsAdminClient} for confirmation of the unregistration after verifying the session identifier. If the eDocs Administrator confirms, the account of the customer organization gets marked as inactive. Finally, the \texttt{RegistrationManager} logs the customer organization out.
+        	\item Effect: After using the \texttt{AuthenticationHandler} to verify the session identifier of the eDocs Administrator, the \texttt{EDocsAdminFacade} will ask the \texttt{EDocsAdminClient} for confirmation of the unregistration. If the eDocs Administrator confirms, the account of the customer organization gets marked as inactive. Finally, the \texttt{EDocsAdminFacade} logs the customer organization out.
         	\item Exceptions:
         	\begin{itemize}
         		\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
         	\end{itemize}
-		\end{itemize}                      
+		\end{itemize}
+	\end{itemize}                       
 \end{itemize}
 
 \subsection{EmailChannel}
@@ -1273,7 +1262,7 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DeliverEmail
     \begin{itemize}
         \item \texttt{void sendEmail(EmailAddress emailAddress, EmailMessage emailMessage)}
         \begin{itemize}
@@ -1336,11 +1325,8 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \begin{itemize}
         \item \texttt{void assignJobs(CompletePartialBatchData batchData)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{Generator} gets a number of jobs assigned which it has to process. The jobs consist of jobs from the same batch, but not necessarily all the jobs from a that batch. The given data consists of list of job identifiers and their corresponding raw data entries, plus the batch meta data. This method is called by the \texttt{GeneratorManager}.
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
 
@@ -2332,7 +2318,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
          
          \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
          \begin{itemize}
-                \item Effect: Describe the effect of the operation
+                \item Effect: The \texttt{PDSDB} will store the the given list of documents, together with their provided meta-data0
                 \item Exceptions: None   
          \end{itemize}
          
@@ -2372,24 +2358,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
 \begin{itemize}
     \item ExtendedDocumentMgmt
     \begin{itemize}
-    % MERK OP: mogelijk is het meer dan een lijst van documenten die over gedragen moet worden. Er staat een goed voorbeeld in de PMS
-    	\item \texttt{List<Document> getAllDocumentsOf(TimeStamp whenFailed)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-        \end{itemize}    
-            
-        \item \texttt{List<Document> getDocumentsSince(TimeStamp whenFailed)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-         \end{itemize}   
+  
          
 % MERK OP: in het sequence diagram geeft dit een zeer geke return waarde terug: OK
          \item \texttt{void storeDocuments(List<Tuple<DocumentId, Document, DocumentMetaData>> documentList)}
@@ -2727,7 +2696,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
                 \item Exceptions: 
                 \begin{itemize}
                 	\item InvalidRecipientDetailsException: Thrown if the provided details are not valid, e.g. there are missing details. The exception lists the missing details to the Unregistered Recipient.
-                	\item EmailAddressInUseException: Thrown if the given e-mail address in \textbf{recipientDetails} is already registered.
+                	\item EmailAddressInUseException: Thrown if the given e-mail address in \texttt{recipientDetails} is already registered.
                 \end{itemize}
             \end{itemize}           
          
@@ -2800,7 +2769,26 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         \item \texttt{void unregisterRecipient(RecipientId recipientId)}
         \begin{itemize}
         	\item Effect: The \texttt{RegistrationManager} first checks whether all the document of the recipient identified by the given recipient identifier have been read. If they have been read, it will remove the account of the recipient from the \texttt{OtherDB} and remove his or her documents from the \texttt{PDSDB}.
+        	\item Exceptions: None
         \end{itemize}
+        
+        \item \texttt{void registerCustomerOrganization(CustomerOrganizationDetails custOrgDetails, Credential credentials) throws InvalidCustomerOrganizationDetailsException, EmailAddressInUseException}
+            \begin{itemize}
+                \item Effect: The \texttt{RegistrationManager} registers the Customer Organization using the given details. 
+                \item Exceptions: 
+                \begin{itemize}
+                	\item InvalidCustomerOrganizationDetailsException: Thrown if the provided details are not valid, e.g. there are missing details. The exception lists the missing details to the eDocs Administrator.
+                	\item EmailAddressInUseException: Thrown if the given e-mail address in \textbf{custOrgDetails} is already registered.
+                \end{itemize}
+            \end{itemize}           
+         
+        \item \texttt{void unregister(RecipientId recipientId)}   
+        \begin{itemize}
+        	\item Effect: The \texttt{RegistrationManager}  will mark the account of the customer organizationas inactive.
+        	\item Exceptions: None
+		\end{itemize}        
+        
+        
         
     \end{itemize}
 \end{itemize}
@@ -2918,7 +2906,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
 	\item GetTemplate
     \begin{itemize}
     
-   		\item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, TimeStamp whenReceived)}
+   		\item \texttt{Template getTemplate(CustomerId customerId, DocumentType documentType, TimeStamp\\ whenReceived)}
        % \item \texttt{Template getTemplate(TemplateId templateId)}
         \begin{itemize}
             \item Effect:  The \texttt{TemplateCache} looks into its cache for the \texttt{Template} belonging to the customer organisation with id \texttt{customerId} corresponding to a document of type \texttt{documentType} and received at time \texttt{whenReceived}. If the \texttt{Template} is in its cache, it returns it. If the \texttt{Template} is not in its cache, it asks \texttt{OtherDB} for the \texttt{Template} and stores it in its cache, after which it returns that \texttt{Template}.
@@ -2934,14 +2922,14 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
 \begin{itemize}
     \item \textbf{Description:} The \texttt{UserFunctionality} is responsible for the interaction of registered recipients, unregistered recipients, customer organizations and eDocs operators with the eDocs system. It provides methods to register, to login and to logout, to consult the personal document store and download documents, to consult the status of document processing jobs, \dots
     \item \textbf{Super-component:} None
-    \item \textbf{Sub-components:} \texttt{RecipientFacade}, \texttt{CustomerOrganizationClient}, \texttt{EDocsadminfacade},\texttt{RegistrationManager} \texttt{AuthenticationHandler} and \texttt{SessionDB}
+    \item \textbf{Sub-components:} \texttt{RecipientFacade}, \texttt{CustomerOrganizationClient},  \texttt{EDocsadminfacade}, \\ \texttt{RegistrationManager},  \texttt{AuthenticationHandler} and \texttt{SessionDB}
 \end{itemize}
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
     \item RecipientIncoming
     \begin{itemize}
-    	\item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
+    	\item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
     	\begin{itemize}
     		\item Effect: The \texttt{UserFunctionality} returns a new session identifier if the given \texttt{Credentials} are correct. This session identifier can be used in future requests to the \texttt{UserFunctionality}.
     		\item Exceptions:
@@ -2956,7 +2944,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     		\item Exceptions: None
     	\end{itemize}
     	
-    	\item \texttt{Tuple<RecipientId, SessionId> registerRecipient(RecipientDetails recipientDetails, Credential credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
+    	\item \texttt{Tuple<RecipientId, SessionId> registerRecipient(RecipientDetails recipientDetails, \\Credential credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
     	\begin{itemize}
     		\item Effect: The \texttt{UserFunctionality} registers the recipient using his or her details and logs him or her in. It returns the session identifier of the created session between the newly registered recipient, plus the recipient identifier of the recipient.
     		\item Exceptions: 
@@ -2976,7 +2964,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     		\end{itemize}       	
     	\end{itemize}
     	
-    	\item \texttt{Tuple<Document, DocumentMetaData> lookupDocument(RecipientId recipientId, SessionId sessionId, DocumentId documentId) throws NotAuthenticatedException, DocumentUnavailableException}  
+    	\item \texttt{Tuple<Document, DocumentMetaData> lookupDocument(RecipientId recipientId, SessionId sessionId, DocumentId documentId) throws NotAuthenticatedException,\\ DocumentUnavailableException}  
     	\begin{itemize}
     		\item Effect: The \texttt{UserFunctionality} first verifies the given \texttt{sessionId}. The \texttt{UserFunctionality} then gets the document identified by \texttt{documentId} and its meta-data using the \texttt{PDSFacade}, which checks whether the document belongs to the Registered Recipient, and returns them.
     		\item Exceptions:
@@ -3016,7 +3004,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         		\end{itemize}
         	\end{itemize}
         	
-        	\item \texttt{List<Tuple<DocumentType,TimeStamp>> getPossibleDocumentTypes(SessionId sessionId, CustomerId cuId) throws NotAuthenticatedException}
+        	\item \texttt{List<Tuple<DocumentType,TimeStamp>> getPossibleDocumentTypes(SessionId sessionId,\\ CustomerId cuId) throws NotAuthenticatedException}
         	\begin{itemize}
         		\item Effect: The \texttt{UserFunctionality} will return a list of the document types that the customer organization is allowed to generate. It also indicates the current template for each document type by returning for each document type the time when the last template was uploaded.
         		\item Exceptions:
@@ -3025,7 +3013,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         		\end{itemize}
         	\end{itemize}
         	
-        	\item \texttt{Boolean updateDocumentTemplate(SessionId sessionId, CustomerId cuId, DocumentType documentType, Template template) throws NotAuthenticatedException, InvalidDocumentTypeException}
+        	\item \texttt{Boolean updateDocumentTemplate(SessionId sessionId, CustomerId cuId, DocumentType\\ documentType, Template template) throws NotAuthenticatedException, InvalidDocumentTypeException}
         	\begin{itemize}
         		\item Effect: The \texttt{UserFunctionality} will update the current template for the given \texttt{documentType} to the given \texttt{template} for the customer organization identified by \texttt{cuId}. Returns true when it succeeds.
         		\item Exceptions:
@@ -3048,8 +3036,9 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         	\end{itemize}  	
         \end{itemize}
     
-    \item EdocsAdminIncoming
-    
+\item EdocsAdminIncoming
+
+\begin{itemize}   
     \item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
     \begin{itemize}
     	\item Effect: The \texttt{UserFunctionality} verifies the given credentials and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{UserFunctionality}.
@@ -3076,7 +3065,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     	\end{itemize}
     \end{itemize}           
     
-    \item \texttt{void unregister(SessionId edocsSessionid, RecipientId recipientId) throws NotAuthenticatedException}   
+    \item \texttt{void unregister(SessionId edocsSessionid, RecipientId recipientId) throws\\ NotAuthenticatedException}   
     \begin{itemize}
     	\item Effect: The \texttt{UserFunctionality} asks the \texttt{EDocsAdminClient} for confirmation of the unregistration after verifying the session identifier. If the eDocs Administrator confirms, the account of the customer organization gets marked as inactive. Finally, the \texttt{UserFunctionality} logs the customer organization out.
     	\item Exceptions:
@@ -3084,7 +3073,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     		\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
     	\end{itemize}
     \end{itemize}  
-    
+  \end{itemize}  
 \end{itemize}
 
 \subsection{ZoomitChannel}
