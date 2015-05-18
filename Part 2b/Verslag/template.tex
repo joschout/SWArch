@@ -797,7 +797,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item AuthN
+    \item CustomerOrganizationIncoming
     \begin{itemize}
            \item \texttt{Boolean logout(SessionId sessionId)}
         \begin{itemize}
@@ -813,10 +813,7 @@ List all elements and interfaces alphabetically for ease of navigation.
                 \item InvalidCredentialsException: Thrown if the given credentials are invalid.
              \end{itemize}
         \end{itemize}
-     \end{itemize}  
-      
-    \item TemplateMgmt
-    \begin{itemize}
+        
     	\item \texttt{List<Tuple<DocumentType,TimeStamp>> getPossibleDocumentTypes(SessionId sessionId, CustomerId cuId) throws NotAuthenticatedException}
         \begin{itemize}
             \item Effect: The \texttt{CustomerOrganizationClient} will return a list of the document types that the customer organization is allowed to generate. It also indicates the current template for each document type by returning for each document type the time when the last template was uploaded.
@@ -1166,7 +1163,7 @@ List all elements and interfaces alphabetically for ease of navigation.
     \begin{itemize}
     	\item \texttt{void markAsDelivered(DocumentId document, TimeStamp whenDelivered)}
     	\begin{itemize}
-    		\item Effect: The \texttt{ZoomitFacade} gets notified that the document identified by the given document identifier is has been delivered by its addressee. The given \texttt{TimeStamp} indicates when the document had been delivered.
+    		\item Effect: The \texttt{DeliveryFunctionality} gets notified that the document identified by the given document identifier is has been delivered by its addressee. The given \texttt{TimeStamp} indicates when the document had been delivered.
     	\end{itemize}
     \end{itemize}
         
@@ -1174,7 +1171,7 @@ List all elements and interfaces alphabetically for ease of navigation.
         \begin{itemize}
         	\item \texttt{void notifyOfEmailDeliveryFailure(EmailAddress emailAddress, EmailMessage emailMessage}
         	\begin{itemize}
-        		\item Effect: The \texttt{EmailFacade} notifies looks up the customer organization 
+        		\item Effect: The \texttt{DeliveryFunctionality} notifies looks up the customer organization 
         	\end{itemize} 
         \end{itemize}
         
@@ -1183,7 +1180,7 @@ List all elements and interfaces alphabetically for ease of navigation.
             \begin{itemize}
             	\item \texttt{void storeAndDeliverDocument(JobId jobid, Document doc)}
             	\begin{itemize}
-            		\item Effect: The \texttt{ChannelDispatcher} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
+            		\item Effect: The \texttt{DeliveryFunctionality} will store the given document \texttt{document} and deliver it. This method is made idempotent. To filer duplicate method calls, it has the \texttt{JobId} of the document as an argument. This idempotence is to account for the case when case when a \texttt{Generator} fails after forwarding the document and before reporting completion to the \texttt{DocumentGenerationManager}. In this case, it can be that the \texttt{DocumentGenerationManager} restarts jobs for which a document has already been stored or delivered.
             		\item Exceptions: None
             	\end{itemize}
             	
@@ -2692,7 +2689,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item AuthN
+    \item RecipientIncoming
     \begin{itemize}
         \item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
         \begin{itemize}
@@ -2728,11 +2725,6 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         	\end{itemize}
 		\end{itemize}            
             
-        \end{itemize}
-    
-
-    \item DocumentMgmt
-    \begin{itemize}
         \item \texttt{PDSOverview getPDSOverview(SessionId, RecipientId recipientId)\\ throws NotAuthenticatedException, PDSUnavailableException}
         \begin{itemize}
             \item Effect: The \texttt{RecipientFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{RecipientFacade} then requests all the document meta-data of the documents of the recipient identified by \texttt{recipientId} from the \texttt{PDSFacade}. It generates a document overview , which is returned  to the caller.
@@ -2932,31 +2924,116 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item RecipientIncoming
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
-		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
+    	\item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{RecipientFacade} forwards the given \texttt{credentials} to the \texttt{AuthenticationHandler}, which verifies them and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{RecipientFacade}.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item InvalidCredentialsException: Thrown if the \texttt{AuthenticationHandler} indicated that the given credentials where incorrect.
+    		\end{itemize}
+    	\end{itemize}
+    	
+    	\item \texttt{Boolean logout(SessionId sessionId)}
+    	\begin{itemize}
+    		\item Effect: The \texttt{RecipientFacade} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
+    		\item Exceptions: None
+    	\end{itemize}
+    	
+    	\item \texttt{Tuple<RecipientId, SessionId> registerRecipient(RecipientDetails recipientDetails, Credential credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{RecipientFacade} registers the recipient using his or her details and logs him or her in. It returns the session identifier of the created session between the newly registered recipient, plus the recipient identifier of the recipient.
+    		\item Exceptions: 
+    		\begin{itemize}
+    			\item InvalidRecipientDetailsException: Thrown if the provided details are not valid, e.g. there are missing details. The exception lists the missing details to the Unregistered Recipient.
+    			\item EmailAddressInUseException: Thrown if the given e-mail address in \textbf{recipientDetails} is already registered.
+    		\end{itemize}
+    	\end{itemize}           
+    	
+    	\item \texttt{PDSOverview getPDSOverview(SessionId, RecipientId recipientId)\\ throws NotAuthenticatedException, PDSUnavailableException}
+    	\begin{itemize}
+    		\item Effect: The \texttt{RecipientFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{RecipientFacade} then requests all the document meta-data of the documents of the recipient identified by \texttt{recipientId} from the \texttt{PDSFacade}. It generates a document overview , which is returned  to the caller.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+    			\item PDSUnavailableException: Thrown if the personal document store is unavailable.
+    		\end{itemize}       	
+    	\end{itemize}
+    	
+    	\item \texttt{Tuple<Document, DocumentMetaData> lookupDocument(RecipientId recipientId, SessionId sessionId, DocumentId documentId) throws NotAuthenticatedException, DocumentUnavailableException}  
+    	\begin{itemize}
+    		\item Effect: The \texttt{RecipientFacade} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{RecipientFacade} then gets the document identified by \texttt{documentId} and its meta-data using the \texttt{PDSFacade}, which checks whether the document belongs to the Registered Recipient, and returns them.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+    			\item DocumentUnavailableException: Thrown if the given document is not available for the given user. An example is when the document identified by the \texttt{documentId} exists, but the document does not belong to the Registered Recipient. Another example is when the document identifier does not exist.
+    		\end{itemize}       	
+    	\end{itemize}
+    	
+    	\item \texttt{Tuple<Document, DocumentMetaData> getDocument(Link link) throws NotAuthenticatedException, DocumentUnavailableException, LinkExpiredException}  
+    	\begin{itemize}
+    		\item Effect: The \texttt{RecipientFacade} returns the document and meta-data to which the unique link points. It first checks whether the link points to a document of a registered or unregistered recipient. If the document belongs to  an Unregistered Recipient, a check occurs to see if the link is older than 30 days. If it is, an exception is thrown. If it is not, the document of the Unregistered Recipient gets marked as received and the \texttt{RecipientFacade} returns the document. \\ If the document belongs to an Registered Recipient, the \texttt{RecipientFacade} asks the Registered Recipient for its session identifier to check whether he or she is logged in and whether the document belongs to him or  her. If those conditions are met, the document of the Registered Recipient gets marked as received and the \texttt{RecipientFacade} returns the document.
+    		\item Exceptions:
+    		\begin{itemize}
+    			\item NotAuthenticatedException: Thrown if the given session identifier is invalid. Also thrown if the link points to the document of a Registered Recipient and the recipient following the link currently has no session with the eDocs system.
+    			\item DocumentUnavailableException: Thrown if the given document is not available for the given user. An example is when the document identified by the \texttt{documentId} exists, but the document does not belong to the Registered Recipient. Another example is when the document identifier does not exist.
+    			\item LinkExpiredException: Thrown if the link is older than 30 calendar days and points to a document of an Unregistered Recipient.
+    		\end{itemize}       	
+    	\end{itemize}  
+    	
     \end{itemize}
+    
+        \item CustomerOrganizationIncoming
+        \begin{itemize}
+        	\item \texttt{Boolean logout(SessionId sessionId)}
+        	\begin{itemize}
+        		\item Effect: The \texttt{AuthenticationHandler} will remove the session with the given id from the \texttt{SessionDB}. If no such session exists, nothing is changed and no exception is thrown.
+        		\item Exceptions: None
+        	\end{itemize}
+        	
+        	\item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
+        	\begin{itemize}
+        		\item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{UserDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
+        		\item Exceptions: 
+        		\begin{itemize}
+        			\item InvalidCredentialsException: Thrown if the given credentials are invalid.
+        		\end{itemize}
+        	\end{itemize}
+        	
+        	\item \texttt{List<Tuple<DocumentType,TimeStamp>> getPossibleDocumentTypes(SessionId sessionId, CustomerId cuId) throws NotAuthenticatedException}
+        	\begin{itemize}
+        		\item Effect: The \texttt{CustomerOrganizationClient} will return a list of the document types that the customer organization is allowed to generate. It also indicates the current template for each document type by returning for each document type the time when the last template was uploaded.
+        		\item Exceptions:
+        		\begin{itemize}
+        			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+        		\end{itemize}
+        	\end{itemize}
+        	
+        	\item \texttt{Boolean updateDocumentTemplate(SessionId sessionId, CustomerId cuId, DocumentType documentType, Template template) throws NotAuthenticatedException, InvalidDocumentTypeException}
+        	\begin{itemize}
+        		\item Effect: The \texttt{CustomerOrganizationClient} will update the current template for the given \texttt{documentType} to the given \texttt{template} for the customer organization identified by \texttt{cuId}. Returns true when it succeeds.
+        		\item Exceptions:
+        		\begin{itemize}
+        			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+        			\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+        		\end{itemize}
+        	\end{itemize}        
 
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
+        	\item \texttt{List<RawData> initiateDocumentProcessing(CustomerId cuid, SessionId sessionId, \\DocumentType docType, RawDataPacket rawDataPacket, \\ DocumentPriority priority, Boolean isRecurring) throws NotAuthenticatedException,\\ InvalidDocumentTypeException, InvalidRawDataPackageException, ToManyRawDataEntriesException }
+        	\begin{itemize}
+        		\item Effect: The \texttt{CustomerOrganizationFacade} gets an indication from a customer organization with customer identifier \texttt{cuid} to start a batch of document processing jobs. The documents to be generated should be of document type \texttt{docType}. The boolean \texttt{isRecurring} indicates whether the batch is recurring or non-recurring. The information necessary to generate the documents is given in  a \texttt{RawDataPacket} containing all the info about the raw data entries of the batch. After verification of the session identifier, the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards it together with most of its arguments to the \texttt{RawDataHandler}.
+        		\item Exceptions:
+        		\begin{itemize}
+        			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
+        			\item InvalidDocumentTypeException: Thrown if the given document type is invalid or not allowed for the given customer organization.
+        			\item InvalidRawDataPackageException: Thrown if the raw data package contains an error (e.g. an invalid Excel file or incorrectly formatted XML).
+        			\item ToManyRawDataEntriesException: Thrown if the batch is a recurring batch and contains more raw data entries than maximally allowed for this batch.
+        		\end{itemize}
+        	\end{itemize}  	
         \end{itemize}
-    \end{itemize}
+    
+    
 \end{itemize}
 
 \subsection{ZoomitChannel}
