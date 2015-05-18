@@ -355,7 +355,7 @@ Registered Recipient in Section \ref{scenario:ConsultPDS}, the consultation of a
 The generation of documents has already been discussed in the provided initial architecture during the decomposition with as non-functional requirements \emph{Av1: Document generation failure} and \emph{P2: Document generation}. Figures \ref{fig:seq_ProcessJobs1} and \ref{fig:seq_ProcessJobs2} originate from the original architecture, but are adapted to fit the final architecture. Therefore, we will not give an in depth dicussion of these figures, but focus on the main differences.\\
 
 Figure \ref{fig:seq_ProcessJobs1} shows a \texttt{Generator} instance that requires new jobs to process contacting the \texttt{GenerationManager}. The \texttt{GenerationManager} then asks the \texttt{Scheduler} for job identifiers of jobs that need to be processed. The \texttt{Scheduler} returns a list of \texttt{JobIds} belonging to the same batch (but not necessarily all the jobs of that batch). Next, the \texttt{Generator} asks the \texttt{Completer} to return all the data necessary to generate the documents. This is data belonging to the jobs and data belonging to the batch of these jobs. The \texttt{Completer} first fetches the raw data for the jobs from the \texttt{OtherDB} using the \texttt{JobFacade}. The \texttt{JobFacade} can fetch these raw data entries because a job contains the identifier of the necessary raw data entry.\\
-After the raw data entries, the \texttt{Completer} fetches the meta-data of the batch, the cryptographic key of the customer organization initiating the processing job and the template for the document type to be generated. The batch meta-data, key and template are all stored in the \texttt{OtherDB}. The batch meta-data contains the customer organization identifier, the time when the batch was received by the eDocs system, whether the batch is recurring, the priority of batch \dots (see also the data type \texttt{BatchmetaData} in Appendix \ref{app:catalog}).\\
+After the raw data entries, the \texttt{Completer} fetches the meta-data of the batch, the cryptographic key of the customer organization initiating the processing job and the template for the document type to be generated. The batch meta-data, key and template are all stored in the \texttt{OtherDB}. The batch meta-data contains the customer organization identifier, the time when the batch was received by the eDocs system, whether the batch is recurring, the priority of batch \dots (see also the data type \texttt{BatchMetaData} in Appendix \ref{app:catalog}).\\
 
 Figure \ref{fig:seq_ProcessJobs2} shows the continuation of figure \ref{fig:seq_ProcessJobs2}. After fetching the template, the \texttt{Completer} returns the list of raw data entries and their job identifiers, together with the batch meta-data, the key and the template to the \texttt{GeneratorManager}. The \texttt{GeneratorManager} assigns these document processing jobs to a \texttt{Generator} instance asking for new processing jobs, giving it this necessary data.\\
 For each received job, the \texttt{Generator} instance tries to generate a document. If it succeeds, it tells the \texttt{BillingManager} to add the appropriate cost to the bill of the customer organization and forwards the job identifier and document to the \texttt{ChannelDispatcher}. The \texttt{ChannelDispatcher} will then initiate the delivery of the document, as explained in Section \ref{scenario:DeliverDoc}. If the \texttt{Generator} instance fails to generate the document because it does not have all of the data necessary to fill in the template, it will notify the appropriate Customer Organization Administrator by sending an  e-mail with a description of the error using the \texttt{NotificationHandler}. The \texttt{NotificationHandler} gets the e-mail address from the SLA in the \texttt{OtherDB}.
@@ -380,18 +380,18 @@ Figure \ref{fig:seq_UC1LogIn} depicts the sequence diagram of a Registered Recip
 Note that the use case \emph{UC1: Log in} also has the Customer Organization as a primary actor. The login procedure for customer organizations is almost identical to the procedure for registered recipient, which is why we do not provide a separate sequence diagram for this primary actor. Compared to figure \ref{fig:seq_UC1LogIn}, the Customer Organization sends it login request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Also, another method call to \texttt{OtherDB} is used to ask for the credentials of a customer organization.
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{Seq_UC1LogIn.png}
+    \includegraphics[width=\textwidth]{UC1LogIn.png}
     \caption{The login behaviour of a Registered Recipient.
         }\label{fig:seq_UC1LogIn}
 \end{figure}
 
 \subsection{A registered recipient logs out}
 \label{scenario:RegRecipLogOut}
-Figure \ref{fig:seq_UC2LogOut} shows the behaviour of a Registered Recipient logging out, according to \emph{UC2: Log out}. The Registered Recipient provides his recipient id and session id to the \texttt{RecipienntFacade}. The \texttt{AuthenticationHandler} first verifies the session (figure \ref{fig:seq_UC2LogOut}). If the session is valid, it logs out the Registered Recipient.\\ Note that the logout procedure for Customer Organizations is almost the same. The only difference is that the Customer Organization sends his logout request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Because of this reason, we do not give a separate sequence diagram for the Customer Organization logging out.
+Figure \ref{fig:seq_UC2LogOut} shows the behaviour of a Registered Recipient logging out, according to \emph{UC2: Log out}. The Registered Recipient provides his recipient id and session id to the \texttt{RecipientFacade}. The \texttt{AuthenticationHandler} first verifies the session (figure \ref{fig:seq_UC2LogOut}). If the session is valid, it logs out the Registered Recipient.\\ Note that the logout procedure for Customer Organizations is almost the same. The only difference is that the Customer Organization sends his logout request to the \texttt{CustomerOrganizationFacade} instead of the \texttt{RecipientFacade}. Because of this reason, we do not give a separate sequence diagram for the Customer Organization logging out.
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{Seq_UC2LogOut.png}
+    \includegraphics[width=\textwidth]{UC2LogOut.png}
     \caption{The logout behaviour of the Registered Recipient.
         }\label{fig:seq_UC2LogOut}
 \end{figure}
@@ -405,7 +405,7 @@ Secondly, the customer administrator provides the document type it wants to upda
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{Seq_UC20UpdateDocumentTemplate.png}
+    \includegraphics[width=\textwidth]{UC20UpdateDocumentTemplate.png}
     \caption{The system behavior for updating a document template.
         }\label{fig:seq_UC20UpdateDocumentTemplate}
 \end{figure}
@@ -424,9 +424,9 @@ Figure \ref{fig:seq_VerifySession} how it is verified whether a session is valid
 
 \subsection{Initiating document processing}
 \label{scenario:InitiateDocProcessing}
-Figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows how a customer organization initiates a batch of document processing jobs. Recurring and non-recurring batches are indicated using the \texttt{isRecurring} boolean value. If the batch is non-recurring, the customer organization can indicate another priority than the default priority of that customer organization if the batch should be handled with another priority than the default priority.  For recurring batches, it does not matter if a priority is given, as the default priority will be used. The customer organization also delivers the raw data as a \texttt{rawDataPackage}. After verification of the session identifier (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards this together with all its arguments except for the \texttt{sessionid} to \texttt{RawDataHandler}, while also indicating if the batch is (non-)recurring.\\
+Figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows how a customer organization initiates a batch of document processing jobs. Recurring and non-recurring batches are indicated using the \texttt{isRecurring} boolean value. If the batch is non-recurring, the customer organization can indicate another priority than the default priority of that customer organization if the batch should be handled with another priority than the default priority.  For recurring batches, it does not matter if a priority is given, as the default priority will be used. The customer organization also delivers the raw data as a \texttt{RawDataPackage}. After verification of the session identifier (figure \ref{fig:seq_VerifySession}), the \texttt{CustomerOrganizationFacade} generates a \texttt{TimeStamp} of the time when this method is called and forwards this together with all its arguments except for the session identifier to \texttt{RawDataHandler}, while also indicating if the batch is (non-)recurring.\\
 
-Figure \ref{fig:seq_VerifyRawData} depicts the first part of the method call in the \texttt{RawDataHandler}, which will verify whether the raw data is valid. First, \texttt{RawDataHandler} checks whether the customer organization is allowed to generated the given document type. If it is allowed, the received raw data packet will be validated, e.g  there will be checked whether the content of the received Excel file can be read or whether a received XML file is correctly formatted. If it is not valid, an exception is thrown. Otherwise, depending on if the batch is  recurring, the \texttt{RawDataHandler} will query the SLA in the \texttt{OtherDB} to check if the number of raw data entries in the raw data package is allowed. If the number of entries exceeds this maximum, an exception is thrown. Next, each individual entry will be checked on validity, so the \texttt{RawdataHandler} knows which \texttt{RawData} entries are valid and which are not.\\
+Figure \ref{fig:seq_VerifyRawData} depicts the first part of the method call in the \texttt{RawDataHandler}, which will verify whether the raw data is valid. First, \texttt{RawDataHandler} checks whether the customer organization is allowed to generated the given document type. If it is allowed, the received raw data packet will be validated, e.g  there will be checked whether the content of the received Excel file can be read or whether a received XML file is correctly formatted. If it is not valid, an exception is thrown. Otherwise, depending on if the batch is  recurring, the \texttt{RawDataHandler} will query the SLA in the \texttt{OtherDB} to check if the number of raw data entries in the raw data package is allowed. If the number of entries exceeds this maximum, an exception is thrown. Next, each individual entry will be checked on validity, so the \texttt{RawDataHandler} knows which \texttt{RawData} entries are valid and which are not.\\
 
 After verification, figure \ref{fig:seq_UC3InitiateDocumentProcessing} shows that the \texttt{RawDataHandler} will only use the given priority if the batch is non-recurring. Otherwise, it will use the default priority. The deadline of the document processing jobs is calculated and a \texttt{BatchMetaData} object is generated, bundling the information about the batch. The \texttt{RawDataHandler} will store the \texttt{RawData} entries and \texttt{BatchMetaData} in the \texttt{OtherDB}. It asks the \texttt{JobFacade} to create jobs for the valid raw data entries and to initiate document processing for those jobs. Finally, it will return the invalid raw data entries to the Customer Organization.\\
 
@@ -435,7 +435,7 @@ Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storin
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=0.8\textwidth]{Seq_UC3InitiateDocumentProcessing.png}
+    \includegraphics[width=0.8\textwidth]{UC3InitiateDocumentProcessing.png}
     \caption{VerifyRawData: verification whether the raw data is valid.
         }\label{fig:seq_UC3InitiateDocumentProcessing}
 \end{figure}
@@ -449,7 +449,7 @@ Figure \ref{fig:seq_CreateJobs} shows the \texttt{JobFacade} creating and storin
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=\textwidth]{Seq_CreateJobs.png}
+    \includegraphics[width=\textwidth]{CreateJobs.png}
     \caption{CreateJobs: the \texttt{JobManager creates jobs and forwards them to be scheduled by the \texttt{Scheduler}}.
         }\label{fig:seq_CreateJobs}
 \end{figure}
@@ -460,7 +460,7 @@ Figure \ref{fig:seq_UC14ConsultdocumentInPDS} shows how a Registered Recipient c
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=0.8\textwidth]{Seq_UC14ConsultDocumentInPDS.png}
+    \includegraphics[width=0.8\textwidth]{UC14ConsultDocumentInPDS.png}
     \caption{A Registered Recipient consults a document in his or her personal document store.
         }\label{fig:seq_UC14ConsultdocumentInPDS}
 \end{figure}
@@ -584,7 +584,7 @@ Next, the \texttt{ChannelDispatcher} contacts the \texttt{DocumentStorageManager
 After storing the document for the 
 Unregistered Recipient, figure \ref{fig:seq_DeliverViaZoomit} shows
 the \texttt{ChannelDispatcher} contacting the \texttt{ZoomitFacade}, forwarding it the Zoomit identifier, the document identifier, the document and the name of the sending customer organization. The \texttt{ChannelDispatcher} also sends it a boolean indicating whether receipt tracking is turned on. If this boolean indicates that receipt tracking is turned on, the Zoomit Service knows that it has to notify the eDocs system when it has actually delivered the document to the addressee, i.e., when the addressee has opened the document in the web application of Zoomit. The \texttt{ZoomitFacade} sends this information to the external \texttt{ZoomitClient}.\\
-The \texttt{ZoomitChannel} can throw an exception when the receipt fails, e.g. because of an incorrect Zoomit account identifier or because this Zoomit user has indicated that he or she does not want to receive documents (of the customer organization identified by the given customer organization identifier) via Zoomit anymore. In this case, the \texttt{ZoomitChannel} looks up the customer organization identifier of the customer organization and notifies it of the failure using the \texttt{NotificationHandler}. But if the receipt does not fail, the \texttt{ZoomitFacade} marks the document as sent.  Finally, the \texttt{ChannelDispatcher} tells the \texttt{BillingManager} to add the cost of delivering the document via Zoomit to the bill of the customer organization.
+The \texttt{ZoomitChannel} can throw an exception when the receipt fails, e.g. because of an incorrect Zoomit account identifier or because this Zoomit user has indicated that he or she does not want to receive documents (of the customer organization identified by the given customer organization identifier) via Zoomit any more. In this case, the \texttt{ZoomitChannel} looks up the customer organization identifier of the customer organization and notifies it of the failure using the \texttt{NotificationHandler}. But if the receipt does not fail, the \texttt{ZoomitFacade} marks the document as sent.  Finally, the \texttt{ChannelDispatcher} tells the \texttt{BillingManager} to add the cost of delivering the document via Zoomit to the bill of the customer organization.
 
 \begin{figure}[!htp]
     \centering
@@ -620,15 +620,7 @@ Figure \ref{fig:seq_RegisterToPDS} shows how an Unregistered Recipient can regis
 
 \appendix
 \section{Element catalog}\label{app:catalog}
-In this section, we list all the components and the interfaces they provide. Per component, we describe its responsibilities, declare its super-component (if any) and list its sub-components (if any).
-
-
-
-List all components and describe their responsibilities and provided
-interfaces.
-Per interface, list all methods using a Java-like syntax and describe their
-effect and exceptions if any.
-List all elements and interfaces alphabetically for ease of navigation.
+In this section, we list all the components and the interfaces they provide. Per component, we describe its responsibilities, declare its super-component (if any) and list its sub-components (if any). Per interface, we list its methods by means of syntax. Per method, we list its effect (mostly in terms of subsequent actions) and possible exceptions. For the syntax of a method, we employ a Java-like notation. Since most data types are used by multiple methods, we give the details of these data types in a separate list in Section \ref{app:datatypes} and only refer to them in the interface specification.
 
 \subsection{AuthenticationHandler}
 \begin{itemize}
