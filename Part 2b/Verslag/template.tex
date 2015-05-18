@@ -632,7 +632,7 @@ List all elements and interfaces alphabetically for ease of navigation.
 
 \subsection{AuthenticationHandler}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{AuthenticationHandler} is responsible for authenticating Registered recipients and Customer organizations. The architecture does not specify the means of authentication (e.g. the type of credentials). The credentials are stored in the \texttt{UserDB}.
+    \item \textbf{Description:} The \texttt{AuthenticationHandler} is responsible for authenticating Registered recipients and Customer organizations. The architecture does not specify the means of authentication (e.g. the type of credentials). The credentials are stored in the \texttt{OtherDB}.
     \item \textbf{Super-component:} \texttt{UserFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -667,7 +667,7 @@ List all elements and interfaces alphabetically for ease of navigation.
         
         \item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
         \begin{itemize}
-            \item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{UserDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
+            \item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{OtherDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
             \item Exceptions: 
             \begin{itemize}
                 \item InvalidCredentialsException: Thrown if the given credentials are invalid.
@@ -807,7 +807,7 @@ List all elements and interfaces alphabetically for ease of navigation.
         
         \item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
         \begin{itemize}
-            \item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{UserDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
+            \item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{OtherDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
             \item Exceptions: 
             \begin{itemize}
                 \item InvalidCredentialsException: Thrown if the given credentials are invalid.
@@ -1088,6 +1088,18 @@ List all elements and interfaces alphabetically for ease of navigation.
             \item Effect: The \texttt{DocumentStorageFunctionality} marks the document identified by the given document identifier as received, by storing the given time in the document meta-data of the document. The given time is the time when the recipient should have received the document. Note that this method only has effect the first time it is called for a valid document identifier and time stamp.
             \item Exceptions: None
         \end{itemize}
+        
+        \item \texttt{void moveDocumentsToPDS(EmailAddress emailAddress, RecipientId recipientId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{DocumentStorageManager} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
+        	\item Exceptions: None
+        \end{itemize}  
+        
+        \item \texttt{void moveDocumentsToPDS(EmailAddress emailAddress, RecipientId recipientId)}
+        \begin{itemize}
+        	\item Effect: The \texttt{DocumentStorageManager} will fetch all documents and their meta-data from the \texttt{DocumentDB} that where sent to the given \texttt{emailAddress} and store them in the personal document store of the Registered Recipient identified by the given recipient identifier. It will also put the \texttt{recipientId} in the meta-data of all those documents.
+        	\item Exceptions: None
+        \end{itemize}   
 
     \end{itemize}
 
@@ -1129,10 +1141,7 @@ List all elements and interfaces alphabetically for ease of navigation.
         \begin{itemize}
             \item Effect: The \texttt{DocumentStorageManager} removes all documents belonging to the Registered Recipient identified by the given recipient identifier from the \texttt{PDSDB}.
             \item Exceptions: None
-		\end{itemize}		
-		
-		
-
+		\end{itemize}	
     
         \item \texttt{void markAsReceived(DocumentId documentId, TimeStamp whenReceived)}
         \begin{itemize}
@@ -2928,16 +2937,16 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     \begin{itemize}
     	\item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
     	\begin{itemize}
-    		\item Effect: The \texttt{RecipientFacade} forwards the given \texttt{credentials} to the \texttt{AuthenticationHandler}, which verifies them and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{UserFunctionality}.
+    		\item Effect: The \texttt{UserFunctionality} returns a new session identifier if the given \texttt{Credentials} are correct. This session identifier can be used in future requests to the \texttt{UserFunctionality}.
     		\item Exceptions:
     		\begin{itemize}
-    			\item InvalidCredentialsException: Thrown if the \texttt{AuthenticationHandler} indicated that the given credentials where incorrect.
+    			\item InvalidCredentialsException: Thrown if the \texttt{UserFunctionality} indicated that the given credentials where incorrect.
     		\end{itemize}
     	\end{itemize}
     	
     	\item \texttt{Boolean logout(SessionId sessionId)}
     	\begin{itemize}
-    		\item Effect: The \texttt{UserFunctionality} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
+    		\item Effect: The \texttt{UserFunctionality} removes the session corresponding to the \texttt{sessionId}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
     		\item Exceptions: None
     	\end{itemize}
     	
@@ -2953,7 +2962,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     	
     	\item \texttt{PDSOverview getPDSOverview(SessionId, RecipientId recipientId)\\ throws NotAuthenticatedException, PDSUnavailableException}
     	\begin{itemize}
-    		\item Effect: The \texttt{UserFunctionality} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{UserFunctionality} then requests all the document meta-data of the documents of the recipient identified by \texttt{recipientId} from the \texttt{PDSFacade}. It generates a document overview , which is returned  to the caller.
+    		\item Effect: The \texttt{UserFunctionality} first verifies the given \texttt{sessionId}. The \texttt{UserFunctionality} then requests all the document meta data of the documents of the recipient identified by \texttt{recipientId} from the \texttt{PDSFacade}. It generates a document overview , which is returned  to the caller.
     		\item Exceptions:
     		\begin{itemize}
     			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
@@ -2963,7 +2972,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     	
     	\item \texttt{Tuple<Document, DocumentMetaData> lookupDocument(RecipientId recipientId, SessionId sessionId, DocumentId documentId) throws NotAuthenticatedException, DocumentUnavailableException}  
     	\begin{itemize}
-    		\item Effect: The \texttt{UserFunctionality} first verifies the given session identifier \texttt{sessionId} using the \texttt{AuthenticationHandler}. The \texttt{UserFunctionality} then gets the document identified by \texttt{documentId} and its meta-data using the \texttt{PDSFacade}, which checks whether the document belongs to the Registered Recipient, and returns them.
+    		\item Effect: The \texttt{UserFunctionality} first verifies the given \texttt{sessionId}. The \texttt{UserFunctionality} then gets the document identified by \texttt{documentId} and its meta-data using the \texttt{PDSFacade}, which checks whether the document belongs to the Registered Recipient, and returns them.
     		\item Exceptions:
     		\begin{itemize}
     			\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
@@ -2988,13 +2997,13 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
         \begin{itemize}
         	\item \texttt{Boolean logout(SessionId sessionId)}
         	\begin{itemize}
-        		\item Effect: The \texttt{AuthenticationHandler} will remove the session with the given id from the \texttt{SessionDB}. If no such session exists, nothing is changed and no exception is thrown.
+        		\item Effect: The \texttt{UserFunctionality} will delete the session with the given id. If no such session exists, nothing is changed and no exception is thrown.
         		\item Exceptions: None
         	\end{itemize}
         	
         	\item \texttt{SessionId login(Credentials credentials) throws InvalidCredentialsException}
         	\begin{itemize}
-        		\item Effect: The \texttt{AuthenticationHandler} verifies the \texttt{credentials} using the \texttt{UserDB}. If they are correct, the \texttt{AuthenticationHandler} creates a new session using the \texttt{SessionDB}, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
+        		\item Effect: The \texttt{UserFunctionality} verifies the \texttt{credentials} using the \texttt{OtherDB}. If they are correct, the \texttt{UserFunctionality} creates a new session, stores the id of the user (i.e. the Registered Recipient id or Customer Organization id) as an attribute in this session and returns the id of the new session. The id of the user is present in the given credentials.
         		\item Exceptions: 
         		\begin{itemize}
         			\item InvalidCredentialsException: Thrown if the given credentials are invalid.
@@ -3037,16 +3046,16 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     
     \item \texttt{SessionId login(Credentials credentials ) throws InvalidCredentialsException}
     \begin{itemize}
-    	\item Effect: The \texttt{UserFunctionality} forwards the given \texttt{credentials} to the \texttt{AuthenticationHandler}, which verifies them and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{RecipientFacade}.
+    	\item Effect: The \texttt{UserFunctionality} verifies the given credentials and returns a new session identifier if correct. This session identifier can be used in future requests to the \texttt{UserFunctionality}.
     	\item Exceptions:
     	\begin{itemize}
-    		\item InvalidCredentialsException: Thrown if the \texttt{AuthenticationHandler} indicated that the given credentials where incorrect.
+    		\item InvalidCredentialsException: Thrown if the \texttt{UserFunctionality} indicated that the given credentials where incorrect.
     	\end{itemize}
     \end{itemize}
     
     \item \texttt{Boolean logout(SessionId sessionId)}
     \begin{itemize}
-    	\item Effect: The \texttt{UserFunctionality} removes the session corresponding to the \texttt{sessionId} using the \texttt{AuthenticationHandler}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
+    	\item Effect: The \texttt{UserFunctionality} removes the session corresponding to the \texttt{sessionId}. As a result, this session cannot be used anymore to access the system without logging in again. If no session corresponds to the \texttt{sessionId}, it does not exist, nothing is changed but no exception is thrown.
     	\item Exceptions: None
     \end{itemize}
     
@@ -3063,7 +3072,7 @@ notifyCustomerOrganizationOfZoomitReceiptFailure(cuid, documentId)
     
     \item \texttt{void unregister(SessionId edocsSessionid, RecipientId recipientId) throws NotAuthenticatedException}   
     \begin{itemize}
-    	\item Effect: The \texttt{RegistrationManager} asks the \texttt{EDocsAdminClient} for confirmation of the unregistration after verifying the session identifier. If the eDocs Administrator confirms, the account of the customer organization gets marked as inactive. Finally, the \texttt{RegistrationManager} logs the customer organization out.
+    	\item Effect: The \texttt{UserFunctionality} asks the \texttt{EDocsAdminClient} for confirmation of the unregistration after verifying the session identifier. If the eDocs Administrator confirms, the account of the customer organization gets marked as inactive. Finally, the \texttt{UserFunctionality} logs the customer organization out.
     	\item Exceptions:
     	\begin{itemize}
     		\item NotAuthenticatedException: Thrown if the given session identifier is invalid.
