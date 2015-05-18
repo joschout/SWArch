@@ -587,11 +587,11 @@ Unregistered Recipient, figure \ref{fig:seq_DeliverViaEmail} shows the \texttt{C
 
 \subsubsection{Delivering a document via postal mail}
 \label{scenario:DeliverDocPostalMail}
-Figure \ref{fig:seq_DeliverViaPostalMail} shows the behaviour of the \texttt{ChannelDispatcher} when the delivery method indicated in the raw data is postal mail. The \texttt{ChannelDispatcher} will first extract the postal address from the raw data. It then looks up the document type and the name of customer organization for who the mail is sent, since this is information that will be stored as document meta-data when storing the document. This information is retrieved from the \texttt{OtherDB} using the \texttt{JobFacade} and the job identifier. In the same way, \texttt{ChannelDispatcher} also looks up the print parameters for the customer organization, which are stored in the SLA in the \texttt{OtherDB}. \\
+Figure \ref{fig:seq_DeliverViaPostalMail} shows the behaviour of the \texttt{ChannelDispatcher} when the delivery method indicated in the raw data is postal mail. The \texttt{ChannelDispatcher} will first extract the postal address from the raw data. It then looks up the document type and the name of customer organization for which the mail is sent, since this is information that will be stored as document meta-data when storing the document. This information is retrieved from the \texttt{OtherDB} using the \texttt{JobFacade} and the job identifier. In the same way, \texttt{ChannelDispatcher} also looks up the print parameters for the customer organization, which are stored in the SLA in the \texttt{OtherDB}. \\
 Next, the \texttt{ChannelDispatcher} contacts the \texttt{DocumentStorageManager}, telling it that a document for an Unregistered Recipient needs to be stored, as shown in figure \ref{fig:seq_StoreDocumentForUnregisteredRecipient}. This is also discussed in Section \ref{scenario:DeliverDocPDS}.\\
 After storing the document for the 
 Unregistered Recipient, figure \ref{fig:seq_DeliverViaEmail} shows
-the \texttt{ChannelDispatcher} contacting the \texttt{Print\&PostalServiceFacade}, forwarding it the postal address, the postal parameters and the document. The  \texttt{Print\&PostalServiceFacade} sends this data to the external / \texttt{Print\&PostalServiceClient}, which will print the document using the given print parameters and send it to the given postal address. Next, \texttt{Print\&PostalServiceFacade} marks the document as sent using the \texttt{JobFacade}. Fimally, the \texttt{ChannelDispatcher} tells the \texttt{BillingManager} to add the cost of delivering the document via postal mail to the bill of the customer organization.
+the \texttt{ChannelDispatcher} contacting the \texttt{Print\&PostalServiceFacade}, forwarding it the postal address, the postal parameters and the document. The  \texttt{Print\&PostalServiceFacade} sends this data to the external \texttt{Print\&PostalServiceClient}, which will print the document using the given print parameters and send it to the given postal address. Next, \texttt{Print\&PostalServiceFacade} marks the document as sent using the \texttt{JobFacade}. Finally, the \texttt{ChannelDispatcher} tells the \texttt{BillingManager} to add the cost of delivering the document via postal mail to the bill of the customer organization.
 
 \begin{figure}[!htp]
     \centering
@@ -600,6 +600,21 @@ the \texttt{ChannelDispatcher} contacting the \texttt{Print\&PostalServiceFacade
         }\label{fig:seq_DeliverViaPostalMail}
 \end{figure}
 
+\subsubsection{Delivering a document via Zoomit}
+\label{scenario:DeliverViaZoomit}
+Figure \ref{fig:seq_DeliverViaZoomit} shows the behaviour of the \texttt{ChannelDispatcher} when the delivery method indicated in the raw data is Zoomit. The \texttt{ChannelDispatcher} will first extract the Zoomit identifier of the recipient from the raw data.  It then looks up the name of customer organization for which the document is sent, since this is information that will be stored as document meta-data when storing the document. This information is retrieved from the \texttt{OtherDB} using the \texttt{JobFacade} and the job identifier. In the same manner, the \texttt{ChannelFacade} uses the \texttt{JobFacade} to check whether the customer organization has receipt tracking turned on or off.\\
+Next, the \texttt{ChannelDispatcher} contacts the \texttt{DocumentStorageManager}, telling it that a document for an Unregistered Recipient needs to be stored, as shown in figure \ref{fig:seq_StoreDocumentForUnregisteredRecipient}. This is also discussed in Section \ref{scenario:DeliverDocPDS}.\\
+After storing the document for the 
+Unregistered Recipient, figure \ref{fig:seq_DeliverViaZoomit} shows
+the \texttt{ChannelDispatcher} contacting the \texttt{ZoomitFacade}, forwarding it the Zoomit identifier, the document identifier, the document and the name of the sending customer organization. The \texttt{ChannelDispatcher} also sends it a boolean indicating whether receipt tracking is turned on. If this boolean indicates that receipt tracking is turned on, the Zoomit Service knows that it has to notify the eDocs system when it has actually delivered the document to the addressee, i.e., when the addressee has opened the document in the web application of Zoomit. The \texttt{ZoomitFacade} sends this information to the external \texttt{ZoomitClient}.\\
+The \texttt{ZoomitChannel} can throw an exception when the receipt fails, e.g. because of an incorrect Zoomit account identifier or because this Zoomit user has indicated that he or she does not want to receive documents (of the customer organization identified by the given customer organization identifier) via Zoomit anymore. In this case, the \texttt{ZoomitChannel} looks up the customer organization identifier of the customer organization and notifies it of the failure using the \texttt{NotificationHandler}. But if the receipt does not fail, the \texttt{ZoomitFacade} marks the document as sent.  Finally, the \texttt{ChannelDispatcher} tells the \texttt{BillingManager} to add the cost of delivering the document via Zoomit to the bill of the customer organization.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=\textwidth]{DeliverViaZoomit.png}
+    \caption{DeliverViaZoomit: (Continuation of  fig. \ref{fig:seq_InitiateDocumentdelivery}) The  \texttt{ChannelDispatcher} uses Zoomit as a delivery method.
+        }\label{fig:seq_DeliverViaZoomit}
+\end{figure}
 
 
 \subsection{Consulting the personal document store}
@@ -615,8 +630,7 @@ Figure \ref{fig:seq_ConsultPDS} shows a Registered Recipient using a \texttt{Rec
 
 \subsection{A recipient registers to the PDS}
 \label{scenario:RegRecipRegisters}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
+Figure \ref{fig:seq_RegisterToPDS} shows how an Unregistered Recipient can register himself or herself to have a personal document store. First, the recipient indicates that he or she wants to register himself or herself by giving his or her details and the credentials he or she wants to use to the \texttt{RecipientFacade}. Theses details include the first name, last name, e-mail address and postal address of the recipient. The \texttt{RecipientFacade} forwards this information to the \texttt{RegistrationManager}, which then verifies whether the given \texttt{RecipientDetails} contain all the necessary information. If these do not contain all necessary information, an exception is thrown. Otherwise, the \texttt{RegistrationManager} checks whether given the e-mail address is already in use by a Registered Recipient. If it is already in use, an exception is thrown. Otherwise, the \texttt{RegistrationManager} orders the \texttt{OtherDB} to create a new Registered Recipient in the system bys storing the given \texttt{RecipientDetails} and \texttt{Credentials}. The \texttt{OtherDB} returns the recipient identifier of the newly created Registered Recipient, which the \texttt{RegistrationManager} then gives  to the \texttt{DocumentStorageManager}, together with the the e-mail address. Next, the \texttt{DocumentStorageManager} copies all documents that were previously sent to the given e-mail address from the \texttt{DocumentDB} to the \texttt{PDSDB}. Before storing a document in the \texttt{PDSDB}, it inserts the recipient identifier in the meta-data of the document. After the copying of the documents, the \texttt{RecipientFacade} logs the newly created session in, as explained in Section \ref{scenario:RegRecipLogIn}. Finally, the \texttt{RecipientFacade} returns the recipient identifier and session identifier of the newly created logged in Registered Recipient.
 
 \begin{figure}[!htp]
     \centering
@@ -1003,13 +1017,10 @@ List all elements and interfaces alphabetically for ease of navigation.
 \begin{itemize}
     \item InsertJobs
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void insertJobs(BatchId batchId, TimeStamp deadline, List<JobId> jobIds )}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{DocumentGenerationManager} adds the jobs identified by their \texttt{JobIds} to its queue of all jobs that have not been processed yet. To lower the size of this queue, the \texttt{DocumentGenerationManager} is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. This method provides new jobs synchronously to the \texttt{\texttt{DocumentGenerationManager}}, which it schedules synchronously. This means that when the method call returns, the given jobs are scheduled.
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
 
@@ -1509,7 +1520,15 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             	\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
             \end{itemize}
         \end{itemize}        
-        
+
+        \item \texttt{PrintParameters getPrintParameters(JobId jobId) throws NoSuchJobException}    
+        \begin{itemize}
+            \item Effect: The \texttt{JobFacade} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NoSuchJobException: Thrown if the \texttt{JobFacade} cannot find a job identified by the given job identifier.
+            \end{itemize}
+        \end{itemize}        
         
     \end{itemize}  
     
@@ -1646,7 +1665,16 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
             \end{itemize}
         \end{itemize}
-        
+
+        \item \texttt{PrintParameters getPrintParameters(JobId jobId) throws NoSuchJobException}    
+        \begin{itemize}
+            \item Effect: The \texttt{JobManager} returns the print parameters belonging to the customer organization who sends the document corresponding to the the given job identifier.
+            \item Exceptions:
+            \begin{itemize}
+            	\item NoSuchJobException: Thrown if the \texttt{JobManager} cannot find a job identified by the given job identifier.
+            \end{itemize}
+        \end{itemize}
+       
     \end{itemize}    
 
     \item JobMgmt
@@ -2065,6 +2093,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{OtherDB} returns the e-mail address corresponding to the given customer organization identifier.
             \item Exceptions: None	
 		\end{itemize}
+				
+        \item \texttt{PrintParameters getPrintParameters(CustomerId customerId)}    
+        \begin{itemize}
+            \item Effect: The \texttt{JobFacade} returns the print parameters belonging to the customer organization identified by the given customer organization identifier.
+            \item Exceptions: None
+        \end{itemize}   		
 						  		    
     \end{itemize}
     
@@ -2497,12 +2531,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
                 \item Exceptions: None
             \end{itemize}
             
-         \item \texttt{SessionId registerRecipient(RecipientDetails recipientDetails, Credential credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
+         \item \texttt{Tuple<RecipientId, SessionId> registerRecipient(RecipientDetails recipientDetails, Credential credentials) throws InvalidRecipientDetailsException, EmailAddressInUseException}
             \begin{itemize}
-                \item Effect: The \texttt{RecipientFacade} registers the recipient using his or her details and logs him or her in.
+                \item Effect: The \texttt{RecipientFacade} registers the recipient using his or her details and logs him or her in. It returns the session identifier of the created session between the newly registered recipient, plus the recipient identifier of the recipient.
                 \item Exceptions: 
                 \begin{itemize}
-                	\item InvalidRecipientDetailsException: Thrown if the provided details are not valied, e.g. there are missing details. The exception lists the missing details to the Unregistered Recipient.
+                	\item InvalidRecipientDetailsException: Thrown if the provided details are not valid, e.g. there are missing details. The exception lists the missing details to the Unregistered Recipient.
                 	\item EmailAddressInUseException: Thrown if the given e-mail address in \textbf{recipientDetails} is already registered.
                 \end{itemize}
             \end{itemize}           
@@ -2568,15 +2602,6 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \end{itemize}
         \end{itemize}
     \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
 \end{itemize}
 
 \subsection{Scheduler}
@@ -2595,21 +2620,21 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
         \begin{itemize}
             \item Effect: The \texttt{Scheduler} returns the \texttt{JobIds} of the group of jobs that belong to the batch identified by \texttt{BatchId} that should be generated next. This method is called by the \texttt{GeneratorManager} when a \texttt{Generator} instance requires a new group of jobs.
             \item Exceptions: None
+		\end{itemize}
 
-
-            \item \texttt{Tuple<BatchId, List<JobId>>  jobsCompletedAndGiveMeMore(List<JobId>)}
-            \begin{itemize}
-                \item Effect: The \texttt{Scheduler} gets notified that the document processing jobs belonging to the list of \texttt{JobIds} are completed. It returns the a list of \texttt{JobIds} belonging to a batch identified by \texttt{BatchId}. The returned list of \texttt{JobIds} identify document processing jobs which are not yet started.
-                \item Exceptions: None
-            \end{itemize}
+        \item \texttt{Tuple<BatchId, List<JobId>>  jobsCompletedAndGiveMeMore(List<JobId>)}
+        \begin{itemize}
+            \item Effect: The \texttt{Scheduler} gets notified that the document processing jobs belonging to the list of \texttt{JobIds} are completed. It returns the a list of \texttt{JobIds} belonging to a batch identified by \texttt{BatchId}. The returned list of \texttt{JobIds} identify document processing jobs which are not yet started.
+            \item Exceptions: None
         \end{itemize}
     \end{itemize}
+    
 
     \item InsertJobs
     \begin{itemize}
         \item \texttt{void insertJobs(BatchId batchId, TimeStamp deadline, List<JobId> jobIds )}
         \begin{itemize}
-            \item Effect: The \texttt{Scheduler} adds the jobs identified by their \texttt{JobId} to its queue of all jobs that have not been processed yet. To lower the size of this queue, the Scheduler is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. This method provides new jobs synchronously to the \texttt{Scheduler}, which it schedules synchronously. This means that when the method call returns, the given jobs are scheduled.
+            \item Effect: The \texttt{Scheduler} adds the jobs identified by their \texttt{JobIds} to its queue of all jobs that have not been processed yet. To lower the size of this queue, the \texttt{Scheduler} is only given the information it needs, i.e., the id of the batch, its deadline and the ids of the individual jobs. This method provides new jobs synchronously to the \texttt{Scheduler}, which it schedules synchronously. This means that when the method call returns, the given jobs are scheduled.
             \item Exceptions: None
         \end{itemize}
     \end{itemize}
@@ -2749,30 +2774,16 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item DeliverZoomit
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void sendDocument(ZoomitId zoomitId, DocumentId docId, Document doc, String senderName, Boolean receiptTracking) throws ZoomitReceiptFailureException}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
+            \item Effect: The \texttt{ZoomitChannel} sends the given document to the Zoomit user identified by the given Zoomit identifier. The document identifier is also sent, so the Zoomit can tell the System when the document is actually delivered to the addressee, if the customer organization has enabled receipt tracking.
             \item Exceptions:
             \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
+                \item ZoomitReceiptFailureException: Thrown when the receipt of the document fails, e.g. because of an incorrect Zoomit account identifier or because this Zoomit user has indicates that he or she does not want to receive documents (of that particular customer organization) via Zoomit anymore.
             \end{itemize}
 		\end{itemize}
-        \item \texttt{void operation2(ParamType2 param)}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
-    \end{itemize}
-
-    \item InterfaceB
-    \begin{itemize}
-        \item \texttt{returntType2 operation3()}
-        \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions: None
-        \end{itemize}
     \end{itemize}
 \end{itemize}
 
@@ -2785,15 +2796,12 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
 
 \subsubsection*{Provided interfaces}
 \begin{itemize}
-    \item InterfaceA
+    \item Deliver
     \begin{itemize}
-        \item \texttt{returntType1 operation1(ParamType param) throws SomeException}
+        \item \texttt{void sendDocument(ZoomitId zoomitId, DocumentId docId, Document doc, String senderName, Boolean receiptTracking)}
         \begin{itemize}
-            \item Effect: Describe the effect of the operation
-            \item Exceptions:
-            \begin{itemize}
-                \item SomeException: Describe when the exception is thrown.
-            \end{itemize}
+            \item Effect: The \texttt{ZoomitFacade} sends the given Zoomit identifier, document identifier,  document and name of the sending customer organization to the \texttt{ZoomitClient}. It also sends a boolean \texttt{receiptTracking}, which is true when the customer organization has receipt tracking turned on. This way, the Zoomit Service knows when it should notify the the eDocs System when the document has actually been delivered to the addressee. If it succeeds, the \texttt{ZoomitFacade} will mark the document as sent. But if it fails, i.e., the \texttt{ZoomitChannel} throws an exception, then the \texttt{ZoomitFacade} will notify the customer organization of this failure.
+            \item Exceptions: None
 		\end{itemize}
     \end{itemize}
 \end{itemize}
