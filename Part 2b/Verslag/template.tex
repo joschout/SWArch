@@ -87,6 +87,7 @@ Upon documenting the final steps in our architectural process, we encountered so
 \paragraph{Joint deployment of DocumentGenerationManager}
 Upon documenting the final steps in our architectural process, it became clear to us that the deployment configuration of the \texttt{DocumentGenerationManager} does not fully comply with the requirements from the domain analysis. More precisely, according to \textit{Av1}, failure of the infrastructure for generating documents ``should not affect the availability of any type of persistent data'' and ``should not affect the availability of other functionality of the system''. Since some components, residing on the same node as the \texttt{DocumentGenerationManager} (i.e. the \texttt{ResidualNode}), do store persistent data (e.g. the \texttt{DocumentStorageCache}) and other system functionality is obviously not unaffected by the failure of the \texttt{DocumentGenerationManager}, this component should be deployed on its own individual node.
 
+\FloatBarrier
 \section{Client-server view (UML Component diagram)}\label{sec:client-server}
 \paragraph{Context diagram}
 The context diagram of the component-and-connector view is given in Figure \ref{fig:cc-context}. As shown, six distinct types of external components communicate with the system:
@@ -104,7 +105,6 @@ Notice that each external interface on the client side is provided by a separate
 	\caption{Context diagram for the client-server view.}
 	\label{fig:cc-context}
 \end{figure}
-\FloatBarrier
 
 \paragraph{Primary diagram}
 The main component-and-connector view is shown in Figure \ref{fig:cs-primary}. All components that were decomposed further are highlighted. The DeliveryFunctionality is further decomposed in Section \ref{subsec:decomp-DeliveryFunctionality}, the DocumentDB in Section \ref{subsec:decomp-DocumentDB}, the DocumentGenerationManager in Section \ref{subsec:decomp-DocumentGenerationManager}, the DocumentStorageFunctionality in Section \ref{subsec:decomp-DocumentStorageFunctionality}, the JobManager in Section \ref{subsec:decomp-JobManager}, the LinkMappingFunctionality in Section \ref{subsec:decomp-LinkMappingFunctionality}, the PDSDB in Section \ref{subsec:decomp-PDSDB} and the UserFunctionality in Section \ref{subsec:decomp-UserFunctionality}. The descriptions of all components in Figure \ref{fig:cs-primary}, their sub-components and their interfaces are given in Appendix \ref*{app:catalog}.
@@ -115,7 +115,6 @@ The main component-and-connector view is shown in Figure \ref{fig:cs-primary}. A
 	\caption{Primary diagram of the client-server view.}
 	\label{fig:cs-primary}
 \end{figure}
-\FloatBarrier
 
 \subsection{Main architectural decisions}
 Figure \ref{fig:cs-primary} provides the overall description of the architecture and illustrates the most important architectural decisions for achieving the required qualities. Here we document how our architecture fulfils the most important qualities (based on the priorities given by the stakeholders). Although the qualities that were already discussed in the provided initial architecture will not be analysed any further here, their residual drivers will. The resulting qualities thus consist of Av1a \& Av2a: Notifying the appropriate operator within 1 minute, Av1b: Storing the status of an individual job and Av2b: Temporary storage and user notification during PDSDB failure. In addition, we also highlight P2: Document lookups, because of the importance of this quality to a significant part of the recipient base.
@@ -158,6 +157,7 @@ In our current architecture, all potential bottleneck components that support th
 \paragraph{Alternative for the DocumentDB and the PDSDB having throttling responsibility}
 In our current design, both the \texttt{DocumentDB} and the \texttt{PDSDB} have the responsibility to throttle excessive read requests (originating from the \texttt{RecipientFacade}) when the rate of these incoming requests exceeds a certain value that is specific to the kind of request (determined by the requirements). Since all document lookup requests pass through the \texttt{RecipientFacade}, a valid alternative for this approach would be to delegate all throttling responsibility to this component. A clear advantage of the latter strategy is the centralization of all throttling functionality, effectively increasing the modifiability of the system. An important drawback, however, is the fact that the throttling component can now not take into account the \texttt{PDSDB} and \texttt{DocumentDB} requests originating from other components in the system. This lack of knowledge results in a fixed suboptimal upper bound for document lookup requests originating from the \texttt{RecipientFacade}. The reason for this is that the throttling component now needs take into account the maximum amount of residual requests (i.e. requests originating from all other components in the system) in order to not let the throttling affect any other functionality in the system. Since our current architecture does support an optimal load balancing policy for document lookup requests by throttling at the source components (i.e. the \texttt{PDSDB} and the \texttt{DocumentDB}), we chose to go with the latter strategy.
 
+\FloatBarrier
 \section{Decomposition view (UML Component diagram)}\label{sec:decomposition}
 An overview of the main component-and-connector view can be found in Section \ref{sec:client-server}. All components that were decomposed any further are highlighted there and will be discussed below in greater detail. This component group consists of the DeliveryFunctionality (Section \ref{subsec:decomp-DeliveryFunctionality}), the DocumentDB (Section \ref{subsec:decomp-DocumentDB}), the DocumentGenerationManager (\ref{subsec:decomp-DocumentGenerationManager}), the DocumentStorageFunctionality (\ref{subsec:decomp-DocumentStorageFunctionality}), the JobManager (Section \ref{subsec:decomp-JobManager}), the LinkMappingFunctionality (Section \ref{subsec:decomp-LinkMappingFunctionality}), the PDSDB (Section \ref{subsec:decomp-PDSDB}) and the UserFunctionality (Section \ref{subsec:decomp-UserFunctionality}).
 
@@ -168,7 +168,6 @@ An overview of the main component-and-connector view can be found in Section \re
 	\caption{Decomposition of \texttt{DeliveryFunctionality}}
 	\label{fig:decomp-DeliveryFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DeliveryFunctionality} is presented in Figure \ref{fig:decomp-DeliveryFunctionality}. As shown, the \texttt{DeliveryFunctionality} is decomposed into five submodules: the \texttt{ChannelDispatcher}, the \texttt{EmailFacade}, the \texttt{Print\&PostalServiceFacade}, the \texttt{ZoomitFacade} and the \texttt{ZoomitDeliveryCache}.\\\\
 The \texttt{DeliveryFunctionality} is responsible for delivering all correctly generated documents to their corresponding recipients. More precisely, upon receiving a document from the \texttt{Generator}, the \texttt{ChannelDispatcher} decides on the channel via which the document should be sent, based on an analysis of the corresponding raw data, receipt tracking information and recipient status (i.e. registered or unregistered) that it has fetched from the \texttt{JobManager} (for the raw data) and the \texttt{OtherDB} (for the other data). Once that it has determined the correct channel for the document, the \texttt{ChannelDispatcher} contacts the \texttt{BillingManager} to register the delivery cost for the respective document. Subsequently, the \texttt{ChannelDispatcher} sends a documents storage request to the \texttt{DocumentStorageFunctionality}, indicating whether it should store the document in both the \texttt{DocumentDB} and the \texttt{PDSDB} (for a registered recipient) or in the \texttt{DocumentDB} alone (for an unregistered recipient). Finally, the \texttt{ChannelDispatcher} forwards the document to the appropriate channel facade along with the necessary information to complete the delivery process.\\\\
@@ -194,7 +193,6 @@ In order to comply with \textit{Av3}, the \texttt{ZoomitDeliveryCache} is respon
 	\caption{Decomposition of \texttt{DocumentDB}}
 	\label{fig:decomp-DocumentDB}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DocumentDB} is presented in Figure \ref{fig:decomp-DocumentDB}. As shown, the \texttt{DocumentDB} is decomposed into only two submodules: the \texttt{DocumentDBShardingManager} and the \texttt{DocumentDBShard}.\\\\
 The \texttt{DocumentDB} is responsible for the actual storage of all documents, along with their meta data. More specifically, the \texttt{DocumentStoragFunctionality} stores documents in it that both this component and the \texttt{RecipientFacade} are able to access. Because the \texttt{DocumentDB} stores a large amount of documents and correspondingly handles a large amount of document requests, its documents are partitioned across several \texttt{DocumentDBShards} that each reside on their own \texttt{DocumentDBShardNode} according to \textit{P2}. In order to further increase performance of the \texttt{DocumentDB} for \textit{P2}, the \texttt{DocumentDBShardingManager} is also deployed on an individual node. It is responsible for managing all \texttt{DocumentDBShards} (i.e. maintaining a consistent overview of all shards and their corresponding documents) and forwarding read and write requests to the appropriate ones.\\\\
@@ -207,7 +205,6 @@ Finally, \textit{P2} requires the \texttt{DocumentDB} to be able to throttle exc
 	\caption{Decomposition of \texttt{DocumentGenerationManager}}
 	\label{fig:decomp-DocumentGenerationManager}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DocumentGenerationManager} is presented in Figure \ref{fig:decomp-DocumentGenerationManager}. As shown, the \texttt{DocumentGenerationManager} is decomposed into five submodules: the \texttt{TemplateCache}, the \texttt{KeyCache}, the \texttt{Completer}, the \texttt{Scheduler} and the \texttt{GeneratorManager}.\\\\
 Since this decomposition was already discussed in the provided initial architecture, we will not repeat those results here. Note, however, that some interfaces have been changed, added or even removed for the \texttt{DocumentGenerationManager} to be able to properly communicate with the rest of the system (see Appendix \ref{app:catalog}).
@@ -220,7 +217,6 @@ Also note that, according to \textit{M1}, all potential changes involving a new 
 	\caption{Decomposition of \texttt{DocumentStorageFunctionality}}
 	\label{fig:decomp-DocumentStorageFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{DocumentStorageFunctionality} is presented in Figure \ref{fig:decomp-DocumentStorageFunctionality}. As shown, the \texttt{DocumentStorageFunctionality} is decomposed into only two submodules: the \texttt{DocumentStorageManager} and the \texttt{DocumentStorageCache}.\\\\
 The \texttt{DocumentStorageManager} is responsible for storing generated documents in the correct database(s) (i.e. the \texttt{PDSDB} and the \texttt{DocumentDB}) upon the appropriate method call from the \texttt{ChannelDispatcher} (see also the decomposition of the \texttt{DeliveryFunctionality} in Section \ref{subsec:decomp-DeliveryFunctionality}). If the call indicates that the document belongs to a registered recipient, the \texttt{DocumentStorageManager} sends a write request to both the \texttt{DocumentDB} and the \texttt{PDSDB}, accompanied by a call to the \texttt{JobManager} to mark the corresponding job as sent. However, if the call indicates that the document belongs to an unregistered recipient, the \texttt{DocumentStorageManager} only sends a write request to the \texttt{DocumentDB}. Note that in each case, the \texttt{DocumentStorageManager} creates the appropriate \texttt{DocumentMetaData} (see Appendix \ref{app:datatypes}) to store along with the document. Also note that all calls to add a receipt timestamp to the meta data of a document pass through the \texttt{DocumentStorageManager} in order to reach both the \texttt{DocumentDB} and the \texttt{PDSDB} in a controlled manner.\\\\
@@ -234,7 +230,6 @@ A major responsibility of the \texttt{DocumentStorageFunctionality} is the tempo
 	\caption{Decomposition of \texttt{JobManager}}
 	\label{fig:decomp-JobManager}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{JobManager} is presented in Figure \ref{fig:decomp-JobManager}. As shown, the \texttt{JobManager} is decomposed into three submodules: the \texttt{JobFacade}, the \texttt{JobDBShardingManager} and the \texttt{JobDBShard}.\\\\
 In order to comply with \textit{Av1b}, the \texttt{JobManager} is responsible for storing all document processing jobs. These jobs are (according to \textit{P3}) partitioned across several \texttt{JobDBShards} that each reside on their own node. In order to further comply with \textit{P3} and thus increase performance of the \texttt{JobManager} and the corresponding speed at which job statuses can be requested, the \texttt{JobDBShardingManager}, which is in charge of managing all \texttt{JobDBShards} and forwarding read and write requests to the appropriate ones, is also deployed on an individual node (see also the deployment view in Section \ref{sec:deployment}).\\\\
@@ -249,7 +244,6 @@ Furthermore, the \texttt{JobFacade} is also responsible for creating jobs, a pro
 	\caption{Decomposition of \texttt{LinkMappingFunctionality}}
 	\label{fig:decomp-LinkMappingFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{LinkMappingFunctionality} is presented in Figure \ref{fig:decomp-LinkMappingFunctionality}. As shown, the \texttt{LinkMappingFunctionality} is decomposed into only two submodules: the \texttt{LinkMappingManager} and the \texttt{LinkMappingDB}.\\\\
 The \texttt{LinkMappingManager} is responsible for creating link mappings upon receiving this request from the \texttt{EmailFacade} in the \texttt{DeliveryFunctionality} (see the decomposition of the \texttt{DeliveryFunctionality} in Section \ref{subsec:decomp-DeliveryFunctionality}) and subsequently storing them in the \texttt{LinkMappingDB}. More precisely, a link mapping consists of a \texttt{Link} and a corresponding \texttt{DocumentId}-\texttt{Boolean} pair along with a timestamp, identifying the mapped document, its location (i.e. the \texttt{PDSDB} or the \texttt{DocumentDB}) and the time at which the mapping was created, respectively.\\\\
@@ -268,7 +262,6 @@ If the requested document is located in the \texttt{PDSDB} (i.e. the recipient i
 	\caption{Decomposition of \texttt{PDSDB}}
 	\label{fig:decomp-PDSDB}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{PDSDB} is presented in Figure \ref{fig:decomp-PDSDB}. As shown, the \texttt{PDSDB} is decomposed into three submodules: the \texttt{PDSLongTermDocumentManager}, the \texttt{PDSReplicationManager} and the \texttt{PDSDBReplica}.\\\\
 Since this decomposition was already discussed in the provided initial architecture, we will not repeat those results here. Note, however, that some interfaces have been changed, added or even removed for the \texttt{PDSDB} to be able to properly communicate with the rest of the system (see Appendix \ref{app:catalog}).\\\\
@@ -282,7 +275,6 @@ Finally, \textit{P2} requires the \texttt{PDSDB} to be able to throttle excessiv
 	\caption{Decomposition of \texttt{UserFunctionality}}
 	\label{fig:decomp-UserFunctionality}
 \end{figure}
-\FloatBarrier
 \noindent
 The decomposition of the \texttt{UserFunctionality} is presented in Figure \ref{fig:decomp-UserFunctionality}. As shown, the \texttt{UserFunctionality} is decomposed into six submodules: the \texttt{RecipientFacade}, the \texttt{CustomerOrganizationFacade}, the \texttt{EDocsAdminFacade}, the \texttt{AuthenticationHandler}, the \texttt{SessionDB} and the \texttt{RegistrationManager}.\\\\
 The \texttt{UserFunctionality} is responsible for the interaction between (un)registered recipients, customer organizations and eDocs operators on the one side and the eDocs system on the other side. More precisely, the interactive functionality between the eDocs system and each of these three user groups is split up into three corresponding facade components: the \texttt{RecipientFacade}, the \texttt{CustomerOrganizationFacade} and the \texttt{EDocsAdminFacade}.\\\\
@@ -301,6 +293,7 @@ Furthermore, the \texttt{RecipientFacade} is able to present a registered recipi
 The \texttt{AuthenticationHandler} is responsible for authenticating registered recipients and customer organizations upon receiving the proper request from the \texttt{RecipientFacade} and the \texttt{CustomerOrganizationFacade} respectively. For the \texttt{AuthenticationHandler} do its job, it needs to communicate with the \texttt{OtherDB} (for fetching user credentials) and the \texttt{SessionDB} (for session management). The latter component is solely responsible for storing user sessions and handling all requests from the \texttt{AuthenticationHandler} concerning these sessions. Furthermore, in order to comply with \textit{P2} and \textit{P3} by preventing the authentication subprocess from introducing a bottleneck in either the document lookup process (\textit{P2}) or the status overview process (\textit{P3}), both the \texttt{AuthenticationHandler} and the \texttt{SessionDB} are deployed on the same individual node.\\\\
 Finally, the \texttt{RegistrationManager} is responsible for registering a recipient (upon which it sends a request to the \texttt{DocumentStorageFunctionality} to create a new personal document store), unregistering a recipient (upon which it sends a request to the \texttt{DocumentStorageFunctionality} to invalidate the recipient's personal document store after having checked if all included documents were received), registering a customer organization and unregistering a customer organization. In each case, the \texttt{RegistrationManager} calls the \texttt{OtherDB} to store (upon registration) or invalidate (upon unregistration) the respective user credentials. Note that the \texttt{RegistrationManager} does not allow a recipient to unregister if he or she has not yet received (i.e. read) all documents in his or her personal document store (as dictated by the requirements).
 
+\FloatBarrier
 \section{Deployment view (UML Deployment diagram)}\label{sec:deployment}
 \begin{figure}[!htp]
 	\centering
@@ -308,7 +301,6 @@ Finally, the \texttt{RegistrationManager} is responsible for registering a recip
 	\caption{Context diagram for the deployment view.}
 	\label{fig:depl_context}
 \end{figure}
-\FloatBarrier
 \noindent
 The context diagram of the deployment view is given in Figure \ref{fig:depl_context}. As shown, four nodes are connected to the outside world: the \texttt{EDocsAdminNode}, the \texttt{CustomerOrganizationNode}, the \texttt{RecipientNode} and the \texttt{ResidualNode}. Notice that there will be multiple \texttt{CustomerOrganizationTerminals}, \texttt{RecipientTerminals} and possibly \texttt{EDocsAdminTerminals} communicating with the eDocs system simultaneously.\\
 Due to its very nature, the \texttt{EmailChannel} communicates with the eDocs system by means of an SMTP protocol. Both the \texttt{ZoomitChannel} and the \texttt{Print\&PostalServiceChannel}, however, are connected to the eDocs system via a TCP protocol, because this connection only needs to support simple data transfer. For the same reason, both the \texttt{EDocsAdminTerminal} and the \texttt{CustomerOrganizationTerminal} support a TCP connection to the internal \texttt{EDocsAdminNode} and \texttt{CustomerOrganizationNode} respectively. Furthermore, the \texttt{EDocsAdminTerminal}, the \texttt{CustomerOrganizationTerminal} and the \texttt{RecipientTerminal} all make use of an HTTP protocol to be able to communicate with their corresponding internal node in a user friendly manner.
@@ -319,7 +311,6 @@ Due to its very nature, the \texttt{EmailChannel} communicates with the eDocs sy
     \caption{Primary diagram for the deployment view.}
     \label{fig:depl_primary}
 \end{figure}
-\FloatBarrier
 \noindent
 The entire deployment diagram of the eDocs system is presented in Figure \ref{fig:depl_primary}. As shown, the deployment diagram employs both top-level components as sub-components of further decompositions. If a top-level component is deployed on a node, this means that all its sub-components are deployed there as well. Notice that for readability reasons, we only show multiplicities differing from 1. Also notice that we did not specify protocols for internal connections.\\
 
@@ -350,6 +341,7 @@ In the current architecture, both the \texttt{EDocsAdminFacade} and the \texttt{
 \paragraph{Alternative for separate deployment of potential bottleneck components in crucial processes}
 In our current architecture, all potential bottleneck components that support crucial processes (i.e. the document lookup process and the status overview process) are deployed on separate nodes. An obvious alternative would be to deploy these components on the same node (assuming this would not contradict with any design decisions that were made for other requirements). Although this approach would greatly increase communication performance between all components involved, it would also decrease overall performance of the document lookup process and, more importantly, of the other functionality in the system. For these reasons, we decided to deploy these components on separate nodes as discussed above.
 
+\FloatBarrier
 \section{Scenarios}\label{sec:scenarios}
 In this scenario, we illustrate the internal behaviour for our system  for the most important data flows, i.e. the authentication of the Registered Recipients and the whole document processing flow.\\
 We describe the authentication of Registered Recipients in Sections \ref{scenario:RegRecipLogIn} and \ref{scenario:RegRecipLogIn}.\\
