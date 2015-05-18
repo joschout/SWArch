@@ -351,29 +351,12 @@ In the current architecture, both the \texttt{EDocsAdminFacade} and the \texttt{
 In our current architecture, all potential bottleneck components that support crucial processes (i.e. the document lookup process and the status overview process) are deployed on separate nodes. An obvious alternative would be to deploy these components on the same node (assuming this would not contradict with any design decisions that were made for other requirements). Although this approach would greatly increase communication performance between all components involved, it would also decrease overall performance of the document lookup process and, more importantly, of the other functionality in the system. For these reasons, we decided to deploy these components on separate nodes as discussed above.
 
 \section{Scenarios}\label{sec:scenarios}
-Illustrate how your architecture fulfills the most important data flows.
-As a rule of thumb, focus on the scenario of the domain description.
-Describe the scenario in terms of architectural components using UML Sequence
-diagrams and further explain the most important interactions in text.
-Illustrating the scenarios serves as a quick validation of the completeness of
-your architecture.
-If you notice at this point that for some reason, certain functionality or
-qualities are not addressed sufficiently in your architecture, it suffices to
-document this, together with a rationale of why this is the case according to
-you.
-You do not have to further refine you architecture at this point.
+In this scenario, we illustrate the internal behaviour for our system  for the most important data flows, i.e. the authentication of the Registered Recipients and the whole document processing flow.\\
+We describe the authentication of Registered Recipients in Sections \ref{scenario:RegRecipLogIn} and \ref{scenario:RegRecipLogIn}.\\
+The document processing flow is covered over multiple sections. The initiation of the document processing by the delivery of raw data is explained in section \ref{scenario:InitiateDocProcessing}. Section \ref{scenario:DocumentGeneration} recaps the generation of documents as already explained in the initial architecture, but adapts it to the extended architecture. Section \ref{scenario:DeliverDoc} and its subsections describe the different ways how a document can be delivered.\\
 
-\subsection{Scenario 1}
-Shortly describe the scenario shown in this subsection.
-Show the complete scenario using one or more sequence diagrams.
-
-\begin{figure}[!htp]
-    \centering
-    %\includegraphics[width=\textwidth]{}
-    \missingfigure[figwidth=0.8\textwidth]{Sequence diagram scenario 1}
-    \caption{The system behavior for the first scenario.
-        }\label{fig:seq_scenario1}
-\end{figure}
+Other data flows that are covered are the consultation of the personal document store by a 
+Registered Recipient in Section \ref{scenario:ConsultPDS}, the consultation of a document in the personal document store of a Registered Recipient in Section \ref{scenario:ConsultDocInPDS}. Section \ref{scenario:DownloadDocUniqueLink} explains how a document can be downloaded by following a unique link and Section \ref{scenario:RegRecipRegisters} describes how an Unregistered Recipient can register himself or herself to get a personal document store.
 
 \subsection{Document generation}
 \label{scenario:DocumentGeneration}
@@ -1285,6 +1268,14 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: If \texttt{receiptTracking} is true, receipt tracking is turned on. The \texttt{EmailFacade} will send an e-mail to the Unregistered Recipient, which will contain a short description of the received document (i.e., the sender of the document (\texttt{senderName}), the \texttt{documentType} of the document and the date when the document was sent). The e-mail will also contain a unique link that can be used to download the document. After sending the e-mail to the given \texttt{emailAddress}, the \texttt{EmailFacade} will mark the document as sent.\\ If receipt tracking is turned of, the \texttt{EmailFacade} will send the document as an attachment with an e-mail.
             \item Exceptions: None
         \end{itemize}
+    \end{itemize}
+    
+    \item NotifyDeliveryFailure
+    \begin{itemize}
+    	\item \texttt{void notifyOfEmailDeliveryFailure(EmailAddress emailAddress, EmailMessage emailMessage}
+    	\begin{itemize}
+    		\item Effect: The \texttt{EmailFacade} notifies looks up the customer organization 
+    	\end{itemize} 
     \end{itemize}
 
 \end{itemize}
@@ -2789,9 +2780,40 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
     \end{itemize}
 \end{itemize}
 
+\subsection{ZoomitDeliveryCache}
+\begin{itemize}
+    \item \textbf{Description:} The \texttt{ZoomitDeliveryCache} is responsible for caching all documents,their document identifiers and corresponding \texttt{ZoomitIds} for which the \texttt{ZoomitFacade} did not yet receive an initial delivery confirmation from the \texttt{ZoomitChannel} up to a maximum of 2 days of documents. 
+    \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
+    \item \textbf{Sub-components:} None
+\end{itemize}
+
+\subsubsection*{Provided interfaces}
+\begin{itemize}
+	\item ZoomitDeliveryCacheMgmt
+	\begin{itemize}
+		\item \texttt{void storeDocument(ZoomitId zoomitId, DocumentId documentId, Document doc, String senderName, Boolean receiptTracking)}
+		\begin{itemize}
+			\item Effect: The \texttt{ZoomitDeliveryCache} stores the given document together with the given information for up to a maximum of 2 days.
+			\item Exceptions: None
+		\end{itemize}
+		
+		\item \texttt{void removeDocument(DocumentId documentId)}
+		\begin{itemize}
+			\item Effect: The \texttt{ZoomitDeliveryCache} removes the document identified by the given document identifier from its memory, together with the data corresponding to the document. If the cache does not contain a document identified by the given document identifier, this method has no effect.
+			\item Exceptions: None
+		\end{itemize}
+		
+		\item \texttt{Tuple<ZoomitId, DocumentId, Document, String,  Boolean> getNext()}
+		\begin{itemize}
+			\item Effect: The \texttt{ZoomitDeliveryCache}  gets the next document in its memory, together with the data corresponding to the document.
+			\item Exceptions: None
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
 \subsection{ZoomitFacade}
 \begin{itemize}
-    \item \textbf{Description:} The \texttt{ZoomitFacade} is responsible for sending documents to Unregistered Recipients through Zoomit. It is also responsible for receiving messages from Zoomit when a document has been received by Zoomit or when a Zoomit user as received his or her document. The \texttt{ZoomitFacade} can use the \texttt{JobManager} to mark jobs as sent or received.
+    \item \textbf{Description:} The \texttt{ZoomitFacade} is responsible for sending documents to Unregistered Recipients through Zoomit. It is also responsible for receiving messages from Zoomit when a document has been received by Zoomit or when a Zoomit user has received his or her document. The \texttt{ZoomitFacade} can use the \texttt{JobManager} to mark jobs as sent or received.
     \item \textbf{Super-component:} \texttt{DeliveryFunctionality}
     \item \textbf{Sub-components:} None
 \end{itemize}
@@ -2805,6 +2827,18 @@ It is external to the eDocs system and represents a mail server of an e-mail pro
             \item Effect: The \texttt{ZoomitFacade} sends the given Zoomit identifier, document identifier,  document and name of the sending customer organization to the \texttt{ZoomitClient}. It also sends a boolean \texttt{receiptTracking}, which is true when the customer organization has receipt tracking turned on. This way, the Zoomit Service knows when it should notify the the eDocs System when the document has actually been delivered to the addressee. If it succeeds, the \texttt{ZoomitFacade} will mark the document as sent. But if it fails, i.e., the \texttt{ZoomitChannel} throws an exception, then the \texttt{ZoomitFacade} will notify the customer organization of this failure.
             \item Exceptions: None
 		\end{itemize}
+    \end{itemize}
+    
+    \item ConfirmZoomit
+    \begin{itemize}
+    
+    \item \texttt{void markAsDelivered(DocumentId document, TimeStamp whenDelivered)}
+    \begin{itemize}
+    	\item Effect: The \texttt{ZoomitFacade} gets notified that the document identified by the given document identifier is has been delivered by its addressee. The given \texttt{TimeStamp} indicates when the document had been delivered.
+    \end{itemize}
+    
+    
+    
     \end{itemize}
 \end{itemize}
 
